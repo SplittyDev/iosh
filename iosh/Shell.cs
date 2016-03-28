@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Iodine.Compiler;
 using Iodine.Runtime;
+using System.Windows.Forms;
 
 namespace iosh {
 
@@ -86,6 +87,7 @@ namespace iosh {
 			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
 				Console.Write (prompt);
 				accum.AppendFormat (" {0}", line.Trim ());
+				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
 			}
 			accum.AppendFormat (" {0}", line.Trim ());
 			prompt.Pop ();

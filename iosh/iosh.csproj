@@ -36,6 +36,7 @@
     <Reference Include="LibIodine">
       <HintPath>..\..\Iodine\bin\lib\LibIodine.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

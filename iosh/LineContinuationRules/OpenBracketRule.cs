@@ -19,6 +19,11 @@ namespace iosh {
 		int remainder;
 
 		/// <summary>
+		/// The indentation.
+		/// </summary>
+		public int indent;
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.OpenBracketRule"/> class.
 		/// </summary>
 		public OpenBracketRule () {
@@ -40,6 +45,7 @@ namespace iosh {
 			int opencount, closecount;
 			var balance = GetBalance (line, out opencount, out closecount);
 			remainder += balance;
+			indent = remainder * 2;
 			if (!check && balance == 0)
 				return false;
 			if (!check)
