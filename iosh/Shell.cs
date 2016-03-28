@@ -134,7 +134,7 @@ namespace iosh {
 			var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
 			case "Null":
-				ConsoleHelper.Write ("{0}", "darkgray/null");
+				ConsoleHelper.Write ("{0}", "gray/null");
 				break;
 			case "Bool":
 				ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", value.ToLowerInvariant ()));
@@ -213,7 +213,7 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
 				break;
 			default:
-				ConsoleHelper.Write ("{0}", string.Format ("darkgray/[Type: {0}]", obj.TypeDef));
+				ConsoleHelper.Write ("{0}", string.Format ("gray/[Type: {0}]", obj.TypeDef));
 				break;
 			}
 		}
