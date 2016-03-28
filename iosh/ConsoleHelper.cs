@@ -8,10 +8,17 @@ namespace iosh {
 	/// </summary>
 	public static class ConsoleHelper {
 
+		public static void Write (string format, params ColoredString[] args) {
+			var c = Console.ForegroundColor;
+			Console.Write (format, args);
+			Console.ForegroundColor = c;
+		}
+
 		public static void WriteLine (string format, params ColoredString[] args) {
 			var c = Console.ForegroundColor;
-			Console.WriteLine (format, args);
+			Console.Write (format, args);
 			Console.ForegroundColor = c;
+			Console.WriteLine ();
 		}
 	}
 
@@ -38,10 +45,6 @@ namespace iosh {
 
 		public static implicit operator ColoredString (string str) {
 			return new ColoredString (str);
-		}
-
-		public static implicit operator string (ColoredString str) {
-			return str.ToString ();
 		}
 
 		public override string ToString () {

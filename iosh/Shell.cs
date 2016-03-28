@@ -1,12 +1,11 @@
 ﻿using System;
-using System.IO;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Iodine.Compiler;
-using Iodine.Interop;
 using Iodine.Runtime;
 
 namespace iosh {
@@ -49,6 +48,10 @@ namespace iosh {
 		/// </summary>
 		public void Run () {
 
+			// Set the culture
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
 			// Set the console output encoding to UTF-8
 			// This is needed in order to properly display the lambda prompt
 			Console.OutputEncoding = Encoding.UTF8;
@@ -71,6 +74,7 @@ namespace iosh {
 			// Prepare variables
 			string line;
 			string value = string.Empty;
+			IodineObject rawvalue = null;
 			var accum = new StringBuilder ();
 
 			// Print the prompt
@@ -91,11 +95,18 @@ namespace iosh {
 			if (source.Length == 0)
 				return;
 
+			// Clear the screen if requested
+			if (source == ":clear") {
+				Console.Clear ();
+				return;
+			}
+
 			// Compile the source unit
 			try {
 				var unit = SourceUnit.CreateFromSource (source);
 				var result = unit.Compile (context);
-				value = context.Invoke (result, new IodineObject[0]).ToString ();
+				rawvalue = context.Invoke (result, new IodineObject[0]);
+				value = rawvalue.ToString ();
 			} catch (UnhandledIodineExceptionException e) {
 				Console.WriteLine (e.OriginalException.GetAttribute ("message"));
 				e.PrintStack ();
@@ -110,35 +121,79 @@ namespace iosh {
 			}
 
 			// Skip empty return values
-			if (value == string.Empty)
+			if (rawvalue == null || value == string.Empty)
 				return;
 
-			// Test if the result is a builtin function
-			if (value == "InternalMethod")
-				ConsoleHelper.WriteLine ("{0}", "cyan/[Function: Bound]");
+			WriteStringRepresentation (rawvalue);
+			Console.WriteLine ();
+		}
 
-			// Test if the result is an anonymous function
-			else if (value == "<Anonymous Function>")
-				ConsoleHelper.WriteLine ("{0}", "cyan/[Function]");
-
-			// Test if the result is a user-defined function
-			else if (Regex.IsMatch (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase)) {
-				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
-				ConsoleHelper.WriteLine ("{0}", string.Format ("cyan/[Function: {0}]", func));
-			}
-
-			// Test if the result is a number
-			else if (value.StartsWith ("-") || value.All (c => char.IsDigit (c) || ".,".Contains (c)))
-				ConsoleHelper.WriteLine ("{0}", string.Format ("darkyellow/{0}", value));
-
-			// Test if the result is null
-			else if (value == "null")
-				ConsoleHelper.WriteLine ("{0}", string.Format ("darkgray/({0})", value));
-
-			// Test if the result is a string
-			else if (value.Any (c => char.IsLetterOrDigit (c))) {
+		// TODO: Implement HashMap
+		void WriteStringRepresentation (IodineObject obj) {
+			var value = obj.ToString ();
+			switch (obj.TypeDef.ToString ()) {
+			case "Bool":
+			case "Int":
+			case "Float":
+				ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", value));
+				break;
+			case "Tuple":
+				var tpl = obj as IodineTuple;
+				Console.Write ("( ");
+				for (var i = 0; i < tpl.Objects.Count (); i++) {
+					if (i > 0)
+						Console.Write (", ");
+					WriteStringRepresentation (tpl.Objects [i]);
+				}
+				Console.Write (" )");
+				break;
+			case "List":
+				var lst = obj as IodineList;
+				Console.Write ("[ ");
+				for (var i = 0; i < lst.Objects.Count; i++) {
+					if (i > 0)
+						Console.Write (", ");
+					WriteStringRepresentation (lst.Objects [i]);
+				}
+				Console.Write (" ]");
+				break;
+			case "ByteArray":
+				var bytearr = obj as IodineByteArray;
+				Console.Write ("[ ");
+				for (var i = 0; i < bytearr.Array.Length; i++) {
+					if (i > 0)
+						Console.Write (", ");
+					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytearr.Array [i]));
+				}
+				Console.Write (" ]");
+				break;
+			case "Bytes":
+				var bytes = obj as IodineBytes;
+				Console.Write ("[ ");
+				for (var i = 0; i < bytes.Value.Length; i++) {
+					if (i > 0)
+						Console.Write (", ");
+					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytes.Value [i]));
+				}
+				Console.Write (" ]");
+				break;
+			case "Str":
 				var str = value.Replace ("'", @"\'");
-				ConsoleHelper.WriteLine ("{0}", string.Format ("green/'{0}'", str));
+				ConsoleHelper.Write ("{0}", string.Format ("green/'{0}'", str));
+				break;
+			case "InternalMethod":
+				ConsoleHelper.Write ("{0}", "cyan/[Function: Bound]");
+				break;
+			case "Closure":
+				ConsoleHelper.Write ("{0}", "cyan/[Function: Closure]");
+				break;
+			case "Method":
+				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
+				break;
+			default:
+				ConsoleHelper.Write ("{0}", string.Format ("darkgray/[Type: {0}]", obj.TypeDef));
+				break;
 			}
 		}
 
