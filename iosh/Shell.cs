@@ -122,7 +122,7 @@ namespace iosh {
 			}
 
 			// Skip empty return values
-			if (rawvalue == null || value == string.Empty)
+			if (rawvalue == null || rawvalue.TypeDef == null || value == string.Empty)
 				return;
 			
 			WriteStringRepresentation (rawvalue);
