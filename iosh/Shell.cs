@@ -124,7 +124,7 @@ namespace iosh {
 			// Skip empty return values
 			if (rawvalue == null || value == string.Empty)
 				return;
-
+			
 			WriteStringRepresentation (rawvalue);
 			Console.WriteLine ();
 		}
@@ -133,7 +133,12 @@ namespace iosh {
 		void WriteStringRepresentation (IodineObject obj) {
 			var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
+			case "Null":
+				ConsoleHelper.Write ("{0}", "darkgray/null");
+				break;
 			case "Bool":
+				ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", value.ToLowerInvariant ()));
+				break;
 			case "Int":
 			case "Float":
 				ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", value));
