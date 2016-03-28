@@ -203,7 +203,7 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("green/'{0}'", str));
 				break;
 			case "InternalMethod":
-				ConsoleHelper.Write ("{0}", "cyan/[Function: Bound]");
+				ConsoleHelper.Write ("{0}", "cyan/[Function: Builtin]");
 				break;
 			case "Closure":
 				ConsoleHelper.Write ("{0}", "cyan/[Function: Closure]");
