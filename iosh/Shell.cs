@@ -117,7 +117,6 @@ namespace iosh {
 					var location = error.Location;
 					Console.WriteLine ("[{0}: {1}] Error: {2}", location.Line, location.Column, error.Text);
 				}
-				e.ErrorLog.Clear ();
 			} catch (Exception e) {
 				Console.WriteLine ("{0}", e.Message);
 			}
@@ -178,6 +177,21 @@ namespace iosh {
 					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytes.Value [i]));
 				}
 				Console.Write (" ]");
+				break;
+			case "HashMap":
+				var map = obj as IodineHashMap;
+				var keys = map.Keys.Reverse ().ToArray ();
+				Console.Write ("{ ");
+				for (var i = 0; i < keys.Length; i++) {
+					if (i > 0)
+						Console.Write (", ");
+					var key = keys [i];
+					var val = map.Get (key);
+					WriteStringRepresentation (key);
+					Console.Write (" = ");
+					WriteStringRepresentation (val);
+				}
+				Console.Write (" }");
 				break;
 			case "Str":
 				var str = value.Replace ("'", @"\'");
