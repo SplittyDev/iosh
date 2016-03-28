@@ -129,7 +129,6 @@ namespace iosh {
 			Console.WriteLine ();
 		}
 
-		// TODO: Implement HashMap
 		void WriteStringRepresentation (IodineObject obj) {
 			var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
@@ -213,6 +212,11 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
 				break;
 			default:
+				var iodineClass = obj as IodineClass;
+				if (iodineClass != null) {
+					ConsoleHelper.Write ("{0}", string.Format ("cyan/[Class: {0}]", iodineClass.Name));
+					break;
+				}
 				ConsoleHelper.Write ("{0}", string.Format ("gray/[Type: {0}]", obj.TypeDef));
 				break;
 			}
