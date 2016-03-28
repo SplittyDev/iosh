@@ -2,7 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Iodine.Compiler;
 using Iodine.Interop;
 using Iodine.Runtime;
@@ -24,10 +26,7 @@ namespace iosh {
 		/// </summary>
 		readonly IodineContext context;
 
-		/// <summary>
-		/// The iodine engine.
-		/// </summary>
-		readonly IodineEngine engine;
+		string lastValue;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
@@ -42,8 +41,7 @@ namespace iosh {
 				AllowBuiltins = true
 			};
 
-			// Create the iodine engine
-			engine = new IodineEngine (context);
+			lastValue = string.Empty;
 		}
 
 		/// <summary>
@@ -72,90 +70,33 @@ namespace iosh {
 
 			// Prepare variables
 			string line;
+			string value = string.Empty;
 			var accum = new StringBuilder ();
 
 			// Print the prompt
 			Console.Write (prompt);
 
-			// Push the | prompt for multi-line statements
+			// Read all lines of the source
 			prompt.Push ("|");
-
-			// Match the openBracketRule for line continuation
 			var openBracketRule = new OpenBracketRule ();
 			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
 				Console.Write (prompt);
 				accum.AppendFormat (" {0}", line.Trim ());
 			}
-
-			// Append the first/last line of the source
 			accum.AppendFormat (" {0}", line.Trim ());
-
-			// Restore the prompt
 			prompt.Pop ();
 
-			// Trim excess spaces and newlines
+			// Skip empty sources
 			var source = accum.ToString ().Trim ();
-
-			// Don't do anything if the source is empty
 			if (source.Length == 0)
 				return;
 
-			// Do the real thing
+			// Compile the source unit
 			try {
-				// TODO: Provide a function to do that in a clean way
-				source = source.Replace (@"\", @"\\").Replace ("\"", "\\\"");
-				source = string.Format ("print (eval (\"{0}\"))", source);
-				// TODO: Automate this
-				using (var ms = new MemoryStream ()) {
-					var cout = Console.Out;
-					using (var writer = new StreamWriter (ms))
-					using (var reader = new StreamReader (ms)) {
-						Console.SetOut (writer);
-						try {
-							engine.DoString (source);
-							writer.Flush ();
-						} finally {
-							ms.Seek (0, SeekOrigin.Begin);
-							Console.SetOut (cout);
-						}
-						var text = reader.ReadToEnd ().Trim ();
-						// TODO: Create rules and matchers for that stuff
-						switch (text) {
-						// Builtin functions
-						// TODO: Create InternalMethod rule
-						case "InternalMethod": {
-								// TODO: Provide a function to print something
-								// TODO: in another color and restore it afterwards
-								var c = Console.ForegroundColor;
-								Console.ForegroundColor = ConsoleColor.Cyan;
-								Console.WriteLine ("[Function: Builtin]");
-								Console.ForegroundColor = c;
-								break;
-							}
-						// Normal stuff
-						// TODO: Create more rules
-						default: {
-								// Test if the output is a number
-								long testnum;
-								if (long.TryParse (text, out testnum)) {
-									// TODO: Provide a function to print something
-									// TODO: in another color and restore it afterwards
-									var c = Console.ForegroundColor;
-									Console.ForegroundColor = ConsoleColor.Yellow;
-									Console.WriteLine ("{0}", testnum);
-									Console.ForegroundColor = c;
-								}
-								// Just print the output otherwise
-								else {
-									Console.WriteLine (text);
-								}
-								break;
-							}
-						}
-					}
-				}
+				var unit = SourceUnit.CreateFromSource (source);
+				var result = unit.Compile (context);
+				value = context.Invoke (result, new IodineObject[0]).ToString ();
 			} catch (UnhandledIodineExceptionException e) {
-				// TODO: Find another way to print the stack in a clean way
 				Console.WriteLine (e.OriginalException.GetAttribute ("message"));
 				e.PrintStack ();
 			} catch (SyntaxException e) {
@@ -163,9 +104,41 @@ namespace iosh {
 					var location = error.Location;
 					Console.WriteLine ("[{0}: {1}] Error: {2}", location.Line, location.Column, error.Text);
 				}
+				e.ErrorLog.Clear ();
 			} catch (Exception e) {
-				Console.WriteLine ("The Iodine engine just crashed :(");
-				Console.WriteLine ("Reason: {0}", e.Message);
+				Console.WriteLine ("{0}", e.Message);
+			}
+
+			// Skip empty return values
+			if (value == string.Empty)
+				return;
+
+			// Test if the result is a builtin function
+			if (value == "InternalMethod")
+				ConsoleHelper.WriteLine ("{0}", "cyan/[Function: Bound]");
+
+			// Test if the result is an anonymous function
+			else if (value == "<Anonymous Function>")
+				ConsoleHelper.WriteLine ("{0}", "cyan/[Function]");
+
+			// Test if the result is a user-defined function
+			else if (Regex.IsMatch (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase)) {
+				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
+				ConsoleHelper.WriteLine ("{0}", string.Format ("cyan/[Function: {0}]", func));
+			}
+
+			// Test if the result is a number
+			else if (value.StartsWith ("-") || value.All (c => char.IsDigit (c) || ".,".Contains (c)))
+				ConsoleHelper.WriteLine ("{0}", string.Format ("darkyellow/{0}", value));
+
+			// Test if the result is null
+			else if (value == "null")
+				ConsoleHelper.WriteLine ("{0}", string.Format ("darkgray/({0})", value));
+
+			// Test if the result is a string
+			else if (value.Any (c => char.IsLetterOrDigit (c))) {
+				var str = value.Replace ("'", @"\'");
+				ConsoleHelper.WriteLine ("{0}", string.Format ("green/'{0}'", str));
 			}
 		}
 

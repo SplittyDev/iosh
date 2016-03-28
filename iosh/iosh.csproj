@@ -31,11 +31,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="libIodine">
-      <HintPath>..\packages\libIodine.0.7.1.9374\lib\net45\libIodine.dll</HintPath>
-    </Reference>
     <Reference Include="System.Dynamic" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="LibIodine">
+      <HintPath>..\..\Iodine\bin\lib\LibIodine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -44,11 +44,9 @@
     <Compile Include="Prompt.cs" />
     <Compile Include="LineContinuationRules\LineContinuationRule.cs" />
     <Compile Include="LineContinuationRules\OpenBracketRule.cs" />
+    <Compile Include="ConsoleHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <ItemGroup>
     <Folder Include="LineContinuationRules\" />
   </ItemGroup>
