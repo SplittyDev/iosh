@@ -26,9 +26,6 @@ namespace iosh {
 		/// </summary>
 		readonly IodineContext context;
 
-		string lastValue;
-		int globalIndent;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
 		/// </summary>
@@ -41,9 +38,6 @@ namespace iosh {
 			context = new IodineContext {
 				AllowBuiltins = true
 			};
-
-			globalIndent = 0;
-			lastValue = string.Empty;
 		}
 
 		/// <summary>
@@ -74,28 +68,16 @@ namespace iosh {
 		/// </summary>
 		void RunIteration () {
 
-			// Prepare variables
-			string line;
-			string value = string.Empty;
+			// Prepare stuff
 			IodineObject rawvalue = null;
-			var accum = new StringBuilder ();
-
-			// Print the prompt
 			Console.Write (prompt);
 
 			// Read all lines of the source
 			prompt.Push ("|");
-			var openBracketRule = new OpenBracketRule ();
-			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
-				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
-				Console.Write (prompt);
-				accum.AppendFormat (" {0}", line.Trim ());
-			}
-			accum.AppendFormat (" {0}", line.Trim ());
+			var source = ReadStatements ();
 			prompt.Pop ();
 
 			// Skip empty sources
-			var source = accum.ToString ().Trim ();
 			if (source.Length == 0)
 				return;
 
@@ -110,7 +92,6 @@ namespace iosh {
 				var unit = SourceUnit.CreateFromSource (source);
 				var result = unit.Compile (context);
 				rawvalue = context.Invoke (result, new IodineObject[0]);
-				value = rawvalue.ToString ();
 			} catch (UnhandledIodineExceptionException e) {
 				Console.WriteLine (e.OriginalException.GetAttribute ("message"));
 				e.PrintStack ();
@@ -123,12 +104,22 @@ namespace iosh {
 				Console.WriteLine ("{0}", e.Message);
 			}
 
-			// Skip empty return values
-			if (rawvalue == null || rawvalue.TypeDef == null || value == string.Empty)
-				return;
-
+			// Print the result
 			WriteStringRepresentation (rawvalue);
 			Console.WriteLine ();
+		}
+
+		string ReadStatements () {
+			string line;
+			var accum = new StringBuilder ();
+			var openBracketRule = new OpenBracketRule ();
+			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
+				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
+				Console.Write (prompt);
+				accum.AppendFormat (" {0}", line.Trim ());
+			}
+			accum.AppendFormat (" {0}", line.Trim ());
+			return accum.ToString ().Trim ();
 		}
 
 		void WriteStringRepresentation (IodineObject obj) {
