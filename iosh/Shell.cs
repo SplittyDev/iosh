@@ -27,6 +27,7 @@ namespace iosh {
 		readonly IodineContext context;
 
 		string lastValue;
+		int globalIndent;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
@@ -41,6 +42,7 @@ namespace iosh {
 				AllowBuiltins = true
 			};
 
+			globalIndent = 0;
 			lastValue = string.Empty;
 		}
 
@@ -85,9 +87,9 @@ namespace iosh {
 			prompt.Push ("|");
 			var openBracketRule = new OpenBracketRule ();
 			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
+				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
 				Console.Write (prompt);
 				accum.AppendFormat (" {0}", line.Trim ());
-				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
 			}
 			accum.AppendFormat (" {0}", line.Trim ());
 			prompt.Pop ();
@@ -124,12 +126,19 @@ namespace iosh {
 			// Skip empty return values
 			if (rawvalue == null || rawvalue.TypeDef == null || value == string.Empty)
 				return;
-			
+
 			WriteStringRepresentation (rawvalue);
 			Console.WriteLine ();
 		}
 
 		void WriteStringRepresentation (IodineObject obj) {
+
+			// Test if the object or its typedef are undefined
+			if (obj == null || obj.TypeDef == null) {
+				ConsoleHelper.Write ("{0}", "red/Error: The object or its typedef are undefined");
+				return;
+			}
+
 			var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
 			case "Null":
@@ -201,9 +210,6 @@ namespace iosh {
 				var str = value.Replace ("'", @"\'");
 				ConsoleHelper.Write ("{0}", string.Format ("green/'{0}'", str));
 				break;
-			case "InternalMethod":
-				ConsoleHelper.Write ("{0}", "cyan/[Function: Builtin]");
-				break;
 			case "Closure":
 				ConsoleHelper.Write ("{0}", "cyan/[Function: Closure]");
 				break;
@@ -211,10 +217,37 @@ namespace iosh {
 				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
 				break;
+			case "InternalMethod":
+				var internalfunc = obj as InternalMethodCallback;
+				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", internalfunc.Callback.Method.Name));
+				ConsoleHelper.Write ("{0}", "magenta/(builtin)");
+				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
+			case "InstanceMethod":
+				var instancefunc = obj as IodineInstanceMethodWrapper;
+				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", instancefunc.Method.Name));
+				ConsoleHelper.Write ("{0}", "magenta/(bound)");
+				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
 			default:
 				var iodineClass = obj as IodineClass;
 				if (iodineClass != null) {
+					var attrcount = iodineClass.Attributes.Count;
 					ConsoleHelper.Write ("{0}", string.Format ("cyan/[Class: {0}]", iodineClass.Name));
+					Console.WriteLine ();
+					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin class {0}", iodineClass.Name));
+					for (var i = 0; i < attrcount; i++) {
+						var attr = iodineClass.Attributes.ElementAt (i);
+						if (attr.Value != null && attr.Value.TypeDef != null) {
+							Console.WriteLine ();
+							Console.Write ("{0}: ", attr.Key);
+							WriteStringRepresentation (attr.Value);
+						}
+					}
+					Console.WriteLine ();
+					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end class {0}", iodineClass.Name));
 					break;
 				}
 				ConsoleHelper.Write ("{0}", string.Format ("gray/[Type: {0}]", obj.TypeDef));

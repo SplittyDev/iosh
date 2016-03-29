@@ -41,6 +41,8 @@ namespace iosh {
 		/// </description>
 		/// <param name="line">Line.</param>
 		public override bool Match (string line) {
+			if (line == null)
+				return false;
 			line = line.Trim ();
 			int opencount, closecount;
 			var balance = GetBalance (line, out opencount, out closecount);
