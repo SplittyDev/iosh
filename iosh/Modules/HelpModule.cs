@@ -14,6 +14,12 @@ namespace iosh {
 				{ "print", helpPrint },
 				{ "input", helpInput },
 				{ "invoke", helpInvoke },
+				{ "eval", helpEval },
+				{ "filter", helpFilter },
+				{ "len", helpLen },
+				{ "map", helpMap },
+				{ "reduce", helpReduce },
+				{ "range", helpRange },
 			};
 			SetAttribute ("help", new BuiltinMethodCallback (help, null));
 			ExistsInGlobalNamespace = true;
@@ -25,13 +31,21 @@ namespace iosh {
 				return IodineNull.Instance;
 			}
 			var str = args [0] as IodineString;
+			var func = args [0] as BuiltinMethodCallback;
 			if (str != null) {
-				if (helpdict.ContainsKey (str.Value.ToLowerInvariant ()))
-					helpdict [str.Value.ToLowerInvariant ()] ();
+				var key = str.Value.ToLowerInvariant ();
+				if (helpdict.ContainsKey (key))
+					helpdict [key] ();
 				else
 					Console.WriteLine ("No documentation found for '{0}'.", str.Value);
+			} else if (func != null) {
+				var key = func.Callback.Method.Name.ToLowerInvariant ();
+				if (helpdict.ContainsKey (key))
+					helpdict [key] ();
+				else
+					Console.WriteLine ("No documentation found for '{0}'.", func.Callback.Method.Name);
 			} else {
-				vm.RaiseException (new IodineTypeException ("Str"));
+				vm.RaiseException (new IodineTypeException ("Str or Method"));
 				return IodineNull.Instance;
 			}
 			return IodineNull.Instance;
@@ -43,7 +57,7 @@ namespace iosh {
 			doc ("Prints the string representation of any object.");
 			doc ("Appends a newline character to the output.");
 			beginargs ();
-			argdoc (variadic ("object"), "The object to be printed.");
+			args (variadic ("object"), "The object to be printed.");
 		}
 
 		static void helpInput () {
@@ -52,26 +66,126 @@ namespace iosh {
 			doc ("Reads from the standard input stream.");
 			doc ("Optionally displays the specified prompt.");
 			beginargs ();
-			argdoc (optional ("prompt"), "The prompt to be displayed.");
+			args (optional ("prompt"), "The prompt to be displayed.");
 		}
 
 		static void helpInvoke () {
-			func ("invoke", arg ("function"), optional ("dict"));
+			func ("invoke", arg ("callable"), optional ("dict"));
 			begindoc ();
-			doc ("Invokes the specified function under a new Iodine context.");
+			doc ("Invokes the specified callable under a new Iodine context.");
 			doc ("Optionally uses the specified dict as the instance's global symbol table.");
 			beginargs ();
-			argdoc (arg ("function"), "The function to be invoked.");
-			argdoc (optional ("dict"), "The global symbol table to be used.");
+			args (arg ("callable"), "The callable to be invoked.");
+			args (optional ("dict"), "The global symbol table to be used.");
 		}
 
-		static void func (string name, params Action[] args) {
+		static void helpEval () {
+			func ("eval", arg ("source"));
+			begindoc ();
+			doc ("Evaluates a string of Iodine source code.");
+			beginargs ();
+			args (arg ("source"), "The source code to be evaluated.");
+		}
+
+		static void helpFilter () {
+			func ("filter", arg ("iterable"), arg ("callable"));
+			begindoc ();
+			doc (
+				"Iterates over the specified iterable, passing the result",
+				"of each iteration to the specified callable.",
+				"If the callable returns true, the result is appended to a list",
+				"that is returned to the caller."
+			);
+			beginargs ();
+			args (arg ("iterable"), "The iterable to be iterated over.");
+			args (arg ("callable"), "The callable to be used for filtering.");
+		}
+
+		static void helpLen () {
+			func ("len", arg ("object"));
+			begindoc ();
+			doc (
+				"Returns the length of the specified object.",
+				"If the object does not implement __len__,",
+				"an AttributeNotFoundException is raised."
+			);
+			beginargs ();
+			args (arg ("object"), "The object whose length is to be determined.");
+		}
+
+		static void helpMap () {
+			func ("map", arg ("iterable"), arg ("callable"));
+			begindoc ();
+			doc (
+				"Iterates over the specified iterable, passing the result",
+				"of each iteration to the specified callable.",
+				"The result of the specified callable is added to a list",
+				"that is returned to the caller."
+			);
+			beginargs ();
+			args (arg ("iterable"), "The iterable to be iterated over.");
+			args (arg ("callable"), "The callable to be used for mapping.");
+		}
+
+		static void helpReduce () {
+			func ("reduce", arg ("iterable"), arg ("callable"), optional ("default"));
+			begindoc ();
+			doc (
+				"Reduces all members of the specified iterable by applying the",
+				"specified callable to each item left to right.",
+				"The callable passed to reduce receives two arguments,",
+				"the first one being the result of the last call to it and the",
+				"second one being the current item from the iterable."
+			);
+			beginargs ();
+			args (arg ("iterable"), "The iterable to be iterated over.");
+			args (arg ("callable"), "The callable to be used for reducing.");
+			args (optional ("default"), string.Empty);
+		}
+
+		static void helpRange () {
+			func ("range", arg ("n"));
+			begindoc ();
+			doc (
+				"Returns an iterable sequence containing [n] items,",
+				"starting with 0 and incrementing by 1, until [n] is reached."
+			);
+			beginargs ();
+			args (arg ("n"), "The number of iterations");
+			br ();
+			func ("range", arg ("start"), arg ("end"));
+			begindoc ();
+			doc (
+				"Returns an iterable sequence containing ([end] - [start]) items,",
+				"starting with [start] and incrementing by 1, until [end] is reached."
+			);
+			beginargs ();
+			args (arg ("start"), "The first number in the sequence.");
+			args (arg ("end"), "The last number in the sequence.");
+			br ();
+			func ("range", arg ("start"), arg ("end"), arg ("step"));
+			begindoc ();
+			doc (
+				"Returns an iterable sequence containing (([end] - [start]) / [step]) items,",
+				"starting with [start] and increasing by [step], until [end] is reached."
+			);
+			beginargs ();
+			args (arg ("start"), "The first number in the sequence.");
+			args (arg ("end"), "The last number in the sequence.");
+			args (arg ("step"), "By how much the current number increases every step to reach [end].");
+		}
+
+		static void br () {
+			Console.WriteLine ();
+		}
+
+		static void func (string name, params Action[] arguments) {
 			ConsoleHelper.Write ("{0}", "cyan/func");
 			Console.Write (" {0} (", name);
-			for (var i = 0; i < args.Length; i++) {
+			for (var i = 0; i < arguments.Length; i++) {
 				if (i > 0)
 					Console.Write (", ");
-				args [i] ();
+				arguments [i] ();
 			}
 			Console.Write (")");
 			Console.WriteLine ();
@@ -85,7 +199,7 @@ namespace iosh {
 			Console.WriteLine ("Arguments:");
 		}
 
-		static void argdoc (Action elem, string description) {
+		static void args (Action elem, string description) {
 			Console.Write ("   ");
 			elem ();
 			Console.Write (": ");
