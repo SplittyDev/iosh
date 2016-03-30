@@ -3,7 +3,7 @@ The Iodine REPL shell
 
 ## About
 Iosh is modeled after the NodeJS REPL shell.  
-The formatting of results is pretty much the same, so you should feel familiar with iosh if you are used to node.
+The formatting of results is pretty much the same- so you should feel familiar with iosh if you are used to node.
 
 ## Features
 - Easy and intuitive to use
@@ -12,24 +12,24 @@ The formatting of results is pretty much the same, so you should feel familiar w
 - Beautifully colored and formatted representations of any type
 
 ## Supported representations
-- Null
 - Bool
-- Int
-- Float
-- Tuple
-- List
+- Builtin
 - ByteArray
 - Bytes
-- HashMap
-- String
 - Closure
-- Method
-- InstanceMethod
-- Builtin
-- Module
+- Float
 - Generator
-- RangeIterator
 - Generic
+- HashMap
+- InstanceMethod
+- Int
+- List
+- Method
+- Module
+- Null
+- RangeIterator
+- String
+- Tuple
 
 ### Todo
 - Add builtin documentation
