@@ -43,12 +43,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shell.cs" />
     <Compile Include="Prompt.cs" />
-    <Compile Include="LineContinuationRules\LineContinuationRule.cs" />
-    <Compile Include="LineContinuationRules\OpenBracketRule.cs" />
     <Compile Include="ConsoleHelper.cs" />
+    <Compile Include="Modules\HelpModule.cs" />
+    <Compile Include="IodineEngine.cs" />
+    <Compile Include="LineContinuationRule.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="LineContinuationRules\" />
+    <Folder Include="Modules\" />
   </ItemGroup>
 </Project>

@@ -24,9 +24,9 @@ namespace iosh {
 		readonly Prompt prompt;
 
 		/// <summary>
-		/// The iodine context.
+		/// The iodine engine.
 		/// </summary>
-		readonly IodineContext context;
+		readonly IodineEngine engine;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
@@ -36,10 +36,8 @@ namespace iosh {
 			// Create the default prompt
 			prompt = new Prompt ("λ");
 
-			// Create the iodine context
-			context = new IodineContext {
-				AllowBuiltins = true
-			};
+			// Create the iodine engine
+			engine = new IodineEngine ();
 		}
 
 		/// <summary>
@@ -57,7 +55,8 @@ namespace iosh {
 
 			// Print the assembly version
 			var version = Assembly.GetEntryAssembly ().GetName ().Version;
-			Console.WriteLine ("iosh v{0}", version.ToString (3));
+			var iodineversion = typeof(IodineContext).Assembly.GetName ().Version;
+			Console.WriteLine ("Iosh v{0} (Iodine v{1})", version.ToString (3), iodineversion.ToString (3));
 
 			// Enter the REPL
 			while (true)
@@ -91,9 +90,7 @@ namespace iosh {
 
 			// Compile the source unit
 			try {
-				var unit = SourceUnit.CreateFromSource (source);
-				var result = unit.Compile (context);
-				rawvalue = context.Invoke (result, new IodineObject[0]);
+				rawvalue = engine.Compile (source);
 			} catch (UnhandledIodineExceptionException e) {
 				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
 				Console.WriteLine (msg);
@@ -119,17 +116,17 @@ namespace iosh {
 
 			// Print the result
 			if (rawvalue != null) {
-				WriteStringRepresentation (rawvalue);
-				Console.WriteLine ();
+				if (WriteStringRepresentation (rawvalue))
+					Console.WriteLine ();
 			}
 		}
 
 		string ReadStatements () {
 			string line;
 			var accum = new StringBuilder ();
-			var openBracketRule = new OpenBracketRule ();
-			while (openBracketRule.Match ((line = Console.ReadLine ()))) {
-				SendKeys.SendWait (string.Empty.PadLeft (openBracketRule.indent, ' '));
+			var matcher = new LineContinuationRule ();
+			while (matcher.Match ((line = Console.ReadLine ()))) {
+				SendKeys.SendWait (string.Empty.PadLeft (matcher.indent, ' '));
 				Console.Write (prompt);
 				accum.AppendFormat (" {0}", line.Trim ());
 			}
@@ -137,19 +134,19 @@ namespace iosh {
 			return accum.ToString ().Trim ();
 		}
 
-		void WriteStringRepresentation (IodineObject obj) {
-
+		bool WriteStringRepresentation (IodineObject obj) {
+			
 			// Test if the object or its typedef are undefined
 			if (obj == null || obj.TypeDef == null) {
 				ConsoleHelper.Write ("{0}", "red/Error: The object or its typedef are undefined");
-				return;
+				return true;
 			}
 
 			var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
 			case "Null":
-				ConsoleHelper.Write ("{0}", "gray/null");
-				break;
+				//ConsoleHelper.Write ("{0}", "gray/null");
+				return false;
 			case "Bool":
 				ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", value.ToLowerInvariant ()));
 				break;
@@ -297,6 +294,20 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", rangestep));
 				ConsoleHelper.Write ("{0}", "cyan/)]");
 				break;
+			case "Property":
+				var property = obj as IodineProperty;
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Property "));
+				if (property.Getter != null && !(property.Getter is IodineNull)
+					&& property.Setter != null && !(property.Setter is IodineNull))
+					ConsoleHelper.Write ("{0}", "magenta/(get, set)");
+				else if (property.Getter != null && !(property.Getter is IodineNull))
+					ConsoleHelper.Write ("{0}", "magenta/(get)");
+				else if (property.Setter != null && !(property.Setter is IodineNull))
+					ConsoleHelper.Write ("{0}", "magenta/(set)");
+				else
+					ConsoleHelper.Write ("{0}", "magenta/(null)");
+				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
 			default:
 				var iodineClass = obj as IodineClass;
 				if (iodineClass != null) {
@@ -337,6 +348,8 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end type {0}", obj.TypeDef.Name));
 				break;
 			}
+
+			return true;
 		}
 
 		// TODO: Remove this. Not used anywhere.

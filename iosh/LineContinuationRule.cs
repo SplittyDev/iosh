@@ -6,7 +6,7 @@ namespace iosh {
 	/// <summary>
 	/// Open bracket line continuation rule.
 	/// </summary>
-	public class OpenBracketRule : LineContinuationRule {
+	public class LineContinuationRule {
 
 		/// <summary>
 		/// Whether the remainder should be checker
@@ -26,7 +26,7 @@ namespace iosh {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.OpenBracketRule"/> class.
 		/// </summary>
-		public OpenBracketRule () {
+		public LineContinuationRule () {
 			check = false;
 			remainder = 0;
 		}
@@ -40,7 +40,7 @@ namespace iosh {
 		/// * else {
 		/// </description>
 		/// <param name="line">Line.</param>
-		public override bool Match (string line) {
+		public bool Match (string line) {
 			if (line == null)
 				return false;
 			line = line.Trim ();
