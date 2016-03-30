@@ -144,6 +144,7 @@ namespace iosh {
 				break;
 			case "Tuple":
 				var tpl = obj as IodineTuple;
+				ConsoleHelper.Write ("{0}", "cyan/[Tuple: ");
 				Console.Write ("( ");
 				for (var i = 0; i < tpl.Objects.Count (); i++) {
 					if (i > 0)
@@ -151,9 +152,17 @@ namespace iosh {
 					WriteStringRepresentation (tpl.Objects [i]);
 				}
 				Console.Write (" )");
+				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "List":
 				var lst = obj as IodineList;
+				if (lst.Objects.Count == 0) {
+					ConsoleHelper.Write ("{0}", "cyan/[List: ");
+					ConsoleHelper.Write ("{0}", "magenta/(empty)");
+					ConsoleHelper.Write ("{0}", "cyan/]");
+					break;
+				}
+				ConsoleHelper.Write ("{0}", "cyan/[List: ");
 				Console.Write ("[ ");
 				for (var i = 0; i < lst.Objects.Count; i++) {
 					if (i > 0)
@@ -161,6 +170,7 @@ namespace iosh {
 					WriteStringRepresentation (lst.Objects [i]);
 				}
 				Console.Write (" ]");
+				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "ByteArray":
 				var bytearr = obj as IodineByteArray;
@@ -221,6 +231,41 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", instancefunc.Method.Name));
 				ConsoleHelper.Write ("{0}", "magenta/(bound)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
+			case "Generator":
+				var generator = obj as IodineGenerator;
+				var generatorfields = generator.GetType ().GetFields (BindingFlags.Instance | BindingFlags.NonPublic);
+				var generatorbasemethod = generatorfields.First (field => field.Name == "baseMethod").GetValue (generator);
+				var generatormethodname = string.Empty;
+				var generatormethod = generatorbasemethod as IodineMethod;
+				if (generatormethod != null)
+					generatormethodname = generatormethod.Name;
+				var generatorinstancemethod = generatorbasemethod as IodineInstanceMethodWrapper;
+				if (generatorinstancemethod != null)
+					generatormethodname = generatorinstancemethod.Method.Name;
+				ConsoleHelper.Write ("{0}", "cyan/[Iterator");
+				if (generatormethodname == string.Empty)
+					ConsoleHelper.Write ("{0}", "magenta/ (generator, anonymous)");
+				else {
+					ConsoleHelper.Write ("{0}", string.Format ("cyan/: {0}", generatormethodname));
+					ConsoleHelper.Write ("{0}", "magenta/ (generator)");
+				}
+				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
+			case "RangeIterator":
+				var range = obj as IodineRange;
+				var rangefields = range.GetType ().GetFields (BindingFlags.Instance | BindingFlags.NonPublic);
+				var rangemin = rangefields.First (field => field.Name == "min").GetValue (range);
+				var rangeend = rangefields.First (field => field.Name == "end").GetValue (range);
+				var rangestep = rangefields.First (field => field.Name == "step").GetValue (range);
+				ConsoleHelper.Write ("{0}", "cyan/[Iterator: Range (");
+				Console.Write ("min: ");
+				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0} ", rangemin));
+				Console.Write ("end: ");
+				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0} ", rangeend));
+				Console.Write ("step: ");
+				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", rangestep));
+				ConsoleHelper.Write ("{0}", "cyan/)]");
 				break;
 			default:
 				var iodineClass = obj as IodineClass;
