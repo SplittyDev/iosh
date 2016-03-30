@@ -245,7 +245,7 @@ namespace iosh {
 				for (var i = 0; i < module.Attributes.Count; i++) {
 					var attr = module.Attributes.ElementAt (i);
 					if (attr.Value == null || attr.Value.TypeDef == null)
-						break;
+						continue;
 					Console.WriteLine ();
 					Console.Write ("{0}: ", attr.Key);
 					WriteStringRepresentation (attr.Value);
@@ -288,7 +288,7 @@ namespace iosh {
 				break;
 			case "TypeDef":
 				var typedef = obj as IodineTypeDefinition;
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", obj.ToString ()));
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", typedef.Name));
 				break;
 			default:
 				var iodineClass = obj as IodineClass;
@@ -300,7 +300,7 @@ namespace iosh {
 					for (var i = 0; i < attrcount; i++) {
 						var attr = iodineClass.Attributes.ElementAt (i);
 						if (attr.Value == null || attr.Value.TypeDef == null)
-							break;
+							continue;
 						Console.WriteLine ();
 						Console.Write ("{0}: ", attr.Key);
 						WriteStringRepresentation (attr.Value);
@@ -309,7 +309,19 @@ namespace iosh {
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end class {0}", iodineClass.Name));
 					break;
 				}
-				ConsoleHelper.Write ("{0}", string.Format ("gray/[Type: {0}]", obj.TypeDef));
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", obj.TypeDef.Name));
+				Console.WriteLine ();
+				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin type {0}", obj.TypeDef.Name));
+				for (var i = 0; i < obj.Attributes.Count; i++) {
+					var attr = obj.Attributes.ElementAt (i);
+					if (attr.Value == null || attr.Value.TypeDef == null)
+						continue;
+					Console.WriteLine ();
+					Console.Write ("{0}: ", attr.Key);
+					WriteStringRepresentation (attr.Value);
+				}
+				Console.WriteLine ();
+				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end type {0}", obj.TypeDef.Name));
 				break;
 			}
 		}
