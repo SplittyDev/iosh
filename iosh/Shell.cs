@@ -218,8 +218,8 @@ namespace iosh {
 				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
 				break;
-			case "InternalMethod":
-				var internalfunc = obj as InternalMethodCallback;
+			case "Builtin":
+				var internalfunc = obj as BuiltinMethodCallback;
 				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", internalfunc.Callback.Method.Name));
 				ConsoleHelper.Write ("{0}", "magenta/(builtin)");
