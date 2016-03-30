@@ -232,6 +232,13 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", "magenta/(bound)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
+			case "Module":
+				var module = obj as IodineModule;
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Module: {0}", module.Name));
+				if (module.ExistsInGlobalNamespace)
+					ConsoleHelper.Write ("{0}", "magenta/ (global)");
+				ConsoleHelper.Write ("{0}", "cyan/]");
+				break;
 			case "Generator":
 				var generator = obj as IodineGenerator;
 				var generatorfields = generator.GetType ().GetFields (BindingFlags.Instance | BindingFlags.NonPublic);
