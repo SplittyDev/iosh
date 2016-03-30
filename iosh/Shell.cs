@@ -98,6 +98,15 @@ namespace iosh {
 				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
 				Console.WriteLine (msg);
 				//e.PrintStack ();
+			} catch (ModuleNotFoundException e) {
+				ConsoleHelper.WriteLine ("{0}", string.Format ("red/Module not found: {0}", e.Name));
+				Console.WriteLine ("Searched in");
+				foreach (var path in e.SearchPath) {
+					var workingpath = new Uri (Environment.CurrentDirectory);
+					var currentpath = new Uri (path);
+					var relativepath = workingpath.MakeRelativeUri (currentpath).ToString ();
+					Console.WriteLine ("- ./{0}", relativepath);
+				}
 			} catch (SyntaxException e) {
 				foreach (var error in e.ErrorLog) {
 					var location = error.Location;
@@ -109,8 +118,10 @@ namespace iosh {
 			}
 
 			// Print the result
-			WriteStringRepresentation (rawvalue);
-			Console.WriteLine ();
+			if (rawvalue != null) {
+				WriteStringRepresentation (rawvalue);
+				Console.WriteLine ();
+			}
 		}
 
 		string ReadStatements () {
