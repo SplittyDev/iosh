@@ -97,7 +97,7 @@ namespace iosh {
 			} catch (UnhandledIodineExceptionException e) {
 				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
 				Console.WriteLine (msg);
-				// e.PrintStack ();
+				//e.PrintStack ();
 			} catch (SyntaxException e) {
 				foreach (var error in e.ErrorLog) {
 					var location = error.Location;
@@ -285,10 +285,6 @@ namespace iosh {
 				Console.Write ("step: ");
 				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", rangestep));
 				ConsoleHelper.Write ("{0}", "cyan/)]");
-				break;
-			case "TypeDef":
-				var typedef = obj as IodineTypeDefinition;
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", typedef.Name));
 				break;
 			default:
 				var iodineClass = obj as IodineClass;
