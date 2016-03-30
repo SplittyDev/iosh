@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows.Forms;
 using Iodine.Compiler;
 using Iodine.Runtime;
-using System.Windows.Forms;
+using System.Collections;
 
 namespace iosh {
 
@@ -93,13 +95,15 @@ namespace iosh {
 				var result = unit.Compile (context);
 				rawvalue = context.Invoke (result, new IodineObject[0]);
 			} catch (UnhandledIodineExceptionException e) {
-				Console.WriteLine (e.OriginalException.GetAttribute ("message"));
-				e.PrintStack ();
+				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
+				Console.WriteLine (msg);
+				// e.PrintStack ();
 			} catch (SyntaxException e) {
 				foreach (var error in e.ErrorLog) {
 					var location = error.Location;
 					Console.WriteLine ("[{0}: {1}] Error: {2}", location.Line, location.Column, error.Text);
 				}
+				e.ErrorLog.Clear ();
 			} catch (Exception e) {
 				Console.WriteLine ("{0}", e.Message);
 			}
@@ -238,6 +242,14 @@ namespace iosh {
 				if (module.ExistsInGlobalNamespace)
 					ConsoleHelper.Write ("{0}", "magenta/ (global)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
+				for (var i = 0; i < module.Attributes.Count; i++) {
+					var attr = module.Attributes.ElementAt (i);
+					if (attr.Value == null || attr.Value.TypeDef == null)
+						break;
+					Console.WriteLine ();
+					Console.Write ("{0}: ", attr.Key);
+					WriteStringRepresentation (attr.Value);
+				}
 				break;
 			case "Generator":
 				var generator = obj as IodineGenerator;
@@ -274,6 +286,10 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", rangestep));
 				ConsoleHelper.Write ("{0}", "cyan/)]");
 				break;
+			case "TypeDef":
+				var typedef = obj as IodineTypeDefinition;
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", obj.ToString ()));
+				break;
 			default:
 				var iodineClass = obj as IodineClass;
 				if (iodineClass != null) {
@@ -283,11 +299,11 @@ namespace iosh {
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin class {0}", iodineClass.Name));
 					for (var i = 0; i < attrcount; i++) {
 						var attr = iodineClass.Attributes.ElementAt (i);
-						if (attr.Value != null && attr.Value.TypeDef != null) {
-							Console.WriteLine ();
-							Console.Write ("{0}: ", attr.Key);
-							WriteStringRepresentation (attr.Value);
-						}
+						if (attr.Value == null || attr.Value.TypeDef == null)
+							break;
+						Console.WriteLine ();
+						Console.Write ("{0}: ", attr.Key);
+						WriteStringRepresentation (attr.Value);
 					}
 					Console.WriteLine ();
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end class {0}", iodineClass.Name));
