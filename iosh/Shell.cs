@@ -308,6 +308,8 @@ namespace iosh {
 						var attr = iodineClass.Attributes.ElementAt (i);
 						if (attr.Value == null || attr.Value.TypeDef == null)
 							continue;
+						if (attr.Key.StartsWith ("__"))
+							continue;
 						Console.WriteLine ();
 						Console.Write ("{0}: ", attr.Key);
 						WriteStringRepresentation (attr.Value);
@@ -317,11 +319,15 @@ namespace iosh {
 					break;
 				}
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", obj.TypeDef.Name));
+				if (obj.Attributes.All (attr => attr.Key.StartsWith ("__")))
+					break;
 				Console.WriteLine ();
 				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin type {0}", obj.TypeDef.Name));
 				for (var i = 0; i < obj.Attributes.Count; i++) {
 					var attr = obj.Attributes.ElementAt (i);
 					if (attr.Value == null || attr.Value.TypeDef == null)
+						continue;
+					if (attr.Key.StartsWith ("__"))
 						continue;
 					Console.WriteLine ();
 					Console.Write ("{0}: ", attr.Key);
