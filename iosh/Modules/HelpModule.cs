@@ -283,7 +283,7 @@ namespace iosh {
 
 		static void helpMD5 () {
 			var arg0 = arg ("value");
-			func ("md5", arg0);
+			modulefunc ("hash", "md5", arg0);
 			begindoc ();
 			doc ("Computes the MD5 hash of [value].");
 			beginargs ();
@@ -292,7 +292,7 @@ namespace iosh {
 
 		static void helpSHA1 () {
 			var arg0 = arg ("value");
-			func ("sha1", arg0);
+			modulefunc ("hash", "sha1", arg0);
 			begindoc ();
 			doc ("Computes the SHA1 hash of [value].");
 			beginargs ();
@@ -301,7 +301,7 @@ namespace iosh {
 
 		static void helpSHA256 () {
 			var arg0 = arg ("value");
-			func ("sha256", arg0);
+			modulefunc ("hash", "sha256", arg0);
 			begindoc ();
 			doc ("Computes the SHA256 hash of [value].");
 			beginargs ();
@@ -310,7 +310,7 @@ namespace iosh {
 
 		static void helpSHA512 () {
 			var arg0 = arg ("value");
-			func ("sha512", arg0);
+			modulefunc ("hash", "sha512", arg0);
 			begindoc ();
 			doc ("Computes the SHA512 hash of [value].");
 			beginargs ();
