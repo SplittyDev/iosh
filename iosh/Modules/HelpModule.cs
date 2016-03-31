@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Iodine.Runtime;
@@ -48,6 +47,8 @@ namespace iosh {
 			}
 			return false;
 		}
+
+		#region Documentation
 
 		static void helpPrint () {
 			var arg0 = variadic ("object");
@@ -276,6 +277,10 @@ namespace iosh {
 			args (arg0, "The iterables to be zipped.");
 		}
 
+		#endregion
+
+		#region Documentation helpers
+
 		static void br () {
 			Console.WriteLine ();
 		}
@@ -341,6 +346,8 @@ namespace iosh {
 			foreach (var str in arguments)
 				ConsoleHelper.WriteLine ("   {0}", string.Format ("green/{0}", str));
 		}
+
+		#endregion
 	}
 }
 

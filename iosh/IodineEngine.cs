@@ -1,9 +1,6 @@
 ﻿using System;
 using Iodine.Compiler;
 using Iodine.Runtime;
-using Iodine.Interop;
-using System.Reflection;
-using System.Linq;
 
 namespace iosh {
 	public class IodineEngine {
