@@ -48,7 +48,7 @@ namespace iosh {
 			return false;
 		}
 
-		#region Documentation
+		#region __builtin__
 
 		static void helpPrint () {
 			var arg0 = variadic ("object");
@@ -275,6 +275,46 @@ namespace iosh {
 			beginargs ();
 			arg0 = arg ("iterables");
 			args (arg0, "The iterables to be zipped.");
+		}
+
+		#endregion
+
+		#region hash
+
+		static void helpMD5 () {
+			var arg0 = arg ("value");
+			func ("md5", arg0);
+			begindoc ();
+			doc ("Computes the MD5 hash of [value].");
+			beginargs ();
+			args (arg0, "The value whose hash is to be computed.");
+		}
+
+		static void helpSHA1 () {
+			var arg0 = arg ("value");
+			func ("sha1", arg0);
+			begindoc ();
+			doc ("Computes the SHA1 hash of [value].");
+			beginargs ();
+			args (arg0, "The value whose hash is to be computed.");
+		}
+
+		static void helpSHA256 () {
+			var arg0 = arg ("value");
+			func ("sha256", arg0);
+			begindoc ();
+			doc ("Computes the SHA256 hash of [value].");
+			beginargs ();
+			args (arg0, "The value whose hash is to be computed.");
+		}
+
+		static void helpSHA512 () {
+			var arg0 = arg ("value");
+			func ("sha512", arg0);
+			begindoc ();
+			doc ("Computes the SHA512 hash of [value].");
+			beginargs ();
+			args (arg0, "The value whose hash is to be computed.");
 		}
 
 		#endregion
