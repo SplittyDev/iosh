@@ -1,86 +1,92 @@
 ﻿using System;
-using Iodine.Runtime;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Iodine.Runtime;
 
 namespace iosh {
 
 	[IodineBuiltinModule ("__iosh_help__")]
 	public class HelpModule : IodineModule {
-
-		readonly Dictionary<string, Action> helpdict;
 		
 		public HelpModule () : base ("__iosh_help__") {
-			helpdict = new Dictionary<string, Action> {
-				{ "print", helpPrint },
-				{ "input", helpInput },
-				{ "invoke", helpInvoke },
-				{ "eval", helpEval },
-				{ "filter", helpFilter },
-				{ "len", helpLen },
-				{ "map", helpMap },
-				{ "reduce", helpReduce },
-				{ "range", helpRange },
-			};
 			SetAttribute ("help", new BuiltinMethodCallback (help, null));
 			ExistsInGlobalNamespace = true;
 		}
 
-		IodineObject help (VirtualMachine vm, IodineObject self, IodineObject[] args) {
-			if (args.Length != 1) {
+		static IodineObject help (VirtualMachine vm, IodineObject self, IodineObject[] arguments) {
+			if (arguments.Length != 1) {
 				vm.RaiseException (new IodineArgumentException (1));
 				return IodineNull.Instance;
 			}
-			var str = args [0] as IodineString;
-			var func = args [0] as BuiltinMethodCallback;
+			var str = arguments [0] as IodineString;
+			var builtin = arguments [0] as BuiltinMethodCallback;
 			if (str != null) {
-				var key = str.Value.ToLowerInvariant ();
-				if (helpdict.ContainsKey (key))
-					helpdict [key] ();
-				else
+				if (!tryInvokeHelpAction (str.Value))
 					Console.WriteLine ("No documentation found for '{0}'.", str.Value);
-			} else if (func != null) {
-				var key = func.Callback.Method.Name.ToLowerInvariant ();
-				if (helpdict.ContainsKey (key))
-					helpdict [key] ();
-				else
-					Console.WriteLine ("No documentation found for '{0}'.", func.Callback.Method.Name);
+			} else if (builtin != null) {
+				if (!tryInvokeHelpAction (builtin.Callback.Method.Name))
+					Console.WriteLine ("No documentation found for '{0}'.", builtin.Callback.Method.Name);
 			} else {
-				vm.RaiseException (new IodineTypeException ("Str or Method"));
+				vm.RaiseException (new IodineTypeException ("Str or BuiltinMethodCallback"));
 				return IodineNull.Instance;
 			}
 			return IodineNull.Instance;
 		}
 
+		static bool tryInvokeHelpAction (string input) {
+			var lowerInput = input.ToLowerInvariant ();
+			var helpMethods = typeof(HelpModule).GetMethods (0x0
+				| BindingFlags.Static
+				| BindingFlags.NonPublic
+			);
+			var helpMethod = helpMethods.FirstOrDefault (m =>
+				m.Name.ToLowerInvariant () == string.Format ("help{0}", lowerInput));
+			if (helpMethod != default (MethodInfo)) {
+				helpMethod.Invoke (null, null);
+				return true;
+			}
+			return false;
+		}
+
 		static void helpPrint () {
-			func ("print", variadic ("object"));
+			var arg0 = variadic ("object");
+			func ("print", arg0);
 			begindoc ();
 			doc ("Prints the string representation of any object.");
 			doc ("Appends a newline character to the output.");
 			beginargs ();
-			args (variadic ("object"), "The object to be printed.");
+			arg0 = arg ("object");
+			args (arg0, "The object to be printed.");
 		}
 
 		static void helpInput () {
-			func ("input", optional ("prompt"));
+			var arg0 = optional ("prompt");
+			func ("input", arg0);
 			begindoc ();
 			doc ("Reads from the standard input stream.");
 			doc ("Optionally displays the specified prompt.");
 			beginargs ();
-			args (optional ("prompt"), "The prompt to be displayed.");
+			arg0 = arg ("prompt");
+			args (arg0, "The prompt to be displayed.");
 		}
 
 		static void helpInvoke () {
-			func ("invoke", arg ("callable"), optional ("dict"));
+			var arg0 = arg ("callable");
+			var arg1 = optional ("dict");
+			func ("invoke", arg0, arg1);
 			begindoc ();
 			doc ("Invokes the specified callable under a new Iodine context.");
 			doc ("Optionally uses the specified dict as the instance's global symbol table.");
 			beginargs ();
-			args (arg ("callable"), "The callable to be invoked.");
-			args (optional ("dict"), "The global symbol table to be used.");
+			arg1 = arg ("dict");
+			args (arg0, "The callable to be invoked.");
+			args (arg1, "The global symbol table to be used.");
 		}
 
 		static void helpEval () {
-			func ("eval", arg ("source"));
+			var arg0 = arg ("source");
+			func ("eval", arg0);
 			begindoc ();
 			doc ("Evaluates a string of Iodine source code.");
 			beginargs ();
@@ -88,7 +94,9 @@ namespace iosh {
 		}
 
 		static void helpFilter () {
-			func ("filter", arg ("iterable"), arg ("callable"));
+			var arg0 = arg ("iterable");
+			var arg1 = arg ("callable");
+			func ("filter", arg0, arg1);
 			begindoc ();
 			doc (
 				"Iterates over the specified iterable, passing the result",
@@ -97,12 +105,13 @@ namespace iosh {
 				"that is returned to the caller."
 			);
 			beginargs ();
-			args (arg ("iterable"), "The iterable to be iterated over.");
-			args (arg ("callable"), "The callable to be used for filtering.");
+			args (arg0, "The iterable to be iterated over.");
+			args (arg1, "The callable to be used for filtering.");
 		}
 
 		static void helpLen () {
-			func ("len", arg ("object"));
+			var arg0 = arg ("object");
+			func ("len", arg0);
 			begindoc ();
 			doc (
 				"Returns the length of the specified object.",
@@ -110,11 +119,13 @@ namespace iosh {
 				"an AttributeNotFoundException is raised."
 			);
 			beginargs ();
-			args (arg ("object"), "The object whose length is to be determined.");
+			args (arg0, "The object whose length is to be determined.");
 		}
 
 		static void helpMap () {
-			func ("map", arg ("iterable"), arg ("callable"));
+			var arg0 = arg ("iterable");
+			var arg1 = arg ("callable");
+			func ("map", arg0, arg1);
 			begindoc ();
 			doc (
 				"Iterates over the specified iterable, passing the result",
@@ -123,12 +134,15 @@ namespace iosh {
 				"that is returned to the caller."
 			);
 			beginargs ();
-			args (arg ("iterable"), "The iterable to be iterated over.");
-			args (arg ("callable"), "The callable to be used for mapping.");
+			args (arg0, "The iterable to be iterated over.");
+			args (arg1, "The callable to be used for mapping.");
 		}
 
 		static void helpReduce () {
-			func ("reduce", arg ("iterable"), arg ("callable"), optional ("default"));
+			var arg0 = arg ("iterable");
+			var arg1 = arg ("callable");
+			var arg2 = optionaldefault ("default", 0);
+			func ("reduce", arg0, arg1, arg2);
 			begindoc ();
 			doc (
 				"Reduces all members of the specified iterable by applying the",
@@ -138,45 +152,136 @@ namespace iosh {
 				"second one being the current item from the iterable."
 			);
 			beginargs ();
-			args (arg ("iterable"), "The iterable to be iterated over.");
-			args (arg ("callable"), "The callable to be used for reducing.");
-			args (optional ("default"), string.Empty);
+			arg2 = arg ("default");
+			args (arg0, "The iterable to be iterated over.");
+			args (arg1, "The callable to be used for reducing.");
+			args (arg2, "The default item.");
 		}
 
 		static void helpRange () {
-			func ("range", arg ("n"));
+			Action arg0, arg1, arg2;
+			arg0 = arg ("n");
+			func ("range", arg0);
 			begindoc ();
 			doc (
 				"Returns an iterable sequence containing [n] items,",
 				"starting with 0 and incrementing by 1, until [n] is reached."
 			);
 			beginargs ();
-			args (arg ("n"), "The number of iterations");
+			args (arg0, "The number of iterations");
 			br ();
-			func ("range", arg ("start"), arg ("end"));
-			begindoc ();
-			doc (
-				"Returns an iterable sequence containing ([end] - [start]) items,",
-				"starting with [start] and incrementing by 1, until [end] is reached."
-			);
-			beginargs ();
-			args (arg ("start"), "The first number in the sequence.");
-			args (arg ("end"), "The last number in the sequence.");
-			br ();
-			func ("range", arg ("start"), arg ("end"), arg ("step"));
+			arg0 = arg ("start");
+			arg1 = arg ("end");
+			arg2 = optionaldefault ("step", 1);
+			func ("range", arg0, arg1, arg2);
 			begindoc ();
 			doc (
 				"Returns an iterable sequence containing (([end] - [start]) / [step]) items,",
 				"starting with [start] and increasing by [step], until [end] is reached."
 			);
 			beginargs ();
-			args (arg ("start"), "The first number in the sequence.");
-			args (arg ("end"), "The last number in the sequence.");
-			args (arg ("step"), "By how much the current number increases every step to reach [end].");
+			arg2 = arg ("step");
+			args (arg0, "The first number in the sequence.");
+			args (arg1, "The last number in the sequence.");
+			args (arg2, "By how much the current number increases every step to reach [end].");
+		}
+
+		static void helpRepr () {
+			var arg0 = arg ("object");
+			func ("repr", arg0);
+			begindoc ();
+			doc (
+				"Returns a string representation of the specified object,",
+				"which is obtained by calling its __repr__ function.",
+				"If the object does not implement the __repr__ function,",
+				"its default string representation is returned."
+			);
+			beginargs ();
+			args (arg0, "The object to be represented.");
+		}
+
+		static void helpSum () {
+			var arg0 = arg ("iterable");
+			var arg1 = optionaldefault ("default", 0);
+			func ("sum", arg0, arg1);
+			begindoc ();
+			doc (
+				"Reduces the iterable by adding each item together,",
+				"starting with [default]."
+			);
+			beginargs ();
+			arg1 = arg ("default");
+			args (arg0, "The iterable to be summed up.");
+			args (arg1, "The default item.");
+		}
+
+		static void helpType () {
+			helpTypeOf ();
+		}
+
+		static void helpTypeOf () {
+			var arg0 = arg ("object");
+			func ("type", arg0);
+			begindoc ();
+			doc ("Returns the type definition of the specified object.");
+			beginargs ();
+			args (arg0, "The object whose type is to be determined.");
+		}
+
+		static void helpTypeCast () {
+			var arg0 = arg ("type");
+			var arg1 = arg ("object");
+			func ("typecast", arg0, arg1);
+			begindoc ();
+			doc (
+				"Performs a sanity check, verifying that the specified",
+				"[object] is an instance of [type].",
+				"If the test fails, a TypeCastException is raised."
+			);
+			beginargs ();
+			args (arg0, "The type to be tested against.");
+			args (arg1, "The object to be tested.");
+		}
+
+		static void helpOpen () {
+			var arg0 = arg ("file");
+			var arg1 = arg ("mode");
+			func ("open", arg0, arg1);
+			begindoc ();
+			doc (
+				"Opens up a file using the specified mode,",
+				"returning a new stream object."
+			);
+			beginargs ();
+			args (arg0, "The filename.");
+			args (arg1, "The mode.");
+			section ("Filemodes");
+			args (arg ("'a'"), "append");
+			args (arg ("'r'"), "read");
+			args (arg ("'w'"), "write");
+			args (arg ("'rw'"), "read/write");
+		}
+
+		static void helpZip () {
+			var arg0 = variadic ("iterables");
+			func ("zip", arg0);
+			begindoc ();
+			doc (
+				"Iterates over each iterable in [iterables],",
+				"appending every item to a tuple, that is then",
+				"appended to a list which is returned to the caller."
+			);
+			beginargs ();
+			arg0 = arg ("iterables");
+			args (arg0, "The iterables to be zipped.");
 		}
 
 		static void br () {
 			Console.WriteLine ();
+		}
+
+		static void section (string name) {
+			Console.WriteLine ("{0}:", name);
 		}
 
 		static void func (string name, params Action[] arguments) {
@@ -218,12 +323,22 @@ namespace iosh {
 			});
 		}
 
+		static Action optionaldefault (string name, object _default) {
+			return new Action (() => {
+				ConsoleHelper.Write ("{0}", "magenta/[");
+				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", name));
+				Console.Write (" = ");
+				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", _default));
+				ConsoleHelper.Write ("{0}", "magenta/]");
+			});
+		}
+
 		static Action variadic (string name) {
 			return new Action (() => arg (string.Format ("{0}*", name)) ());
 		}
 
-		static void doc (params string[] args) {
-			foreach (var str in args)
+		static void doc (params string[] arguments) {
+			foreach (var str in arguments)
 				ConsoleHelper.WriteLine ("   {0}", string.Format ("green/{0}", str));
 		}
 	}

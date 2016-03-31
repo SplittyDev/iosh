@@ -137,7 +137,11 @@ namespace iosh {
 		bool WriteStringRepresentation (IodineObject obj) {
 			
 			// Test if the object or its typedef are undefined
-			if (obj == null || obj.TypeDef == null) {
+			if (obj.TypeDef == null && obj != null) {
+				var type = obj.ToString ();
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Type: {0}]", type));
+				return true;
+			} else if (obj == null && obj.TypeDef == null) {
 				ConsoleHelper.Write ("{0}", "red/Error: The object or its typedef are undefined");
 				return true;
 			}
@@ -313,6 +317,8 @@ namespace iosh {
 				if (iodineClass != null) {
 					var attrcount = iodineClass.Attributes.Count;
 					ConsoleHelper.Write ("{0}", string.Format ("cyan/[Class: {0}]", iodineClass.Name));
+					if (obj.Attributes.All (attr => attr.Key.StartsWith ("__")))
+						break;
 					Console.WriteLine ();
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin class {0}", iodineClass.Name));
 					for (var i = 0; i < attrcount; i++) {
