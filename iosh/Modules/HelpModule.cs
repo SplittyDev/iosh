@@ -319,6 +319,123 @@ namespace iosh {
 
 		#endregion
 
+		#region Math
+
+		static void helpPow () {
+			var arg0 = arg ("base");
+			var arg1 = arg ("power");
+			modulefunc ("math", "pow", arg0, arg1);
+			begindoc ();
+			doc ("Raises [base] to [power].");
+			beginargs ();
+			args (arg0, "The base.");
+			args (arg1, "The power.");
+		}
+
+		static void helpSin () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "sin", arg0);
+			begindoc ();
+			doc ("Returns the sine of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose sine is to be calculated.");
+		}
+
+		static void helpCos () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "cos", arg0);
+			begindoc ();
+			doc ("Returns the cosine of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose cosine is to be calculated.");
+		}
+
+		static void helpTan () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "tan", arg0);
+			begindoc ();
+			doc ("Returns the tangent of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose tangent is to be calculated.");
+		}
+
+		static void helpASin () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "asin", arg0);
+			begindoc ();
+			doc ("Returns the inverse sine of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose inverse sine is to be calculated.");
+		}
+
+		static void helpACos () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "acos", arg0);
+			begindoc ();
+			doc ("Returns the inverse cosine of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose inverse cosine is to be calculated.");
+		}
+
+		static void helpATan () {
+			var arg0 = arg ("angle");
+			modulefunc ("math", "atan", arg0);
+			begindoc ();
+			doc ("Returns the inverse tangent of [angle].");
+			beginargs ();
+			args (arg0, "The angle whose inverse tangent is to be calculated.");
+		}
+
+		static void helpAbs () {
+			var arg0 = arg ("value");
+			modulefunc ("math", "abs", arg0);
+			begindoc ();
+			doc ("Returns the absolute value of [value].");
+			beginargs ();
+			args (arg0, "The value whose absolute value is to be calculated.");
+		}
+
+		static void helpFloor () {
+			var arg0 = arg ("value");
+			modulefunc ("math", "floor", arg0);
+			begindoc ();
+			doc ("Rounds [value] down to the closest integer.");
+			beginargs ();
+			args (arg0, "The value to be rounded down.");
+		}
+
+		static void helpCeiling () {
+			var arg0 = arg ("value");
+			modulefunc ("math", "celiling", arg0);
+			begindoc ();
+			doc ("Rounds [value] up to the closest integer.");
+			beginargs ();
+			args (arg0, "The value to be rounded up.");
+		}
+
+		static void helpLog () {
+			var arg0 = arg ("value");
+			var arg1 = optionaldefault ("base", 10);
+			modulefunc ("math", "log", arg0, arg1);
+			begindoc ();
+			doc ("Returns the logarithm of [value] to [base].");
+			beginargs ();
+			arg1 = arg ("base");
+			args (arg0, "The value whose logarithm is to be calculated.");
+			args (arg1, "The base.");
+		}
+
+		static void helpSqrt () {
+			var arg0 = arg ("value");
+			modulefunc ("math", "sqrt", arg0);
+			begindoc ();
+			doc ("Returns the square root of [value].");
+			beginargs ();
+			args (arg0, "The value whose square root is to be calculated.");
+		}
+
+		#endregion
+
 		#region Documentation helpers
 
 		static void br () {
@@ -327,6 +444,19 @@ namespace iosh {
 
 		static void section (string name) {
 			Console.WriteLine ("{0}:", name);
+		}
+
+		static void modulefunc (string module, string name, params Action[] arguments) {
+			ConsoleHelper.Write ("{0}", "cyan/func ");
+			ConsoleHelper.Write ("{0}", string.Format ("magenta/{0}.", module));
+			Console.Write ("{0} (", name);
+			for (var i = 0; i < arguments.Length; i++) {
+				if (i > 0)
+					Console.Write (", ");
+				arguments [i] ();
+			}
+			Console.Write (")");
+			Console.WriteLine ();
 		}
 
 		static void func (string name, params Action[] arguments) {
