@@ -27,11 +27,10 @@ The formatting of results is pretty much the same- so you should feel familiar w
 - Method
 - Module
 - Null
+- Property
 - RangeIterator
 - String
 - Tuple
 
 ### Todo
-- Add builtin documentation
-- Add property representation
-- Fix module imports
+- Add more documentation
