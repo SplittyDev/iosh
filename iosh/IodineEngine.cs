@@ -5,7 +5,7 @@ using Iodine.Runtime;
 namespace iosh {
 	public class IodineEngine {
 
-		readonly IodineContext Context;
+		public readonly IodineContext Context;
 
 		public IodineEngine () {
 			BuiltInModules.Modules.Add ("__iosh_help__", new HelpModule ());

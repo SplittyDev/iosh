@@ -228,29 +228,55 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", string.Format ("green/'{0}'", str));
 				break;
 			case "Closure":
-				ConsoleHelper.Write ("{0}", "cyan/[Function: Closure]");
+				ConsoleHelper.Write ("{0}", "cyan/[Function ");
+				ConsoleHelper.Write ("{0}", "magenta/(closure)");
+				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "Method":
-				var func = Regex.Match (value, "<function\\s([a-z0-9]*)>", RegexOptions.IgnoreCase).Groups [1];
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Function: {0}]", func));
+				var method = obj as IodineMethod;
+				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
+				Console.Write (method.Name);
+				if (method.ParameterCount > 0) {
+					Console.Write (" (");
+					for (var i = 0; i < method.ParameterCount; i++) {
+						var arg = method.Parameters.ElementAt (i);
+						if (i > 0)
+							Console.Write (", ");
+						ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", arg.Key));
+					}
+					Console.Write (")");
+				}
+				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "Builtin":
 				var internalfunc = obj as BuiltinMethodCallback;
+				var internalfuncname = internalfunc.Callback.Method.Name.ToLowerInvariant ();
 				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", internalfunc.Callback.Method.Name));
+				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", internalfuncname));
 				ConsoleHelper.Write ("{0}", "magenta/(builtin)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "InstanceMethod":
 				var instancefunc = obj as IodineInstanceMethodWrapper;
 				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/{0} ", instancefunc.Method.Name));
+				Console.Write ("{0} ", instancefunc.Method.Name);
+				if (instancefunc.Method.ParameterCount > 0) {
+					Console.Write (" (");
+					for (var i = 0; i < instancefunc.Method.ParameterCount; i++) {
+						var arg = instancefunc.Method.Parameters.ElementAt (i);
+						if (i > 0)
+							Console.Write (", ");
+						ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", arg.Key));
+					}
+					Console.Write (")");
+				}
 				ConsoleHelper.Write ("{0}", "magenta/(bound)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "Module":
 				var module = obj as IodineModule;
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Module: {0}", module.Name));
+				ConsoleHelper.Write ("{0}", "cyan/[Module: ");
+				Console.Write (module.Name);
 				if (module.ExistsInGlobalNamespace)
 					ConsoleHelper.Write ("{0}", "magenta/ (global)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
@@ -278,7 +304,8 @@ namespace iosh {
 				if (generatormethodname == string.Empty)
 					ConsoleHelper.Write ("{0}", "magenta/ (generator, anonymous)");
 				else {
-					ConsoleHelper.Write ("{0}", string.Format ("cyan/: {0}", generatormethodname));
+					ConsoleHelper.Write ("{0}", "cyan/: ");
+					Console.Write ("{0}", generatormethodname);
 					ConsoleHelper.Write ("{0}", "magenta/ (generator)");
 				}
 				ConsoleHelper.Write ("{0}", "cyan/]");
