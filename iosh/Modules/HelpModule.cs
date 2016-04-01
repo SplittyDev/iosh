@@ -509,7 +509,7 @@ namespace iosh {
 		}
 
 		static Action variadic (string name) {
-			return new Action (() => arg (string.Format ("{0}*", name)) ());
+			return new Action (() => arg (string.Format ("*{0}", name)) ());
 		}
 
 		static void doc (params string[] arguments) {
