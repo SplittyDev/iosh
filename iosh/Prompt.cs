@@ -19,6 +19,14 @@ namespace iosh {
 		string currentPrompt;
 
 		/// <summary>
+		/// Gets the length.
+		/// </summary>
+		/// <value>The length.</value>
+		public int Length {
+			get { return ToString ().Length; }
+		}
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Prompt"/> class.
 		/// </summary>
 		public Prompt () {

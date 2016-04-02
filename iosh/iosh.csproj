@@ -47,6 +47,7 @@
     <Compile Include="Modules\HelpModule.cs" />
     <Compile Include="IodineEngine.cs" />
     <Compile Include="LineContinuationRule.cs" />
+    <Compile Include="IodineConstants.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

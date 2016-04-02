@@ -83,8 +83,12 @@ namespace iosh {
 				return;
 
 			// Clear the screen if requested
-			if (source == ":clear") {
+			switch (source) {
+			case ":c":
 				Console.Clear ();
+				return;
+			case ":r":
+				engine.Reload ();
 				return;
 			}
 
@@ -94,7 +98,7 @@ namespace iosh {
 			} catch (UnhandledIodineExceptionException e) {
 				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
 				Console.WriteLine (msg);
-				//e.PrintStack ();
+				// e.PrintStack ();
 			} catch (ModuleNotFoundException e) {
 				ConsoleHelper.WriteLine ("{0}", string.Format ("red/Module not found: {0}", e.Name));
 				Console.WriteLine ("Searched in");
@@ -125,13 +129,99 @@ namespace iosh {
 			string line;
 			var accum = new StringBuilder ();
 			var matcher = new LineContinuationRule ();
-			while (matcher.Match ((line = Console.ReadLine ()))) {
+			while (matcher.Match ((line = ReadLineEx ()))) {
 				SendKeys.SendWait (string.Empty.PadLeft (matcher.indent, ' '));
 				Console.Write (prompt);
 				accum.AppendFormat (" {0}", line.Trim ());
 			}
 			accum.AppendFormat (" {0}", line.Trim ());
 			return accum.ToString ().Trim ();
+		}
+
+		string ReadLineEx () {
+			Console.ForegroundColor = ConsoleColor.Gray;
+			var accum = new StringBuilder ();
+			var accumcw = new StringBuilder ();
+			int total = 0;
+			int tcurr = 0;
+			char stringchr = '\0';
+			bool leave = false;
+			bool instring = false;
+			bool escaping = false;
+			while (!leave) {
+				var key = Console.ReadKey (intercept: true);
+				var chr = key.KeyChar;
+				switch (key.Key) {
+				case ConsoleKey.Backspace:
+					accum.Length = Math.Max (0, accum.Length - 1);
+					accumcw.Length = Math.Max (0, accumcw.Length - 1);
+					if (tcurr > 0) {
+						if (Console.CursorLeft == 0) {
+							Console.CursorTop--;
+							Console.CursorLeft = Math.Min (Console.BufferWidth, Console.WindowWidth);
+						}
+						total = Math.Max (0, total - 1);
+						tcurr = Math.Max (0, tcurr - 1);
+						Console.Write ("\b \b");
+					}
+					break;
+				case ConsoleKey.Enter:
+					Console.Write ('\n');
+					leave = true;
+					break;
+				case ConsoleKey.LeftArrow:
+					if (Console.CursorLeft == prompt.Length && tcurr > 0)
+						Console.Write (string.Empty.PadLeft (prompt.Length, '\b'));
+					else
+						Console.CursorLeft = Math.Max (prompt.Length, Console.CursorLeft - 1);
+					tcurr = Math.Min (0, tcurr - 1);
+					break;
+				case ConsoleKey.RightArrow:
+					if (Console.CursorLeft == Console.WindowWidth && tcurr < total + 2) {
+						Console.CursorTop++;
+						Console.CursorLeft = 0;
+					} else
+						Console.CursorLeft = Math.Min (Console.CursorLeft + 1, Math.Min (Console.WindowWidth, accum.Length + 2));
+					break;
+				default:
+					total++;
+					tcurr++;
+					Console.Write (chr);
+					accum.Append (chr);
+					if (char.IsLetter (chr))
+						accumcw.Append (chr);
+					else if (!escaping && (chr == '"' || chr == '\'')) {
+						if (instring && chr != stringchr) {
+							break;
+						} else
+							stringchr = chr == '"' ? '"' : '\'';
+						if (!instring) {
+							Console.ForegroundColor = ConsoleColor.Green;
+							Console.Write ("\b{0}", stringchr);
+							instring = true;
+						} else if (instring && chr == stringchr) {
+							Console.ForegroundColor = ConsoleColor.Gray;
+							instring = false;
+							stringchr = '\0';
+						}
+					} else if (char.IsDigit (chr)) {
+						Console.Write ("\b");
+						ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", chr));
+						accumcw.Clear ();
+					} else {
+						escaping = !escaping && chr == '\\';
+						accumcw.Clear ();
+					}
+					break;
+				}
+				if (IodineConstants.Keywords.Contains (accumcw.ToString ())) {
+					if (Console.CursorLeft >= prompt.Length + accumcw.Length) {
+						Console.CursorLeft -= accumcw.Length;
+						ConsoleHelper.Write ("{0}", string.Format ("cyan/{0}", accumcw));
+					}
+				}
+			}
+			return accum.ToString ();
 		}
 
 		bool WriteStringRepresentation (IodineObject obj) {
