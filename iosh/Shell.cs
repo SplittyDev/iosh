@@ -29,9 +29,30 @@ namespace iosh {
 		readonly IodineEngine engine;
 
 		/// <summary>
+		/// The command line options.
+		/// </summary>
+		readonly Options CommandLineOptions;
+
+		/// <summary>
+		/// The foreground color.
+		/// </summary>
+		readonly ConsoleColor Foreground;
+
+		/// <summary>
+		/// The background color.
+		/// </summary>
+		readonly ConsoleColor Background;
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
 		/// </summary>
-		public Shell () {
+		public Shell (Options options) {
+			CommandLineOptions = options;
+
+			// Set colors
+			Foreground = options.ForegroundColor;
+			Background = options.BackgroundColor;
+			ColoredString.Fallback = Foreground;
 
 			// Create the default prompt
 			prompt = new Prompt ("λ");
@@ -52,6 +73,11 @@ namespace iosh {
 			// Set the console output encoding to UTF-8
 			// This is needed in order to properly display the lambda prompt
 			Console.OutputEncoding = Encoding.UTF8;
+
+			// Set colors
+			Console.ForegroundColor = Foreground;
+			Console.BackgroundColor = Background;
+			Console.Clear ();
 
 			// Print the assembly version
 			var version = Assembly.GetEntryAssembly ().GetName ().Version;
@@ -139,7 +165,12 @@ namespace iosh {
 		}
 
 		string ReadLineEx () {
-			Console.ForegroundColor = ConsoleColor.Gray;
+
+			// Native read line
+			if (!CommandLineOptions.EnableSyntaxHighlighting)
+				return Console.ReadLine ();
+			
+			Console.ForegroundColor = Foreground;
 			var accum = new StringBuilder ();
 			var accumcw = new StringBuilder ();
 			int total = 0;
@@ -200,7 +231,7 @@ namespace iosh {
 							Console.Write ("\b{0}", stringchr);
 							instring = true;
 						} else if (instring && chr == stringchr) {
-							Console.ForegroundColor = ConsoleColor.Gray;
+							Console.ForegroundColor = Foreground;
 							instring = false;
 							stringchr = '\0';
 						}

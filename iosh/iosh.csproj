@@ -37,6 +37,9 @@
     <Reference Include="LibIodine">
       <HintPath>..\..\Iodine\bin\lib\LibIodine.dll</HintPath>
     </Reference>
+    <Reference Include="codeaddicts.libArgument">
+      <HintPath>..\packages\Codeaddicts.libArgument.0.1.5745.4423\lib\codeaddicts.libArgument.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -48,9 +51,13 @@
     <Compile Include="IodineEngine.cs" />
     <Compile Include="LineContinuationRule.cs" />
     <Compile Include="IodineConstants.cs" />
+    <Compile Include="Options.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Modules\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

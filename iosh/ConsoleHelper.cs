@@ -24,6 +24,8 @@ namespace iosh {
 
 	public class ColoredString {
 
+		public static ConsoleColor Fallback;
+
 		public ConsoleColor Color;
 		string value;
 
@@ -38,7 +40,7 @@ namespace iosh {
 				Color = (ConsoleColor)Enum.Parse (typeof(ConsoleColor), str.Substring (0, match.Length), true);
 				value = str.Substring (match.Length + 1);
 			} else {
-				Color = ConsoleColor.Gray;
+				Color = Fallback;
 				value = str;
 			}
 		}
