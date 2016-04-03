@@ -59,6 +59,10 @@ namespace iosh {
 
 			// Create the iodine engine
 			engine = new IodineEngine ();
+
+			// Add search path if requested
+			if (options.IncludeFolder != null)
+				engine.IncludeFolder (options.IncludeFolder);
 		}
 
 		/// <summary>

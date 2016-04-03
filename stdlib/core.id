@@ -1,0 +1,58 @@
+# Author: SplittyDev (github.com/splittydev)
+
+# func print (*object)
+# func input ([prompt])
+# func invoke (function, [dict])
+# func eval (source)
+# func filter (iterable, function)
+# func len (object)
+# func map (iterable, function)
+# func reduce (iterable, function, [default])
+# func range (n)
+# func range (start, end, [step = 1])
+# func repr (object)
+# func sum (iterable, [default])
+# func type (object)
+# func typecast (type, object)
+# func open (file, mode)
+# func zip (*iterables)
+
+use reflection
+
+func _repr (object) {
+    if (reflection.hasAttribute (object, "__repr__"))
+        return object.__repr__ ()
+    if (reflection.hasAttribute (object, "__str__"))
+        return object.__str__ ()
+    dict = {
+        "Str": lambda () => '"{0}"'.format (object),
+        "List": lambda () {
+            i = 0
+            accum = StringBuffer ()
+            accum.append ("[")
+            foreach (item in object) {
+                if (i > 0) accum.append (", ")
+                accum.append (_repr (item))
+                i += 1
+            }
+            accum.append ("]")
+            return Str (accum)
+        }
+    }
+    typename = Str (object.__type__)
+    if (reflection.hasAttribute (object, "__name__"))
+        typename = object.__name__
+    if (dict.contains (typename))
+        return dict [typename] ()
+    return Str (object)
+}
+
+func test () {
+    testrepr = lambda (x) {
+        print ( repr (x))
+        print (_repr (x))
+    }
+    testrepr ("hello")
+    testrepr (123)
+    testrepr (print)
+}

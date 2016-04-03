@@ -11,8 +11,11 @@ namespace iosh {
 		[Argument ("--bc", "/bc")]
 		public string BackgroundString;
 
-		[Switch ("--enable-syntax-coloring")]
+		[Switch ("--enable-syntax-coloring", "/enable-syntax-coloring")]
 		public bool EnableSyntaxHighlighting;
+
+		[Argument ("--lib", "/lib")]
+		public string IncludeFolder;
 
 		public ConsoleColor ForegroundColor {
 			get { return GetColor (ForegroundString, Console.ForegroundColor); }

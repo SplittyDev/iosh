@@ -19,6 +19,10 @@ namespace iosh {
 			Init ();
 		}
 
+		public void IncludeFolder (string path) {
+			context.SearchPath.Add (path);
+		}
+
 		public IodineObject Compile (string source) {
 			var unit = SourceUnit.CreateFromSource (source);
 			var result = unit.Compile (Context);
