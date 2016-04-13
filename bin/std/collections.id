@@ -1,6 +1,13 @@
 # Author: SplittyDev (github.com/splittydev)
 
-class Stack {
+interface IEnumerable {
+    func __iter__ (self);
+    func __iterReset__ (self);
+    func __iterMoveNext__ (self);
+    func __iterGetCurrent__ (self);
+}
+
+class Stack : IEnumerable {
 
     # Constructor
     # Optional arguments:
@@ -108,5 +115,27 @@ class Stack {
     # @return object The current item
     func __iterGetCurrent__ (self) {
         return self.list [self.iterIndex]
+    }
+}
+
+class TypedStack : Stack {
+
+    # Constructor
+    # Optional arguments:
+    # 0 -> capacity (int)
+    # @param typedef T The type
+    # @param variadic args Optional arguments
+    func TypedStack (self, T, *args) {
+        super (*args);
+        self.type = T
+    }
+
+    # Pushes an item onto the stack
+    # @param object item The item to be pushed onto the stack
+    # @return null
+    func push (self, item) {
+        if (item isnot self.type)
+            raise Exception ("Invalid type!")
+        self.__super__.push (item)
     }
 }
