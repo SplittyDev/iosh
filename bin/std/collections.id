@@ -1,0 +1,112 @@
+# Author: SplittyDev (github.com/splittydev)
+
+class Stack {
+
+    # Constructor
+    # Optional arguments:
+    # 0 -> capacity (int)
+    # @param variadic args Optional arguments
+    func Stack (self, *args) {
+        self.iterIndex = 0
+        self.top = 0
+        self.list = []
+        self.capacity = -1
+        if (len (args) == 1 && args [0] is Int)
+            self.capacity = args [0]
+    }
+
+    # Pushes an item onto the stack
+    # @param object item The item to be pushed onto the stack
+    # @return null
+    func push (self, item) {
+        if (self.top == self.capacity)
+            raise Exception ("Maximum capacity reached.")
+        self.list.add (item)
+        self.top += 1
+        self.__iterReset__ ()
+    }
+
+    # Pops an item from the stack
+    # @return object The item that was popped from the stack
+    func pop (self) {
+        if (self.top == 0)
+            raise Exception ("There are no elements on the stack.")
+        self.top -= 1
+        item = self.list [self.top]
+        self.list.removeAt (self.top)
+        self.__iterReset__ ()
+        return item
+    }
+
+    # Gets the length
+    # @return int The length
+    func __len__ (self) {
+        return self.top
+    }
+
+    # Gets the string representation
+    # @deprecated Use __repr__ instead
+    # @return The string representation
+    func __str__ (self) {
+        return __repr__ ()
+    }
+
+    # Gets the string representation
+    # @return The string representation
+    func __repr__ (self) {
+        i = 0
+        accum = StringBuffer ()
+        accum.append ("[")
+        foreach (item in self) {
+            if (i > 0) accum.append (", ")
+            accum.append (repr (item))
+            i += 1
+        }
+        accum.append ("]")
+        return Str (accum)
+    }
+
+    # Gets the item at the specified index
+    # @param int i The index
+    # @return object The item at the specified index
+    func __getIndex__ (self, i) {
+        return self.list [self.top - i - 1]
+    }
+
+    # Sets the item at the specified index
+    # @param int i The index
+    # @param object item The item
+    # @return null
+    func __setIndex__ (self, i, item) {
+        self.list [self.top - i - 1] = item
+    }
+    
+    # Gets the iterator
+    # @return iterator The iterator
+    func __iter__ (self) {
+        return self
+    }
+    
+    # Resets the iterator
+    # @return null
+    func __iterReset__ (self) {
+        self.iterIndex = self.top
+    }
+    
+    # Moves to the next item of the iterator
+    # @return bool Whether iterating is possible
+    func __iterMoveNext__ (self) {
+        if (self.iterIndex == 0) {
+            self.__iterReset__ ()
+            return false
+        }
+        self.iterIndex -= 1
+        return true
+    }
+    
+    # Gets the current item of the iterator
+    # @return object The current item
+    func __iterGetCurrent__ (self) {
+        return self.list [self.iterIndex]
+    }
+}

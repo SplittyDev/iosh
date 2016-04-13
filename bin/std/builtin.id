@@ -1,0 +1,159 @@
+# Author: SplittyDev (github.com/splittydev)
+
+# ! func print (*object)
+# ! func invoke (function, [dict])
+# ! func eval (source)
+# func input ([prompt])
+# func filter (iterable, function)
+# func map (iterable, function)
+# func reduce (iterable, function, [default])
+# func sum (iterable, [default])
+# func typecast (type, object)
+# ! func open (file, mode)
+# func zip (*iterables)
+
+use hasAttribute from reflection
+
+# Returns a string representation of an object
+# @param object object The object to be represented
+# @return str The string representation of the specified object
+func repr (object) {
+    if (hasAttribute (object, "__repr__"))
+        return object.__repr__ ()
+    if (hasAttribute (object, "__str__"))
+        return object.__str__ ()
+    dict = {
+        "Str": lambda () => '"' + object + '"',
+        "List": lambda ()
+            => repr_get_list (repr, object),
+        "Tuple": lambda ()
+            => repr_get_tuple (repr, object),
+        "HashMap": lambda ()
+            => repr_get_hashmap (repr, object),
+    }
+    typename = Str (object.__type__)
+    if (hasAttribute (object, "__name__"))
+        typename = object.__name__
+    if (dict.contains (typename))
+        return dict [typename] ()
+    return Str (object)
+}
+
+# Builds the string representation of a list
+# @param function this The repr function
+# @param list lst The list
+# @return str The string representation
+func repr_get_list (this, lst) {
+    i = 0
+    accum = StringBuffer ()
+    accum.append ("[")
+    foreach (item in lst) {
+        if (i > 0) accum.append (", ")
+        accum.append (this (item))
+        i += 1
+    }
+    accum.append ("]")
+    return Str (accum)
+}
+
+# Builds the string representation of a tuple
+# @param function this The repr function
+# @param tuple tpl The tuple
+# @return str The string representation
+func repr_get_tuple (this, tpl) {
+    i = 0
+    accum = StringBuffer ()
+    accum.append ("(")
+    foreach (item in tpl) {
+        if (i > 0) accum.append (", ")
+        accum.append (this (item))
+        i += 1
+    }
+    accum.append (")")
+    return Str (accum)
+}
+
+# Builds the string representation of a hashmap
+# @param function this The repr function
+# @param hashmap hashmap The hashmap
+# @return str The string representation
+func repr_get_hashmap (this, hashmap) {
+    i = 0
+    accum = StringBuffer ()
+    accum.append ("{")
+    foreach (key in hashmap) {
+        if (i > 0) accum.append (", ")
+        accum.append (this (key))
+        accum.append ("=")
+        accum.append (this (hashmap [key]))
+        i += 1
+    }
+    accum.append ("}")
+    return Str (accum)
+}
+
+# Returns the type of an object
+# @param object object The object whose type is to be returned
+# @return typedef The type of the specified object
+func type (object) {
+    return object.__type__
+}
+
+# Returns an iterable covering a range
+# @param variadic args The parameters
+# @return range|generator An iterable covering the specified range
+func range (*args) {
+    result = match (len (args)) {
+        case 1 => 0 .. args [0]
+        case 2 => args [0] .. args [1]
+    }
+    if (result != null)
+        return result
+    for (i = args [0]; i < args [1]; i += args [2])
+        yield i
+}
+
+# Returns the length of a countable object
+# @param object countable The countable object
+# @return int The length of the specified object
+func len (countable) {
+    i = 0
+    if (!hasAttribute (countable, "__iter__")) {
+        if (countable is Str)
+            return len_bruteforce_string_length (countable)
+        if (countable is Tuple)
+            return len_bruteforce_tuple_length (countable)
+        return 0
+    }
+    foreach (_ in countable)
+        i += 1
+    return i
+}
+
+# Bruteforces the length of a string
+# @param string str The string
+# @return int The length of the string
+func len_bruteforce_string_length (str) {
+    i = 0
+    try {
+        while (true) {
+            str.substr (i)
+            i += 1
+        }
+    } except { }
+    return i
+}
+
+# Bruteforces the length of a tuple
+# @param tuple tpl The tuple
+# @return int The length of the tuple
+func len_bruteforce_tuple_length (tpl) {
+    i = 0
+    try {
+        while (true) {
+            tpl [i]
+            i += 1
+        }
+    } except { }
+    return i
+}

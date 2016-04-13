@@ -1,5 +1,5 @@
 ﻿using System;
-using Codeaddicts.libArgument.Attributes;
+using Codeaddicts.libArgument;
 
 namespace iosh {
 	
@@ -15,7 +15,7 @@ namespace iosh {
 		public bool EnableSyntaxHighlighting;
 
 		[Argument ("--lib", "/lib")]
-		public string IncludeFolder;
+		public string[] IncludeFolders;
 
 		public ConsoleColor ForegroundColor {
 			get { return GetColor (ForegroundString, Console.ForegroundColor); }

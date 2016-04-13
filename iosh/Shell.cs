@@ -61,14 +61,15 @@ namespace iosh {
 			engine = new IodineEngine ();
 
 			// Add search path if requested
-			if (options.IncludeFolder != null)
-				engine.IncludeFolder (options.IncludeFolder);
+			if (options.IncludeFolders != null)
+				engine.IncludeFolders (options.IncludeFolders);
 		}
 
 		/// <summary>
 		/// Run the REPL shell.
 		/// </summary>
-		public void Run () {
+		public void Run ()
+		{
 
 			// Set the culture
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -216,8 +217,8 @@ namespace iosh {
 						Console.CursorTop++;
 						Console.CursorLeft = 0;
 					} else
-						Console.CursorLeft = Math.Min (Console.CursorLeft + 1, Math.Min (Console.WindowWidth, accum.Length + 2));
-					break;
+							Console.CursorLeft = Math.Min (Console.CursorLeft + 1, Math.Min (Console.WindowWidth, accum.Length + 2));
+						break;
 				default:
 					total++;
 					tcurr++;
@@ -469,7 +470,7 @@ namespace iosh {
 				if (iodineClass != null) {
 					var attrcount = iodineClass.Attributes.Count;
 					ConsoleHelper.Write ("{0}", string.Format ("cyan/[Class: {0}]", iodineClass.Name));
-					if (obj.Attributes.All (attr => attr.Key.StartsWith ("__")))
+					if (obj.Attributes.All (attr => attr.Key.StartsWith("__", StringComparison.Ordinal)))
 						break;
 					Console.WriteLine ();
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin class {0}", iodineClass.Name));
@@ -477,7 +478,7 @@ namespace iosh {
 						var attr = iodineClass.Attributes.ElementAt (i);
 						if (attr.Value == null || attr.Value.TypeDef == null)
 							continue;
-						if (attr.Key.StartsWith ("__"))
+						if (attr.Key.StartsWith("__", StringComparison.Ordinal))
 							continue;
 						Console.WriteLine ();
 						Console.Write ("{0}: ", attr.Key);
@@ -488,7 +489,7 @@ namespace iosh {
 					break;
 				}
 				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Typedef: {0}]", obj.TypeDef.Name));
-				if (obj.Attributes.All (attr => attr.Key.StartsWith ("__")))
+				if (obj.Attributes.All (attr => attr.Key.StartsWith("__", StringComparison.Ordinal)))
 					break;
 				Console.WriteLine ();
 				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# begin type {0}", obj.TypeDef.Name));
@@ -496,7 +497,7 @@ namespace iosh {
 					var attr = obj.Attributes.ElementAt (i);
 					if (attr.Value == null || attr.Value.TypeDef == null)
 						continue;
-					if (attr.Key.StartsWith ("__"))
+					if (attr.Key.StartsWith("__", StringComparison.Ordinal))
 						continue;
 					Console.WriteLine ();
 					Console.Write ("{0}: ", attr.Key);
