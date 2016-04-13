@@ -117,7 +117,8 @@ func range (*args) {
 # @param object countable The countable object
 # @return int The length of the specified object
 func len (countable) {
-    i = 0
+    if (hasAttribute (countable, "__len__"))
+        return countable.__len__ ()
     if (!hasAttribute (countable, "__iter__")) {
         if (countable is Str)
             return len_bruteforce_string_length (countable)
@@ -125,6 +126,7 @@ func len (countable) {
             return len_bruteforce_tuple_length (countable)
         return 0
     }
+    i = 0
     foreach (_ in countable)
         i += 1
     return i

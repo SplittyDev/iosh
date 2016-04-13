@@ -2,24 +2,29 @@
 
 interface IEnumerable {
     func __iter__ (self);
-    func __iterReset__ (self);
-    func __iterMoveNext__ (self);
-    func __iterGetCurrent__ (self);
 }
 
 class Stack : IEnumerable {
 
     # Constructor
     # Optional arguments:
-    # 0 -> capacity (int)
+    # int capacity
+    # iterable content
     # @param variadic args Optional arguments
-    func Stack (self, *args) {
-        self.iterIndex = 0
+    func Stack (self, **kwargs) {
         self.top = 0
         self.list = []
         self.capacity = -1
-        if (len (args) == 1 && args [0] is Int)
-            self.capacity = args [0]
+        foreach (key in kwargs) {
+            given (key) {
+                when "capacity" {
+                    capacity = kwargs [key]
+                    if (capacity isnot Int)
+                        raise Exception ("Argument 'capacity' is expected to be an 'Int'.")
+                    self.capacity = capacity
+                }
+            }
+        }
     }
 
     # Pushes an item onto the stack
@@ -30,7 +35,6 @@ class Stack : IEnumerable {
             raise Exception ("Maximum capacity reached.")
         self.list.add (item)
         self.top += 1
-        self.__iterReset__ ()
     }
 
     # Pops an item from the stack
@@ -41,7 +45,6 @@ class Stack : IEnumerable {
         self.top -= 1
         item = self.list [self.top]
         self.list.removeAt (self.top)
-        self.__iterReset__ ()
         return item
     }
 
@@ -52,7 +55,6 @@ class Stack : IEnumerable {
     }
 
     # Gets the string representation
-    # @deprecated Use __repr__ instead
     # @return The string representation
     func __str__ (self) {
         return __repr__ ()
@@ -91,30 +93,10 @@ class Stack : IEnumerable {
     # Gets the iterator
     # @return iterator The iterator
     func __iter__ (self) {
-        return self
-    }
-    
-    # Resets the iterator
-    # @return null
-    func __iterReset__ (self) {
-        self.iterIndex = self.top
-    }
-    
-    # Moves to the next item of the iterator
-    # @return bool Whether iterating is possible
-    func __iterMoveNext__ (self) {
-        if (self.iterIndex == 0) {
-            self.__iterReset__ ()
-            return false
+        for (i = 0; i < self.top; i += 1) {
+            print ("i: " + Str (i))
+            yield self [i]
         }
-        self.iterIndex -= 1
-        return true
-    }
-    
-    # Gets the current item of the iterator
-    # @return object The current item
-    func __iterGetCurrent__ (self) {
-        return self.list [self.iterIndex]
     }
 }
 
