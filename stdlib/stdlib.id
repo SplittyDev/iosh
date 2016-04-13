@@ -1,0 +1,9 @@
+# Author: SplittyDev (github.com/splittydev)
+# Description:
+#   Patches the global dictionary to use core functions
+#   instead of _builtin_ functions.
+
+use core
+func patch () {
+    
+}

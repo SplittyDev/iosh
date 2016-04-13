@@ -381,8 +381,8 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", "magenta/(builtin)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
-			case "InstanceMethod":
-				var instancefunc = obj as IodineInstanceMethodWrapper;
+			case "BoundMethod":
+				var instancefunc = obj as IodineBoundMethod;
 				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
 				Console.Write ("{0} ", instancefunc.Method.Name);
 				if (instancefunc.Method.ParameterCount > 0) {
@@ -422,7 +422,7 @@ namespace iosh {
 				var generatormethod = generatorbasemethod as IodineMethod;
 				if (generatormethod != null)
 					generatormethodname = generatormethod.Name;
-				var generatorinstancemethod = generatorbasemethod as IodineInstanceMethodWrapper;
+				var generatorinstancemethod = generatorbasemethod as IodineBoundMethod;
 				if (generatorinstancemethod != null)
 					generatormethodname = generatorinstancemethod.Method.Name;
 				ConsoleHelper.Write ("{0}", "cyan/[Iterator");

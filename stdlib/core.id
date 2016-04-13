@@ -1,58 +1,77 @@
 # Author: SplittyDev (github.com/splittydev)
 
-# func print (*object)
+# ! func print (*object)
+# ! func invoke (function, [dict])
+# ! func eval (source)
 # func input ([prompt])
-# func invoke (function, [dict])
-# func eval (source)
 # func filter (iterable, function)
-# func len (object)
 # func map (iterable, function)
 # func reduce (iterable, function, [default])
-# func range (n)
-# func range (start, end, [step = 1])
-# func repr (object)
 # func sum (iterable, [default])
-# func type (object)
 # func typecast (type, object)
-# func open (file, mode)
+# ! func open (file, mode)
 # func zip (*iterables)
+use corehacks
+use hasAttribute from reflection
 
-use reflection
-
-func _repr (object) {
-    if (reflection.hasAttribute (object, "__repr__"))
+# Returns a string representation of an object
+# @param object object The object to be represented
+# @return str The string representation of the specified object
+func repr (object) {
+    if (hasAttribute (object, "__repr__"))
         return object.__repr__ ()
-    if (reflection.hasAttribute (object, "__str__"))
+    if (hasAttribute (object, "__str__"))
         return object.__str__ ()
     dict = {
-        "Str": lambda () => '"{0}"'.format (object),
-        "List": lambda () {
-            i = 0
-            accum = StringBuffer ()
-            accum.append ("[")
-            foreach (item in object) {
-                if (i > 0) accum.append (", ")
-                accum.append (_repr (item))
-                i += 1
-            }
-            accum.append ("]")
-            return Str (accum)
-        }
+        "Str": lambda () => object,
+        "List": lambda ()
+            => corehacks.repr_get_list (repr, object),
+        "Tuple": lambda ()
+            => corehacks.repr_get_tuple (repr, object),
+        "HashMap": lambda ()
+            => corehacks.repr_get_hashmap (repr, object),
     }
     typename = Str (object.__type__)
-    if (reflection.hasAttribute (object, "__name__"))
+    if (hasAttribute (object, "__name__"))
         typename = object.__name__
     if (dict.contains (typename))
         return dict [typename] ()
     return Str (object)
 }
 
-func test () {
-    testrepr = lambda (x) {
-        print ( repr (x))
-        print (_repr (x))
+# Returns the type of an object
+# @param object object The object whose type is to be returned
+# @return typedef The type of the specified object
+func type (object) {
+    return object.__type__
+}
+
+# Returns an iterable covering a range
+# @param variadic args The parameters
+# @return range|generator An iterable covering the specified range
+func range (*args) {
+    result = match (len (args)) {
+        case 1 => 0 .. args [0]
+        case 2 => args [0] .. args [1]
     }
-    testrepr ("hello")
-    testrepr (123)
-    testrepr (print)
+    if (result != null)
+        return result
+    for (i = args [0]; i < args [1]; i += args [2])
+        yield i
+}
+
+# Returns the length of a countable object
+# @param object countable The countable object
+# @return int The length of the specified object
+func len (countable) {
+    i = 0
+    if (!hasAttribute (countable, "__iterMoveNext__")) {
+        if (countable is Str)
+            return corehacks.len_bruteforce_string_length (countable)
+        if (countable is Tuple)
+            return corehacks.len_bruteforce_tuple_length (countable)
+        return 0
+    }
+    for (i; countable.__iterMoveNext__ (); i += 1) { }
+    return i
 }
