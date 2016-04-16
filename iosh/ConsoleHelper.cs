@@ -35,7 +35,7 @@ namespace iosh {
 
 		void ParseColorString (string str) {
 			var colors = Enum.GetNames (typeof(ConsoleColor));
-			var match = colors.FirstOrDefault (c => str.StartsWith (string.Format ("{0}/", c.ToLowerInvariant ())));
+			var match = colors.FirstOrDefault (c => str.StartsWith (string.Format ("{0}/", c.ToLowerInvariant ()), StringComparison.Ordinal));
 			if (match != null) {
 				Color = (ConsoleColor)Enum.Parse (typeof(ConsoleColor), str.Substring (0, match.Length), true);
 				value = str.Substring (match.Length + 1);

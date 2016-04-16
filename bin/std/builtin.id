@@ -3,31 +3,27 @@
 # ! func print (*object)
 # ! func invoke (function, [dict])
 # ! func eval (source)
-# func input ([prompt])
-# func filter (iterable, function)
-# func map (iterable, function)
-# func reduce (iterable, function, [default])
-# func sum (iterable, [default])
-# func typecast (type, object)
 # ! func open (file, mode)
-# func zip (*iterables)
+# ! func input ([prompt])
+# func reduce (iterable, function, [default])
 
 use hasAttribute from reflection
 
 # Returns a string representation of an object
-# @param object object The object to be represented
-# @return str The string representation of the specified object
+# @param Object object The object to be represented
+# @return Str The string representation of the specified object
 func repr (object) {
     if (hasAttribute (object, "__repr__"))
         return object.__repr__ ()
-    if (hasAttribute (object, "__str__"))
-        return object.__str__ ()
+    # TODO: Remove this after Iodine has been updated
+    # This should not be needed at all
+    # __repr__ should be implemented for every type
     dict = {
         "Str": lambda () => '"' + object + '"',
         "List": lambda ()
-            => repr_get_list (repr, object),
+            => repr_get_iterable (repr, object, "[", "]"),
         "Tuple": lambda ()
-            => repr_get_tuple (repr, object),
+            => repr_get_iterable (repr, object, "(", ")"),
         "HashMap": lambda ()
             => repr_get_hashmap (repr, object),
     }
@@ -39,44 +35,27 @@ func repr (object) {
     return Str (object)
 }
 
-# Builds the string representation of a list
-# @param function this The repr function
-# @param list lst The list
-# @return str The string representation
-func repr_get_list (this, lst) {
+# Builds the string representation of an iterable
+# @param Object this The repr function
+# @param Object itr The iterable
+# @return Str The string representation
+func repr_get_iterable (this, itr, ochr, cchr) {
     i = 0
     accum = StringBuffer ()
-    accum.append ("[")
-    foreach (item in lst) {
+    accum.append (ochr)
+    foreach (item in itr) {
         if (i > 0) accum.append (", ")
         accum.append (this (item))
         i += 1
     }
-    accum.append ("]")
-    return Str (accum)
-}
-
-# Builds the string representation of a tuple
-# @param function this The repr function
-# @param tuple tpl The tuple
-# @return str The string representation
-func repr_get_tuple (this, tpl) {
-    i = 0
-    accum = StringBuffer ()
-    accum.append ("(")
-    foreach (item in tpl) {
-        if (i > 0) accum.append (", ")
-        accum.append (this (item))
-        i += 1
-    }
-    accum.append (")")
+    accum.append (cchr)
     return Str (accum)
 }
 
 # Builds the string representation of a hashmap
-# @param function this The repr function
-# @param hashmap hashmap The hashmap
-# @return str The string representation
+# @param Object this The repr function
+# @param HashMap hashmap The hashmap
+# @return Str The string representation
 func repr_get_hashmap (this, hashmap) {
     i = 0
     accum = StringBuffer ()
@@ -93,15 +72,15 @@ func repr_get_hashmap (this, hashmap) {
 }
 
 # Returns the type of an object
-# @param object object The object whose type is to be returned
-# @return typedef The type of the specified object
+# @param Object object The object whose type is to be returned
+# @return Type The type of the specified object
 func type (object) {
     return object.__type__
 }
 
 # Returns an iterable covering a range
-# @param variadic args The parameters
-# @return range|generator An iterable covering the specified range
+# @param *Object args The parameters
+# @return Range|Iterator An iterable covering the specified range
 func range (*args) {
     result = match (len (args)) {
         case 1 => 0 .. args [0]
@@ -114,8 +93,8 @@ func range (*args) {
 }
 
 # Returns the length of a countable object
-# @param object countable The countable object
-# @return int The length of the specified object
+# @param Object countable The countable object
+# @return Int The length of the specified object
 func len (countable) {
     if (hasAttribute (countable, "__len__"))
         return countable.__len__ ()
@@ -133,8 +112,8 @@ func len (countable) {
 }
 
 # Bruteforces the length of a string
-# @param string str The string
-# @return int The length of the string
+# @param Str str The string
+# @return Int The length of the string
 func len_bruteforce_string_length (str) {
     i = 0
     try {
@@ -147,8 +126,8 @@ func len_bruteforce_string_length (str) {
 }
 
 # Bruteforces the length of a tuple
-# @param tuple tpl The tuple
-# @return int The length of the tuple
+# @param Tuple tpl The tuple
+# @return Int The length of the tuple
 func len_bruteforce_tuple_length (tpl) {
     i = 0
     try {
@@ -158,4 +137,112 @@ func len_bruteforce_tuple_length (tpl) {
         }
     } except { }
     return i
+}
+
+# Casts the specified object to the specified type
+# @param Type The type
+# @param Object object The object
+# @return Object The object casted to the specified type
+func typecast (type, object) {
+    if (object isnot type)
+        raise TypeException (Str (type))
+    return object
+}
+
+# Iterates through an iterable, passing each to a function.
+# If that functions returns true, the item is appended to a list,
+# which is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @return List The filtered items
+func filter (iterable, callback) {
+    lst = []
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    foreach (item in iterable) {
+        if (callback (item))
+            lst.add (item)
+    }
+    return lst
+}
+
+# Iterates through an iterable, passing each to a function.
+# The return value of each function call is appended to a list,
+# which is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @return List The mapped items
+func map (iterable, callback) {
+    lst = []
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    foreach (item in iterable)
+        lst.add (callback (item))
+    return lst
+}
+
+# Reduces an iterable by iterating over it,
+# passing, for all items, the result of the previous item and the current item
+# to a function, whose result is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @param **Object kwargs Optional arguments
+# @optional Object start The result to start with
+# @return Object The result of the reduction
+func reduce (iterable, callback, **kwargs) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    result = null
+    foreach (key in kwargs) {
+        match (key) {
+            case "start" => result = kwargs [key]
+        }
+    }
+    foreach (item in iterable) {
+        if (result == null)
+            result = item
+        result = callback (result, item)
+    }
+    return result
+}
+
+# Adds up all items of an iterable
+# @param Object iterable The iterable
+# @param **Object kwargs Optional arguments
+# @optional Object start The result to start with
+# @return Object The result
+func sum (iterable, **kwargs) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    result = 0
+    foreach (key in kwargs) {
+        match (key) {
+            case "start" => result = kwargs [key]
+        }
+    }
+    foreach (item in iterable)
+        result += item
+    return result
+}
+
+func zip (*iterables) {
+    result = []
+    iteratorCount = len (iterables)
+    iterators = []
+    iteratorIndices = []
+    iteratorCounts = []
+    foreach (iterator in iterables) {
+        iterators.add (iterator)
+        iteratorIndices.add (0)
+        iteratorCounts.add (len (iterator))
+    }
+    while (true) {
+        objs = []
+        for (i = 0; i < iteratorCount; i += 1) {
+            if (iteratorCounts [i] == iteratorIndices [i])
+                return result
+            objs.add (iterators [i] [iteratorIndices [i]])
+            iteratorIndices [i] += 1
+        }
+        result.add (Tuple (objs))
+    }
 }

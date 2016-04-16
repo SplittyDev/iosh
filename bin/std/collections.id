@@ -1,34 +1,239 @@
 # Author: SplittyDev (github.com/splittydev)
 
-interface IEnumerable {
-    func __iter__ (self);
-}
+# TODO: Change to trait Enumerable
+# interface IEnumerable {
+#     func __iter__ (self);
+# }
 
-class Stack : IEnumerable {
+class Set {
 
     # Constructor
-    # Optional arguments:
-    # int capacity
-    # iterable content
-    # @param variadic args Optional arguments
-    func Stack (self, **kwargs) {
-        self.top = 0
+    # @param **Object kwargs Optional arguments
+    # @optional Int capacity The capacity
+    # @optional List items The elements to initialize the Set with
+    func Set (self, **kwargs) {
         self.list = []
+        self.cardinality = 0
         self.capacity = -1
         foreach (key in kwargs) {
-            given (key) {
-                when "capacity" {
-                    capacity = kwargs [key]
-                    if (capacity isnot Int)
-                        raise Exception ("Argument 'capacity' is expected to be an 'Int'.")
-                    self.capacity = capacity
-                }
+            match (key) {
+                case "capacity" => self.capacity = typecast (Int, kwargs [key])
+                case "items" => (lambda () {
+                    foreach (i in typecast (List, kwargs [key]))
+                        self.add (i)
+                }) ()
+            }
+        }
+    }
+
+    # Adds an element to the set
+    # @param Object item The element to be added
+    # @return null
+    func add (self, item) {
+        if (self.cardinality == self.capacity)
+            raise Exception ("Maximum capacity reached.")
+        if (self.contains (item))
+            raise Exception ("The item is already an element of the set.")
+        self.list.add (item)
+        self.cardinality += 1
+    }
+
+    # Removes an element from the set
+    # @param Object item The element to be removed
+    # @return null
+    func remove (self, item) {
+        if (!self.contains (item))
+            raise Exception ("The item is not an element of the set.")
+        i = 0
+        foreach (x in self.list) {
+            if (x == item) {
+                self.list.removeAt (i)
+                break
+            }
+            i += 1
+        }
+        self.cardinality -= 1
+    }
+
+    # Determines whether the set is empty
+    # @return Bool Whether the set is empty
+    func empty (self) {
+        return self.cardinality == 0
+    }
+
+    # Returns the union of this and another set
+    # @param Set other The other set
+    # @return Set A set containing the union of this and another set
+    func union (self, other) {
+            typecast (Set, other)
+            set = Set (items: other.list)
+            foreach (item in self.list) {
+                if (!other.contains (item))
+                    set.add (item)
+            }
+            return set
+    }
+
+    # Returns the intersection of this and another set
+    # @param Set other The other set
+    # @return Set A set containing the intersection of this and the other set
+    func intersection (self, other) {
+        typecast (Set, other)
+        set = Set ()
+        foreach (item in self.list) {
+            if (other.contains (item))
+                set.add (item)
+        }
+        return set
+    }
+
+    # Returns the difference of this and another set
+    # @param Set other The other set
+    # @return Set A set containing the difference of this and the other set
+    func difference (self, other) {
+        typecast (Set, other)
+        set = Set ()
+        foreach (item in self.list) {
+            if (!other.contains (item))
+                set.add (item)
+        }
+        return set
+    }
+
+    # Determines whether this is a superset of another set
+    # @param Set other The other set
+    # @return Bool Whether this is a superset of the other set
+    func superset (self, other) {
+        typecast (Set, other)
+        i = 0
+        foreach (item in self.list)
+            if (other.contains (item))
+                i += 1
+        return other.cardinality == i
+    }
+
+    # Determines whether this is a subset of another set
+    # @param Set other The other set
+    # @return Bool Whether this is a subset of the other set
+    func subset (self, other) {
+        typecast (Set, other)
+        i = 0
+        foreach (item in other.list)
+            if (self.contains (item))
+                i += 1
+        return self.cardinality == i
+    }
+
+    # Determines whether something is an element of the set
+    # @param Object item The item
+    func contains (self, item) {
+        return (self.list).contains (item)
+    }
+
+    # Gets the length
+    # @return Int The length
+    func __len__ (self) {
+        return self.cardinality
+    }
+
+    # Gets the string representation
+    # @return Str The string representation
+    func __str__ (self) {
+        return self.__repr__ ()
+    }
+
+    # Gets the string representation
+    # @return Str The string representation
+    func __repr__ (self) {
+        return repr (self.list)
+    }
+
+    # Gets the item at the specified index
+    # @param Int i The index
+    # @return Object The item at the specified index
+    func __getIndex__ (self, i) {
+        return self.list [i]
+    }
+    
+    # Gets the iterator
+    # @return Iterator The items
+    func __iter__ (self) {
+        for (i = 0; i < self.cardinality; i += 1) {
+            yield self [i]
+        }
+    }
+    
+    # Creates a new set from a list
+    # @param List lst The items
+    # @return Set A set contaning the elements of the specified lists
+    func create (lst) {
+        return Set (items: typecast (List, lst))
+    }
+
+    # Returns the union of two sets
+    # @param Set a The first set
+    # @param Set b The second set
+    # @return Set A set containing the union of the two sets
+    func unionOf (a, b) {
+        return typecast (Set, a).union (b)
+    }
+
+    # Returns the intersection of two sets
+    # @param Set a The first set
+    # @param Set b The second set
+    # @return Set A set containing the intersection of the two sets
+    func intersectionOf (a, b) {
+        return typecast (Set, a).intersection (b)
+    }
+
+    # Returns the difference of two sets
+    # @param Set a The first set
+    # @param Set b The second set
+    # @return Set A set contaning the difference of the two sets
+    func differenceOf (a, b) {
+        return typecast (Set, a).difference (b)
+    }
+
+    # Determines whether a set is a superset of another set
+    # @param Set a The first set
+    # @param Set b The second set
+    # @return Bool Whether the first set is a superset of the second set
+    func supersetOf (a, b) {
+        return typecast (Set, a).superset (b)
+    }
+
+    # Determines whether a set is a subset of another set
+    # @param Set a The first set
+    # @param Set b The second set
+    # @return Bool Whether the first set is a subset of the second set
+    func subsetOf (a, b) {
+        return typecast (Set, a).subset (b)
+    }
+}
+
+class Stack {
+
+    # Constructor
+    # @param **Object kwargs Optional arguments
+    # @optional Int capacity
+    # @optional List items
+    func Stack (self, **kwargs) {
+        self.list = []
+        self.top = 0
+        self.capacity = -1
+        foreach (key in kwargs) {
+            match (key) {
+                case "capacity" => self.capacity = typecast (Int, kwargs [key])
+                case "items" => (lambda () {
+                    foreach (i in typecast (List, kwargs [key]))
+                        self.push (i)
+                }) ()
             }
         }
     }
 
     # Pushes an item onto the stack
-    # @param object item The item to be pushed onto the stack
+    # @param Object item The item to be pushed onto the stack
     # @return null
     func push (self, item) {
         if (self.top == self.capacity)
@@ -38,7 +243,7 @@ class Stack : IEnumerable {
     }
 
     # Pops an item from the stack
-    # @return object The item that was popped from the stack
+    # @return Object The item that was popped from the stack
     func pop (self) {
         if (self.top == 0)
             raise Exception ("There are no elements on the stack.")
@@ -49,52 +254,42 @@ class Stack : IEnumerable {
     }
 
     # Gets the length
-    # @return int The length
+    # @return Int The length
     func __len__ (self) {
         return self.top
     }
 
     # Gets the string representation
-    # @return The string representation
+    # @return Str The string representation
     func __str__ (self) {
-        return __repr__ ()
+        return self.__repr__ ()
     }
 
     # Gets the string representation
-    # @return The string representation
+    # @return Str The string representation
     func __repr__ (self) {
-        i = 0
-        accum = StringBuffer ()
-        accum.append ("[")
-        foreach (item in self) {
-            if (i > 0) accum.append (", ")
-            accum.append (repr (item))
-            i += 1
-        }
-        accum.append ("]")
-        return Str (accum)
+        return repr (self.list)
     }
 
     # Gets the item at the specified index
-    # @param int i The index
-    # @return object The item at the specified index
+    # @param Int i The index
+    # @return Object The item at the specified index
     func __getIndex__ (self, i) {
         return self.list [self.top - i - 1]
     }
 
     # Sets the item at the specified index
-    # @param int i The index
-    # @param object item The item
+    # @param Int i The index
+    # @param Object item The item
     # @return null
     func __setIndex__ (self, i, item) {
         self.list [self.top - i - 1] = item
     }
     
     # Gets the iterator
-    # @return iterator The iterator
+    # @return Iterator The items
     func __iter__ (self) {
         for (i = 0; i < self.top; i += 1) {
-            print ("i: " + Str (i))
             yield self [i]
         }
     }
@@ -103,17 +298,17 @@ class Stack : IEnumerable {
 class TypedStack : Stack {
 
     # Constructor
-    # Optional arguments:
-    # 0 -> capacity (int)
-    # @param typedef T The type
-    # @param variadic args Optional arguments
-    func TypedStack (self, T, *args) {
-        super (*args);
+    # @param Type T The type
+    # @param **Object kwargs Optional arguments
+    # @optional Int capacity
+    # @optional List items
+    func TypedStack (self, T, **kwargs) {
+        super (kwargs);
         self.type = T
     }
 
     # Pushes an item onto the stack
-    # @param object item The item to be pushed onto the stack
+    # @param Object item The item to be pushed onto the stack
     # @return null
     func push (self, item) {
         if (item isnot self.type)
