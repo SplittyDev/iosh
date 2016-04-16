@@ -27,10 +27,16 @@ namespace iosh {
 
 		static ConsoleColor GetColor (string str, ConsoleColor fallback) {
 			ConsoleColor color;
-			if (!Enum.TryParse<ConsoleColor> (str, true, out color))
+			if (!Enum.TryParse (str, true, out color))
 				color = fallback;
 			return color;
 		}
+
+        readonly public static Options Default;
+
+        static Options () {
+            Default = new Options ();
+        }
 	}
 }
 

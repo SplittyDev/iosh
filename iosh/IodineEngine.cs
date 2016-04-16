@@ -23,7 +23,8 @@ namespace iosh {
 		}
 
 		public IodineEngine () {
-			BuiltInModules.Modules.Add ("__iosh_help__", new HelpModule ());
+            if (!BuiltInModules.Modules.ContainsKey ("__iosh_help__"))
+			    BuiltInModules.Modules.Add ("__iosh_help__", new HelpModule ());
 			Init ();
 		}
 

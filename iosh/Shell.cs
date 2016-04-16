@@ -43,27 +43,43 @@ namespace iosh {
 		/// </summary>
 		readonly ConsoleColor Background;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:iosh.Shell"/> class.
+        /// </summary>
+        Shell () {
+            
+            // Set colors
+            ColoredString.Fallback = Foreground;
+
+            // Create the default prompt
+            prompt = new Prompt ("λ");
+
+            // Create the iodine engine
+            engine = new IodineEngine ();
+        }
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
 		/// </summary>
-		public Shell (Options options) {
-			CommandLineOptions = options;
+        public Shell (Options options) : this () {
+            CommandLineOptions = options;
 
-			// Set colors
-			Foreground = options.ForegroundColor;
-			Background = options.BackgroundColor;
-			ColoredString.Fallback = Foreground;
-
-			// Create the default prompt
-			prompt = new Prompt ("λ");
-
-			// Create the iodine engine
-			engine = new IodineEngine ();
+            // Set colors
+            Foreground = options.ForegroundColor;
+            Background = options.BackgroundColor;
 
 			// Add search path if requested
 			if (options.IncludeFolders != null)
 				engine.IncludeFolders (options.IncludeFolders);
 		}
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:iosh.Shell"/> class.
+        /// </summary>
+        /// <param name="engine">Engine.</param>
+        public Shell (IodineEngine engine) : this (Options.Default) {
+            this.engine = engine;
+        }
 
 		/// <summary>
 		/// Run the REPL shell.
