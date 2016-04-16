@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Codeaddicts.libArgument;
+using Iodine.Runtime;
 
 namespace iosh {
 
@@ -36,7 +37,9 @@ namespace iosh {
                 Environment.Exit (1);
             }
             var engine = new IodineEngine ();
-            engine.Compile (File.ReadAllText (filename));
+            var result = engine.Compile (File.ReadAllText (filename));
+            if (result.HasAttribute ("main"))
+                result.Invoke (engine.VirtualMachine, new IodineObject [0]);
             var shell = new Shell (engine);
             shell.Run ();
         }

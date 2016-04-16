@@ -52,6 +52,7 @@
     <Compile Include="LineContinuationRule.cs" />
     <Compile Include="IodineConstants.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

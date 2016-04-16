@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Iodine.Compiler;
 using Iodine.Runtime;
-using System.Collections;
 
 namespace iosh {
 
-	/// <summary>
-	/// Iodine REPL Shell.
-	/// </summary>
-	public class Shell {
+    /// <summary>
+    /// Iodine REPL Shell.
+    /// </summary>
+    public class Shell {
 
 		/// <summary>
 		/// The prompt.
@@ -43,6 +40,8 @@ namespace iosh {
 		/// </summary>
 		readonly ConsoleColor Background;
 
+        bool ExitRequested;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:iosh.Shell"/> class.
         /// </summary>
@@ -58,9 +57,9 @@ namespace iosh {
             engine = new IodineEngine ();
         }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="iosh.Shell"/> class.
-		/// </summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Shell"/> class.
+        /// </summary>
         public Shell (Options options) : this () {
             CommandLineOptions = options;
 
@@ -106,7 +105,7 @@ namespace iosh {
 			Console.WriteLine ("Iosh v{0} (Iodine v{1})", version.ToString (3), iodineversion.ToString (3));
 
 			// Enter the REPL
-			while (true)
+			while (!ExitRequested)
 				RunIteration ();
 		}
 
@@ -132,11 +131,12 @@ namespace iosh {
 			// Clear the screen if requested
 			switch (source) {
 			case ":c":
+            case ":clear":
 				Console.Clear ();
 				return;
-			case ":r":
-				engine.Reload ();
-				return;
+            case ":exit":
+                ExitRequested = true;
+                return;
 			}
 
 			// Compile the source unit
@@ -210,8 +210,8 @@ namespace iosh {
 					if (tcurr > 0) {
 						if (Console.CursorLeft == 0) {
 							Console.CursorTop--;
-							Console.CursorLeft = Math.Min (Console.BufferWidth, Console.WindowWidth);
-						}
+                            Console.CursorLeft = Math.Min (Console.BufferWidth, Console.WindowWidth);
+                        }
 						total = Math.Max (0, total - 1);
 						tcurr = Math.Max (0, tcurr - 1);
 						Console.Write ("\b \b");
@@ -525,24 +525,6 @@ namespace iosh {
 			}
 
 			return true;
-		}
-
-		// TODO: Remove this. Not used anywhere.
-		[Obsolete]
-		void ShouldContinueLinex (string line) {
-			var trimmedLine = line.Trim ();
-
-			/* Uncontinued if test
-			 * [Triggers]
-			 * if (cond)
-			 * [Ignores]
-			 * if (cond) stmt;
-			 */
-			var uncontinuedIfBegin = new [] { "if", "else" };
-			var uncontinuedIfEnd = new [] { ";", ")" };
-			var uncontinuedIf = true
-				&& uncontinuedIfBegin.Any (trimmedLine.StartsWith)
-				&& !uncontinuedIfEnd.Any (trimmedLine.EndsWith);
 		}
 	}
 }

@@ -22,6 +22,10 @@ namespace iosh {
 			get { return context; }
 		}
 
+        public VirtualMachine VirtualMachine {
+            get { return context.VirtualMachine; }
+        }
+
 		public IodineEngine () {
             if (!BuiltInModules.Modules.ContainsKey ("__iosh_help__"))
 			    BuiltInModules.Modules.Add ("__iosh_help__", new HelpModule ());
