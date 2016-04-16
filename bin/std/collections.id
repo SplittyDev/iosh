@@ -42,17 +42,16 @@ class Set {
     # @param Object item The element to be removed
     # @return null
     func remove (self, item) {
-        if (!self.contains (item))
-            raise Exception ("The item is not an element of the set.")
         i = 0
         foreach (x in self.list) {
             if (x == item) {
                 self.list.removeAt (i)
-                break
+                self.cardinality -= 1
+                return null
             }
             i += 1
         }
-        self.cardinality -= 1
+        raise Exception ("The item is not an element of the set.")
     }
 
     # Determines whether the set is empty
