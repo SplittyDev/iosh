@@ -5,6 +5,138 @@
 #     func __iter__ (self);
 # }
 
+class Array {
+
+    # Constructor
+    # @param **Object kwargs Optional arguments
+    # @optional Int capacity The capacity
+    # @optional List items The elements to initialize the Array with
+    # @optional Int prealloc The amount of space to be preallocated
+    func Array (self, **kwargs) {
+        self.list = []
+        self.length = 0
+        self.capacity = -1
+        foreach (key in kwargs) {
+            match (key) {
+                case "capacity" => self.capacity = typecast (Int, kwargs [key])
+                case "items" => (lambda () {
+                    foreach (i in typecast (List, kwargs [key]))
+                        self.add (i)
+                    }) ()
+                case "prealloc" => (lambda () {
+                    maxfill = typecast (Int, kwargs [key])
+                    if (maxfill > self.capacity)
+                        raise Exception ("Preallocating overflows the capacity.")
+                    for (i = 0; i < maxfill; i += 1)
+                        self.add (null)
+                    }) ()
+            }
+        }
+    }
+
+    # Adds an element to the array
+    # @param Object item The element to be added
+    # @return null
+    func add (self, item) {
+        if (self.length == self.capacity)
+            raise Exception ("Maximum capacity reached.")
+        self.list.add (item)
+        self.length += 1
+    }
+
+    # Removes an element from the array
+    # @param Object item The element to be removed
+    # @return null
+    func remove (self, item) {
+        i = 0
+        foreach (x in self.list) {
+            if (x == item) {
+                self.list.removeAt (i)
+                self.length -= 1
+                return null
+            }
+            i += 1
+        }
+        raise Exception ("The item is not an element of the array.")
+    }
+
+    # Removes the specific element from the array
+    # @param Int index The index of the element to be removed
+    # @return null
+    func removeAt (self, index) {
+        self.list.removeAt (typecast (Int, index))
+        self.length -= 1
+    }
+
+    # Determines whether something is an element of the array
+    # @param Object item The item
+    # @return bool Whether the specified item is an element of the array
+    func contains (self, item) {
+        return self.list.contains (item)
+    }
+
+    # Gets the length
+    # @return Int The length
+    func __len__ (self) {
+        return self.length
+    }
+
+    # Gets the string representation
+    # @return Str The string representation
+    func __str__ (self) {
+        return self.__repr__ ()
+    }
+
+    # Gets the string representation
+    # @return Str The string representation
+    func __repr__ (self) {
+        return repr (self.list)
+    }
+
+    # Gets the item at the specified index
+    # @param Int i The index
+    # @return Object The item at the specified index
+    func __getIndex__ (self, i) {
+        return self.list [i]
+    }
+
+    # Sets the item at the specified index
+    # @param Int i The index
+    # @param Object item The item
+    # @return null
+    func __setIndex__ (self, i, item) {
+        self.list [i] = item
+    }
+    
+    # Gets the iterator
+    # @return Iterator The items
+    func __iter__ (self) {
+        for (i = 0; i < self.length; i += 1)
+            yield self.list [i]
+    }
+
+    # Fills an array with zeros
+    # @param Array arr The array to be filled with zeros
+    # @return Array The array
+    func zeroFill (arr) {
+        typecast (Array, arr)
+        for (i = 0; i < arr.length; i += 1)
+            arr [i] = 0
+        return arr
+    }
+
+    # Fills an array with an object
+    # @param Array arr The array to be filled with the specified object
+    # @param Object filler The object that the array is to be filled with
+    # @return Array The array
+    func fill (arr, filler) {
+        typecast (Array, arr)
+        for (i = 0; i < arr.length; i += 1)
+            arr [i] = filler
+        return arr
+    }
+}
+
 class Set {
 
     # Constructor
@@ -64,13 +196,13 @@ class Set {
     # @param Set other The other set
     # @return Set A set containing the union of this and another set
     func union (self, other) {
-            typecast (Set, other)
-            set = Set (items: other.list)
-            foreach (item in self.list) {
-                if (!other.contains (item))
-                    set.add (item)
-            }
-            return set
+        typecast (Set, other)
+        set = Set (items: other.list)
+        foreach (item in self.list) {
+            if (!other.contains (item))
+                set.add (item)
+        }
+        return set
     }
 
     # Returns the intersection of this and another set
@@ -105,9 +237,10 @@ class Set {
     func superset (self, other) {
         typecast (Set, other)
         i = 0
-        foreach (item in self.list)
+        foreach (item in self.list) {
             if (other.contains (item))
                 i += 1
+        }
         return other.cardinality == i
     }
 
@@ -117,16 +250,18 @@ class Set {
     func subset (self, other) {
         typecast (Set, other)
         i = 0
-        foreach (item in other.list)
+        foreach (item in other.list) {
             if (self.contains (item))
                 i += 1
+        }
         return self.cardinality == i
     }
 
     # Determines whether something is an element of the set
     # @param Object item The item
+    # @return bool Whether the specified item is an element of the array
     func contains (self, item) {
-        return (self.list).contains (item)
+        return self.list.contains (item)
     }
 
     # Gets the length
@@ -157,9 +292,8 @@ class Set {
     # Gets the iterator
     # @return Iterator The items
     func __iter__ (self) {
-        for (i = 0; i < self.cardinality; i += 1) {
-            yield self [i]
-        }
+        for (i = 0; i < self.cardinality; i += 1)
+            yield self.list [i]
     }
     
     # Creates a new set from a list
