@@ -96,6 +96,8 @@ func range (*args) {
 # @param Object countable The countable object
 # @return Int The length of the specified object
 func len (countable) {
+    if (countable is Collection)
+        return countable.count ()
     if (hasAttribute (countable, "__len__"))
         return countable.__len__ ()
     if (!hasAttribute (countable, "__iter__")) {
