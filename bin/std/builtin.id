@@ -87,7 +87,8 @@ func type (object) {
 
 # Returns an iterable covering a range
 # @param *Object args The parameters
-# @return Range|Iterator An iterable covering the specified range
+# @return Range An iterable covering the specified range
+# @yield Object The whole numbers that lie within the specified range
 func range (*args) {
     result = match (len (args)) {
         case 1 => 0 .. args [0]
@@ -215,7 +216,8 @@ func reduce (iterable, callback, **kwargs) {
         }
     }
     foreach (item in iterable) {
-        if (result == null) {
+        # TODO: Replace with Null typecheck
+        if (result.__type__ == null.__type__) {
             result = item
         }
         result = callback (result, item)

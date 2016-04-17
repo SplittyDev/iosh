@@ -1,0 +1,32 @@
+# Author: SplittyDev (github.com/splittydev)
+
+# The Pi constant
+PI = 3.14159265358979
+
+# The E constant
+E = 2.71828182845905
+
+func pow (base, exponent) {
+    base = typecast (Int, base)
+    exponent = typecast (Int, exponent)
+    current = 1
+    for (i = 0; i < exponent; i += 1) {
+        current *= base
+    }
+    return current
+}
+
+func abs (x) {
+    if (x < 0)
+        return -x
+    return x
+}
+
+func toFloat (x) {
+    if (x is Float) {
+        return x
+    } else if (x is Int) {
+        return Float (x)
+    }
+    throw Exception ("Unable to convert {0} to 'Float'".format (x))
+}

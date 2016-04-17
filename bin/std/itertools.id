@@ -1,19 +1,30 @@
 # Author: SplittyDev (github.com/splittydev)
 
-func chain (*iterators) {
-    foreach (iterator in iterators) {
+# Chains multiply iterables to one
+# @param *iterators The iterables
+# @yield Object The items of the chain
+func chain (*iterables) {
+    foreach (iterator in iterables) {
         foreach (item in iterator) {
             yield item
         }
     }
 }
 
+# Executes a function for every element of an iterator
+# @param Object iterator The iterator
+# @param Object The callback
+# @return null
 func each (iterator, callback) {
     foreach (item in iterator) {
         callback (item)
     }
 }
 
+# Takes the first n elements
+# @param Object iterator The iterator
+# @param Int count The number of elements to take
+# @yield Object The elements
 func take (iterator, count) {
     i = 0
     foreach (item in iterator) {
@@ -24,6 +35,10 @@ func take (iterator, count) {
     }
 }
 
+# Takes elements while a condition is true
+# @param Object iterator The iterator
+# @param Object callback The condition
+# @yield Object The elements
 func takeWhile (iterator, callback) {
     foreach (item in iterator) {
         if (!typecast (Bool, callback (item))) {
@@ -33,6 +48,10 @@ func takeWhile (iterator, callback) {
     }
 }
 
+# Skips the first n elements
+# @param Object iterator The iterator
+# @param Int The number of elements to skip
+# @yield The remaining elements
 func skip (iterator, count) {
     i = 0
     foreach (item in iterator) {
@@ -43,6 +62,10 @@ func skip (iterator, count) {
     }
 }
 
+# Skips elements while a condition is true
+# @param Object iterator The iterator
+# @param Object callback The condition
+# @yield Object The remaining elements
 func skipWhile (iterator, callback) {
     foreach (item in iterator) {
         if (typecast (Bool, callback (item))) {
