@@ -2,3 +2,4 @@
 
 use * from builtin
 use * from collections
+use * from itertools

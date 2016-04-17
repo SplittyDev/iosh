@@ -13,8 +13,9 @@ use hasAttribute from reflection
 # @param Object object The object to be represented
 # @return Str The string representation of the specified object
 func repr (object) {
-    if (hasAttribute (object, "__repr__"))
+    if (hasAttribute (object, "__repr__")) {
         return object.__repr__ ()
+    }
     # TODO: Remove this after Iodine has been updated
     # This should not be needed at all
     # __repr__ should be implemented for every type
@@ -28,10 +29,12 @@ func repr (object) {
             => repr_get_hashmap (repr, object),
     }
     typename = Str (object.__type__)
-    if (hasAttribute (object, "__name__"))
+    if (hasAttribute (object, "__name__")) {
         typename = object.__name__
-    if (dict.contains (typename))
+    }
+    if (dict.contains (typename)) {
         return dict [typename] ()
+    }
     return Str (object)
 }
 
@@ -44,7 +47,9 @@ func repr_get_iterable (this, itr, ochr, cchr) {
     accum = StringBuffer ()
     accum.append (ochr)
     foreach (item in itr) {
-        if (i > 0) accum.append (", ")
+        if (i > 0) {
+            accum.append (", ")
+        }
         accum.append (this (item))
         i += 1
     }
@@ -61,7 +66,9 @@ func repr_get_hashmap (this, hashmap) {
     accum = StringBuffer ()
     accum.append ("{")
     foreach (key in hashmap) {
-        if (i > 0) accum.append (", ")
+        if (i > 0) {
+            accum.append (", ")
+        }
         accum.append (this (key))
         accum.append ("=")
         accum.append (this (hashmap [key]))
@@ -86,30 +93,34 @@ func range (*args) {
         case 1 => 0 .. args [0]
         case 2 => args [0] .. args [1]
     }
-    if (result != null)
+    if (result != null) {
         return result
-    for (i = args [0]; i < args [1]; i += args [2])
+    }
+    for (i = args [0]; i < args [1]; i += args [2]) {
         yield i
+    }
 }
 
 # Returns the length of a countable object
 # @param Object countable The countable object
 # @return Int The length of the specified object
 func len (countable) {
-    if (countable is Collection)
+    if (countable is Collection) {
         return countable.count ()
-    if (hasAttribute (countable, "__len__"))
+    } else if (hasAttribute (countable, "__len__")) {
         return countable.__len__ ()
-    if (!hasAttribute (countable, "__iter__")) {
-        if (countable is Str)
+    } else if (!hasAttribute (countable, "__iter__")) {
+        if (countable is Str) {
             return len_bruteforce_string_length (countable)
-        if (countable is Tuple)
+        } else if (countable is Tuple) {
             return len_bruteforce_tuple_length (countable)
+        }
         return 0
     }
     i = 0
-    foreach (_ in countable)
+    foreach (_ in countable) {
         i += 1
+    }
     return i
 }
 
@@ -146,8 +157,9 @@ func len_bruteforce_tuple_length (tpl) {
 # @param Object object The object
 # @return Object The object casted to the specified type
 func typecast (type, object) {
-    if (object isnot type)
+    if (object isnot type) {
         raise TypeException (Str (type))
+    }
     return object
 }
 
@@ -162,8 +174,9 @@ func filter (iterable, callback) {
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
     foreach (item in iterable) {
-        if (callback (item))
+        if (callback (item)) {
             lst.add (item)
+        }
     }
     return lst
 }
@@ -178,8 +191,9 @@ func map (iterable, callback) {
     lst = []
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
-    foreach (item in iterable)
+    foreach (item in iterable) {
         lst.add (callback (item))
+    }
     return lst
 }
 
@@ -201,8 +215,9 @@ func reduce (iterable, callback, **kwargs) {
         }
     }
     foreach (item in iterable) {
-        if (result == null)
+        if (result == null) {
             result = item
+        }
         result = callback (result, item)
     }
     return result
@@ -221,8 +236,9 @@ func sum (iterable, **kwargs) {
             case "start" => result = kwargs [key]
         }
     }
-    foreach (item in iterable)
+    foreach (item in iterable) {
         result += item
+    }
     return result
 }
 
@@ -240,8 +256,9 @@ func zip (*iterables) {
     while (true) {
         objs = []
         for (i = 0; i < iteratorCount; i += 1) {
-            if (iteratorCounts [i] == iteratorIndices [i])
+            if (iteratorCounts [i] == iteratorIndices [i]) {
                 return result
+            }
             objs.add (iterators [i] [iteratorIndices [i]])
             iteratorIndices [i] += 1
         }

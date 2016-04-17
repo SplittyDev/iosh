@@ -1,0 +1,53 @@
+# Author: SplittyDev (github.com/splittydev)
+
+func chain (*iterators) {
+    foreach (iterator in iterators) {
+        foreach (item in iterator) {
+            yield item
+        }
+    }
+}
+
+func each (iterator, callback) {
+    foreach (item in iterator) {
+        callback (item)
+    }
+}
+
+func take (iterator, count) {
+    i = 0
+    foreach (item in iterator) {
+        if (i < count) {
+            yield item
+        }
+        i += 1
+    }
+}
+
+func takeWhile (iterator, callback) {
+    foreach (item in iterator) {
+        if (!typecast (Bool, callback (item))) {
+            break
+        }
+        yield item
+    }
+}
+
+func skip (iterator, count) {
+    i = 0
+    foreach (item in iterator) {
+        if (i >= count) {
+            yield item
+        }
+        i += 1
+    }
+}
+
+func skipWhile (iterator, callback) {
+    foreach (item in iterator) {
+        if (typecast (Bool, callback (item))) {
+            continue
+        }
+        yield item
+    }
+}
