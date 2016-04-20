@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Codeaddicts.libArgument;
 using Iodine.Runtime;
 
@@ -16,6 +17,9 @@ namespace iosh {
 		/// </summary>
 		/// <param name="args">The command-line arguments.</param>
 		public static void Main (string[] args) {
+
+            // Set the console output encoding to UTF-8
+            Console.OutputEncoding = Encoding.UTF8;
 
             // Invoke script directly
             if (args.Length == 1 && args [0].EndsWith (".id", StringComparison.Ordinal)) {
@@ -36,13 +40,14 @@ namespace iosh {
                 Console.WriteLine ("Error: Invalid filename.");
                 Environment.Exit (1);
             }
+            IodineModule module;
             var engine = new IodineEngine ();
-            var result = engine.Compile (File.ReadAllText (filename));
+            engine.Compile (File.ReadAllText (filename), out module);
+            engine.TryInvokeModule (module);
             var iodineArgs = args.Skip (1).Select (s => new IodineString (s));
-            if (result.HasAttribute ("main"))
-                result.Invoke (engine.VirtualMachine, iodineArgs.ToArray ());
+            engine.TryInvokeModuleAttribute (module, "main", iodineArgs.ToArray ());
             var shell = new Shell (engine);
-            shell.Run ();
+            shell.Run (showLogo: false);
         }
 	}
 }

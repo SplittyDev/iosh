@@ -40,9 +40,12 @@ func take (iterator, count) {
 # @param Object callback The condition
 # @yield Object The elements
 func takeWhile (iterator, callback) {
+    stop = false
     foreach (item in iterator) {
-        if (!typecast (Bool, callback (item))) {
-            break
+        if (!stop && !typecast (Bool, callback (item)))
+            stop = true
+        if (stop) {
+            continue
         }
         yield item
     }
@@ -67,10 +70,110 @@ func skip (iterator, count) {
 # @param Object callback The condition
 # @yield Object The remaining elements
 func skipWhile (iterator, callback) {
+    _skip = true
     foreach (item in iterator) {
-        if (typecast (Bool, callback (item))) {
+        if (_skip && !typecast (Bool, callback (item))) {
+            _skip = false
+        }
+        if (_skip) {
             continue
         }
         yield item
+    }
+}
+
+# Adds up all items of an iterable
+# @param Object iterable The iterable
+# @param **Object kwargs Optional arguments
+# @optional Object start The result to start with
+# @return Object The result
+func sum (iterable, **kwargs) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    result = 0
+    foreach (key in kwargs) {
+        match (key) {
+            case "start" => result = kwargs [key]
+        }
+    }
+    foreach (item in iterable) {
+        result += item
+    }
+    return result
+}
+
+func zip (*iterables) {
+    result = []
+    iteratorCount = len (iterables)
+    iterators = []
+    iteratorIndices = []
+    iteratorCounts = []
+    foreach (iterator in iterables) {
+        iterators.add (iterator)
+        iteratorIndices.add (0)
+        iteratorCounts.add (len (iterator))
+    }
+    while (true) {
+        objs = []
+        for (i = 0; i < iteratorCount; i += 1) {
+            if (iteratorCounts [i] == iteratorIndices [i]) {
+                return result
+            }
+            objs.add (iterators [i] [iteratorIndices [i]])
+            iteratorIndices [i] += 1
+        }
+        result.add (Tuple (objs))
+    }
+}
+
+# Reduces an iterable by iterating over it,
+# passing, for all items, the result of the previous item and the current item
+# to a function, whose result is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @param **Object kwargs Optional arguments
+# @optional Object start The result to start with
+# @return Object The result of the reduction
+func reduce (iterable, callback, **kwargs) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    result = 0
+    foreach (key in kwargs) {
+        match (key) {
+            case "start" => result = kwargs [key]
+        }
+    }
+    foreach (item in iterable) {
+        result = callback (result, item)
+    }
+    return result
+}
+
+# Iterates through an iterable, passing each to a function.
+# If that functions returns true, the item is appended to a list,
+# which is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @return List The filtered items
+func filter (iterable, callback) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    foreach (item in iterable) {
+        if (callback (item)) {
+            yield item
+        }
+    }
+}
+
+# Iterates through an iterable, passing each to a function.
+# The return value of each function call is appended to a list,
+# which is then returned to the caller.
+# @param Object iterable The iterable
+# @param Object callback The callback
+# @return List The mapped items
+func map (iterable, callback) {
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
+    foreach (item in iterable) {
+        yield callback (item)
     }
 }

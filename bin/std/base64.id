@@ -1,0 +1,91 @@
+# Author: SplittyDev (github.com/splittydev)
+
+use each, skipWhile from itertools
+
+class Base64 {
+
+    func encode (str) {
+        typecast (Str, str)
+        length = len (str)
+        encoded = StringBuffer ()
+        i = 0
+        for (i; i < length - 2; i += 3) {
+            encoded.append (Base64.chars  [(ord (str [i + 0]) >>    2) &  0x3F])
+            encoded.append (Base64.chars [((ord (str [i + 0]) &  0x03) <<   4)|
+                                          ((ord (str [i + 1]) &  0xF0) >>   4)])
+            encoded.append (Base64.chars [((ord (str [i + 1]) &  0x0F) <<   2)|
+                                          ((ord (str [i + 2]) &  0xC0) >>   6)])
+            encoded.append (Base64.chars   [ord (str [i + 2]) &  0x3F]         )
+        }
+        if (i < length) {
+            encoded.append (Base64.chars  [(ord (str [i + 0]) >>    2) &  0x3F])
+            if (i == (length - 1)) {
+                encoded.append (Base64.chars  [(ord (str [i + 0]) & 0x03) << 4])
+                encoded.append ('=')
+            } else {
+                encoded.append (Base64.chars [((ord (str [i + 0]) & 0x03) << 4)|
+                                              ((ord (str [i + 1]) & 0xF0) >> 4)])
+                encoded.append (Base64.chars  [(ord (str [i + 1]) & 0x0F) << 2 ])
+            }
+            encoded.append ('=')
+        }
+        return Str (encoded)
+    }
+
+    func decode (str) {
+        typecast (Str, str)
+        length = len (str)
+        i = 0
+        for (i; i < length; i += 1) {
+            if (Base64.lut [ord (str [i])] > 63) {
+                break
+            }
+        }
+        remaining = i
+        decoded = StringBuffer ()
+        for (i = 0; remaining > 4; i) {
+            decoded.append (chr ((Base64.lut [ord (str [i + 0]) & 0xFF] << 2 |
+                                  Base64.lut [ord (str [i + 1]) & 0xFF] >> 4) & 0xFF))
+            decoded.append (chr ((Base64.lut [ord (str [i + 1]) & 0xFF] << 4 |
+                                  Base64.lut [ord (str [i + 2]) & 0xFF] >> 2) & 0xFF))
+            decoded.append (chr ((Base64.lut [ord (str [i + 2]) & 0xFF] << 6 |
+                                  Base64.lut [ord (str [i + 3]) & 0xFF]     ) & 0xFF))
+            i += 4
+            remaining -= 4
+        }
+        if (remaining > 1) {
+            decoded.append (chr ((Base64.lut [ord (str [i + 0]) & 0xFF] << 2 |
+                                  Base64.lut [ord (str [i + 1]) & 0xFF] >> 4) & 0xFF))
+        }
+        if (remaining > 2) {
+            decoded.append (chr ((Base64.lut [ord (str [i + 1]) & 0xFF] << 4 |
+                                  Base64.lut [ord (str [i + 2]) & 0xFF] >> 2) & 0xFF))
+        }
+        if (remaining > 3) {
+            decoded.append (chr ((Base64.lut [ord (str [i + 2]) & 0xFF] << 6 |
+                                  Base64.lut [ord (str [i + 3]) & 0xFF]     ) & 0xFF))
+        }
+        return Str (decoded)
+    }
+}
+
+Base64.lut = [
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
+    64, 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64,
+    64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+]
+
+Base64.chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"

@@ -83,7 +83,7 @@ namespace iosh {
 		/// <summary>
 		/// Run the REPL shell.
 		/// </summary>
-		public void Run ()
+		public void Run (bool showLogo = true)
 		{
 
 			// Set the culture
@@ -97,12 +97,12 @@ namespace iosh {
 			// Set colors
 			Console.ForegroundColor = Foreground;
 			Console.BackgroundColor = Background;
-			Console.Clear ();
 
 			// Print the assembly version
 			var version = Assembly.GetEntryAssembly ().GetName ().Version;
 			var iodineversion = typeof(IodineContext).Assembly.GetName ().Version;
-			Console.WriteLine ("Iosh v{0} (Iodine v{1})", version.ToString (3), iodineversion.ToString (3));
+            if (showLogo)
+                Console.WriteLine ("Iosh v{0} (Iodine v{1})", version.ToString (3), iodineversion.ToString (3));
 
 			// Enter the REPL
 			while (!ExitRequested)
@@ -141,11 +141,12 @@ namespace iosh {
 
 			// Compile the source unit
 			try {
-				rawvalue = engine.Compile (source);
+                IodineModule _;
+				rawvalue = engine.Compile (source, out _);
 			} catch (UnhandledIodineExceptionException e) {
 				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
 				Console.WriteLine (msg);
-				// e.PrintStack ();
+			    e.PrintStack ();
 			} catch (ModuleNotFoundException e) {
 				ConsoleHelper.WriteLine ("{0}", string.Format ("red/Module not found: {0}", e.Name));
 				Console.WriteLine ("Searched in");

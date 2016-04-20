@@ -1,0 +1,431 @@
+# Author: SplittyDev (github.com/splittydev)
+
+use skip, take, takeWhile from itertools
+
+func __isset (arg) {
+    # TODO: Replace with Null type-check
+    return arg.__type__ != null.__type__
+}
+
+func __isBuiltinType (arg) {
+    # TODO: Replace with Null type-check
+    # TODO: Replace with Type type-check
+    return __isset (arg) && arg.__type__.__type__ == null.__type__
+}
+
+func __keyName (self, key) {
+    accum = StringBuffer ()
+    strip = true
+    foreach (c in typecast (Str, key)) {
+        match (c) {
+            case '-' when !strip => accum.append ('_')
+            case '-' => null
+            case _ => (lambda () { strip = false; accum.append (c) }) ()
+        }
+    }
+    return Str (accum)
+}
+
+class ArgumentParser {
+
+    func ArgumentParser (self, **kwargs) {
+        self.defs       = []
+        self.usage      = null
+        self.prolog     = null
+        self.epilog     = null
+        self.program    = null
+        self.version    = null
+        foreach (key in kwargs) {
+            current = kwargs [key]
+            match (key) {
+                case "usage"    => self.usage   = typecast (Str, current)
+                case "prolog"   => self.prolog  = typecast (Str, current)
+                case "epilog"   => self.epilog  = typecast (Str, current)
+                case "program"  => self.program = typecast (Str, current)
+                case "version"  => self.version = typecast (Str, current)
+            }
+        }
+    }
+
+    # TODO: Extend the functionality of this
+    # TODO: Iterate through the arguments and print the help strings
+    func help (self) {
+        if (__isset (self.program)) {
+            version = match (__isset (self.version)) {
+                case true   => "({0})".format (self.version)
+                case false  => "(unknown)"
+            }
+            print ("{0} {1}".format (self.program, version))
+            if (!__isset (self.usage))
+                print ('') # newline
+        }
+        if (__isset (self.usage)) {
+            print ("Usage: {0}".format (self.usage))
+            print ('') # newline
+        }
+        if (__isset (self.prolog)) {
+            print (self.prolog)
+            print ('') # newline
+        }
+        if (__isset (self.epilog)) {
+            print (self.epilog)
+        }
+    }
+
+    func add (self, name, **kwargs) {
+        argdef = ArgumentDefinition (name)
+        foreach (key in kwargs) {
+            current = kwargs [key]
+            match (key) {
+                case "type"     => argdef.setType (current)
+                case "metavar"  => argdef.setMetaVar (current)
+                case "nargs"    => argdef.setNargs (current)
+                case "help"     => argdef.setHelpText (current)
+                case "choices"  => argdef.setChoices (current)
+                case "fallback" => argdef.setDefault (current)
+                case "dest"     => argdef.setName (current)
+                case "const"    => argdef.setConst (current)
+            }
+        }
+        self.defs.add (argdef)
+        return self
+    }
+
+    func parse (self, args) {
+        dict = HashMap ()
+        args = List (args)
+        argcount = len (args)
+        realdest = 0
+
+        # Iterate through the argument strings
+        for (i = 0; i < argcount; i += 1) {
+            key = args [i]
+
+            # Continue if the current string is not an argument
+            if (!self.isArgument (key)) {
+                continue
+            }
+
+            # Get the argument definition for the current string
+            # Continue if no argument definition is found
+            def = null
+            if ((def = self.tryGetDefinition (key)) == false) {
+                continue
+            }
+
+            # Check if the argument is optional or positional
+            if (def.isOptional ()) {
+
+                # Check if the argument should be parsed normally
+                nargs = def.getNargs ()
+                if (nargs == def.DEFAULT) {
+                    i += 1
+                    def.setValue (args [i])
+                }
+
+                # Check if the argument is optional
+                else if (nargs == def.OPTIONAL) {
+
+                    # Check if the argument is a switch
+                    if ((i + 1) == argcount
+                        || ((i + 1) < argcount && self.isArgument (args [i + 1]))) {
+                        def.setValue (def.getConst ())
+                        continue
+                    }
+
+                    # Otherwise set the value
+                    i += 1
+                    def.setValue (args [i])
+                }
+
+                # Check if the value of the argument should be a list
+                else if (false
+                    || nargs == def.ZERO_OR_MORE
+                    || nargs == def.ONE_OR_MORE) {
+                    lst = []
+
+                    # Check if the argument is a switch
+                    # Only if nargs is ZERO_OR_MORE
+                    if (nargs == def.ZERO_OR_MORE && ((i + 1) == argcount
+                        || (i + 1) < argcount && self.isArgument (args [i + 1]))) {
+
+                        # Set the value of the argument to the default value
+                        if (def.hasDefault ()) {
+                            lst.add (def.getDefault ())
+                        }
+
+                        # If that fails, raise an exception
+                        else {
+                            raise Exception ("Unable to assign a value to argument '{0}'"
+                                .format (def.getName ()))
+                        }
+                        continue
+                    }
+
+                    # Raise an exception if the argument is a switch
+                    # Only if nargs is ONE_OR_MORE
+                    else if (nargs == def.ONE_OR_MORE && ((i + 1) == argcount
+                        || (i + 1) < argcount && self.isArgument (args [i + 1]))) {
+                        raise Exception ("Unable to assign value to argument '{0}'"
+                            .format (def.getName ()))
+                        continue
+                    }
+
+                    # Take the following elements if no limit is specified
+                    if (nargs isnot Int) {
+
+                        # Fetch elements that are not actual arguments
+                        elements = takeWhile (skip (args, i + 1), lambda (x) => !self.isArgument (x))
+                        foreach (element in elements) {
+                            lst.add (element)
+                        }
+                    }
+
+                    # Take the following n elements if a limit is specified
+                    else {
+                        count = typecast (Int, nargs)
+
+                        # Raise an exception if more items are requested
+                        # than there are elements available
+                        if (argcount >= (i + 1 + count)) {
+                            raise Exception ("Requested {0} elements; only {1} more available!"
+                                .format (count))
+                        }
+                        elements = take (skip (args, i + 1), count)
+                        foreach (element in elements) {
+
+                            # Raise an exception if one of the fetched elements
+                            # is an actual argument
+                            if (self.isArgument (element)) {
+                                raise Exception ("Fetched argument '{0}'' when element was expected!"
+                                    .format (__keyName (element)))
+                            }
+
+                            lst.add (element)
+                        }
+                    }
+                    def.setValueList (lst)
+                }
+            }
+        }
+
+        # Iterate through the argument definitions
+        foreach (def in self.defs) {
+
+            # Check if the value is required and not set
+            # raise an exception
+            if (def.isRequired () && !def.hasValue () && !def.hasDefault ()) {
+                raise Exception ("Required argument {0} not set!".format (def.getName ()))
+            }
+
+            # Check if the value is required and has no value
+            # but can be set to a default value
+            else if (def.isRequired () && def.hasDefault ()) {
+
+                # Check if the value should be a list
+                nargs = def.getNargs ()
+                if (nargs == def.ZERO_OR_MORE
+                    || nargs == def.ONE_OR_MORE) {
+                    def.setValue ([def.getDefault ()])
+                }
+
+                # Otherwise set the value to the default value
+                else {
+                    def.setValue (def.getDefault ())
+                }
+            }
+
+            # Check if the argument definition satisfies
+            # the choices, if any
+            if (def.satisfiesChoices ()) {
+
+                # Set the dict entry
+                dict [def.getName ()] = def.getValue ()
+            }
+        }
+
+        return dict
+    }
+
+    func isArgument (self, key) {
+        return key.startsWith ("--") || key.startsWith ("-")
+    }
+
+    func tryGetDefinition (self, key) {
+        foreach (def in self.defs) {
+            if (def.name == key) {
+                return def
+            }
+        }
+        return false
+    }
+}
+
+class ArgumentDefinition {
+
+    func ArgumentDefinition (self, name) {
+        self.name           = name
+        self.DEFAULT        = 0
+        self.OPTIONAL       = '?'
+        self.ONE_OR_MORE    = '+'
+        self.ZERO_OR_MORE   = '*'
+        self.choices        = []
+        self.const          = null
+        self.value          = null
+        self.help           = null
+        self.def            = null # default
+        self.optional       = true
+        self.positional     = false
+        self.required       = false
+        self.type           = Str
+        self.metavar        = "Str"
+        self.nargs          = self.DEFAULT
+        self.dest           = __keyName (typecast (Str, name))
+    }
+
+    func getName (self) {
+        return self.dest
+    }
+
+    func setName (self, destination) {
+        self.dest = typecast (Str, destination)
+    }
+
+    func hasConst (self) {
+        # TODO: Replace with Null type-check
+        return self.const.__type__ != null.__type__
+    }
+
+    func getConst (self) {
+        return self.const
+    }
+
+    func setConst (self, obj) {
+        self.const = obj
+    }
+
+    func hasValue (self) {
+        # TODO: Replace with Null type-check
+        return self.value.__type__ != null.__type__
+    }
+
+    func getValue (self) {
+        if (self.hasValue ())
+            return self.value
+        return self.getDefault ()
+    }
+
+    func setValue (self, str) {
+        result = self.tryCast (self.type, str)
+        if (!result [0]) {
+            raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
+                .format (str.__name__, self.type.__name__, self.getName ()))
+        }
+        self.value = result [1]
+    }
+
+    func setValueList (self, lst) {
+        self.value = []
+        foreach (item in lst) {
+            result = self.tryCast (self.type, item)
+            if (!result [0]) {
+                raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
+                    .format (item.__name__, self.type.__name__, self.getName ()))
+            }
+            self.value.add (result [1])
+        }
+    }
+
+    func getDefault (self) {
+        return self.def
+    }
+    
+    func setMetaVar (self, T) {
+        if (T is Str) {
+            self.metavar = T
+        } else {
+            self.metavar = Str (T)
+        }
+    }
+
+    func setType (self, T) {
+        self.type = T
+    }
+
+    func setDefault (self, obj) {
+        self.def = obj
+    }
+
+    func getNargs (self) {
+        return self.nargs
+    }
+
+    func setNargs (self, num) {
+        if (num is Int) {
+            if (num < 0) {
+                raise Exception ("Nargs has to be a positive integer!")
+            }
+            self.nargs = num
+        } else if (false
+            || num == self.DEFAULT
+            || num == self.OPTIONAL
+            || num == self.ONE_OR_MORE
+            || num == self.ZERO_OR_MORE) {
+            self.nargs = num
+        } else {
+            raise Exception ("Invalid nargs value!")
+        }
+    }
+
+    func hasChoices (self) {
+        # TODO: Replace with Null type-check
+        return self.choices.__type__ != null.__type__ && len (self.choices) > 0
+    }
+
+    func satisfiesChoices (self) {
+        if (!self.hasChoices ()) {
+            return true
+        }
+        if (!self.hasValue ()) {
+            return false
+        }
+        value = repr (self.getValue ())
+        foreach (choice in self.choices) {
+            if (value == repr (choice)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func setChoices (self, choices) {
+        self.choices = typecast (List, choices)
+    }
+
+    func getHelpText (self) {
+        return typecast (Str, self.help)
+    }
+
+    func setHelpText (self, str) {
+        self.help = typecast (Str, str)
+    }
+
+    func isRequired (self) {
+        return self.required
+    }
+
+    func isOptional (self) {
+        return self.optional
+    }
+
+    func isPositional (self) {
+        return self.positional
+    }
+
+    func tryCast (self, T, str) {
+        try {
+            return (true, T (str))
+        } except { }
+        return (false, null)
+    }
+}

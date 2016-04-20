@@ -426,17 +426,24 @@ class Set : ICollection {
     }
 }
 
-class TypedSet : Set, ICollection {
+class GenericSet : Set, ICollection {
 
     /* Constructor
-     * @param Type T The type
      * @param **Object kwargs Optional arguments
+     * @optional Type T
      * @optional Int capacity
      * @optional List items
      */
-    func TypedSet (self, T, **kwargs) {
+    func GenericSet (self, **kwargs) {
         super (kwargs);
-        self.type = T
+        self.type = null
+        foreach (key in kwargs) {
+            print (key)
+            current = kwargs [key]
+            match (key) {
+                case "T" => self.type = current
+            }
+        }
     }
 
     /* Adds an element to the set
@@ -444,6 +451,10 @@ class TypedSet : Set, ICollection {
      * @return null
      */
     func add (self, item) {
+        # TODO: Replace with Null type-check
+        if (self.type.__type__ == null.__type__) {
+            self.type = item.__type__
+        }
         typecast (self.type, item)
         self.__super__.add (item)
     }
@@ -612,17 +623,24 @@ class Stack : ICollection {
     }
 }
 
-class TypedStack : Stack, ICollection {
+class GenericStack : Stack, ICollection {
 
     /* Constructor
-     * @param Type T The type
      * @param **Object kwargs Optional arguments
      * @optional Int capacity
      * @optional List items
+     * @optional Type T The type
      */
-    func TypedStack (self, T, **kwargs) {
+    func GenericStack (self, **kwargs) {
         super (kwargs);
-        self.type = T
+        self.type = null
+        print (len (kwargs))
+        foreach (key in kwargs) {
+            current = kwargs [key]
+            match (key) {
+                case "T" => self.type = current
+            }
+        }
     }
 
     /* Pushes an item onto the stack
@@ -630,6 +648,10 @@ class TypedStack : Stack, ICollection {
      * @return null
      */
     func push (self, item) {
+        # TODO: Replace with Null type-check
+        if (self.type.__type__ == null.__type__) {
+            self.type = item.__type__
+        }
         typecast (self.type, item)
         self.__super__.push (item)
     }
