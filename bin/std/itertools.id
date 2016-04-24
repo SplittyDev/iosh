@@ -109,9 +109,9 @@ func zip (*iterables) {
     iteratorIndices = []
     iteratorCounts = []
     for (iterator in iterables) {
-        iterators.add (iterator)
-        iteratorIndices.add (0)
-        iteratorCounts.add (len (iterator))
+        iterators.append (iterator)
+        iteratorIndices.append (0)
+        iteratorCounts.append (len (iterator))
     }
     while (true) {
         objs = []
@@ -119,10 +119,10 @@ func zip (*iterables) {
             if (iteratorCounts [i] == iteratorIndices [i]) {
                 return result
             }
-            objs.add (iterators [i] [iteratorIndices [i]])
+            objs.append (iterators [i] [iteratorIndices [i]])
             iteratorIndices [i] += 1
         }
-        result.add (Tuple (objs))
+        result.append (Tuple (objs))
     }
 }
 

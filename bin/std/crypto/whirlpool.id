@@ -1,7 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use Array from std.collections
-use typecast, len, hex from std.builtin
+use Iterable, Array from std.collections
+use BuiltinIterables, typecast, len, hex from std.builtin
 
 class whirlpool {
 
@@ -13,13 +13,9 @@ class whirlpool {
     func update (self, obj) {
         if (obj is Str) {
             self.update (Bytes (obj))
-        }
-        # TODO: Check for trait Iterable
-        else {
-            # Assume something iterable
+        } else if (obj is Iterable || obj is Str || BuiltinIterables.contains (obj.__type__)) {
             for (elem in obj) {
-                # TODO: List.add -> List.append
-                self.data.add (elem)
+                self.data.append (elem)
             }
         }
         return self

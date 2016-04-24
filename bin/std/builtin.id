@@ -16,10 +16,10 @@ trait Representable {
 # A list of builtin countables
 BuiltinIterables = [
     List,
-    HashMap,
+    Dict,
     Tuple,
-    Str,
     Bytes,
+    Str,
 ]
 
 # Returns a string representation of an object
@@ -32,8 +32,20 @@ func repr (object) {
         return object.__repr__ ()
     }
 
+    # Build a table of types that require a special representation
+    dict = {
+        "Str": lambda () => '"' + object + '"',
+        "Dict": lambda () => repr_get_dict (repr, object),
+    }
+
+    # Check the table of special representations
+    typename = Str (object.__type__)
+    if (dict.contains (typename)) {
+        return dict [typename] ()
+    }
+
     # Check if the object matches the Iterable trait
-    else if (object is Iterable || BuiltinIterables.contains (object.__type__)) {
+    if (object is Iterable || BuiltinIterables.contains (object.__type__)) {
         i = 0
         accum = StringBuffer ()
         accum.append ("[")
@@ -48,40 +60,26 @@ func repr (object) {
         return Str (accum)
     }
 
-    # Get the name of the type
-    typename = Str (object.__type__)
-
-    # Build a table of types that require a special representation
-    dict = {
-        "Str": lambda () => '"' + object + '"',
-        "HashMap": lambda () => repr_get_hashmap (repr, object),
-    }
-
-    # Check the table of special representations
-    if (dict.contains (typename)) {
-        return dict [typename] ()
-    }
-
     # If everything else fails, return the
     # default string representation of the object
     return Str (object)
 }
 
-# Builds the string representation of a hashmap
+# Builds the string representation of a dict
 # @param Object this The repr function
-# @param HashMap hashmap The hashmap
+# @param Dict dict The dict
 # @return Str The string representation
-func repr_get_hashmap (this, hashmap) {
+func repr_get_dict (this, dict) {
     i = 0
     accum = StringBuffer ()
     accum.append ("{")
-    foreach (key in hashmap) {
+    foreach (key in dict) {
         if (i > 0) {
             accum.append (", ")
         }
         accum.append (this (key))
         accum.append (" = ")
-        accum.append (this (hashmap [key]))
+        accum.append (this (dict [key]))
         i += 1
     }
     accum.append ("}")
@@ -135,7 +133,7 @@ func len (countable) {
 
         # Iterate over the countable
         # and count the elements
-        i = 0
+        i = 0;
         for (_ in countable) {
             i += 1
         }

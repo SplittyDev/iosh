@@ -84,12 +84,12 @@ class ArgumentParser {
                 case "const"    => argdef.setConst (current)
             }
         }
-        self.defs.add (argdef)
+        self.defs.append (argdef)
         return self
     }
 
     func parse (self, args) {
-        dict = HashMap ()
+        dict = Dict ()
         args = List (args)
         argcount = len (args)
         realdest = 0
@@ -148,7 +148,7 @@ class ArgumentParser {
 
                         # Set the value of the argument to the default value
                         if (def.hasDefault ()) {
-                            lst.add (def.getDefault ())
+                            lst.append (def.getDefault ())
                         }
 
                         # If that fails, raise an exception
@@ -174,7 +174,7 @@ class ArgumentParser {
                         # Fetch elements that are not actual arguments
                         elements = takeWhile (skip (args, i + 1), lambda (x) => !self.isArgument (x))
                         for (element in elements) {
-                            lst.add (element)
+                            lst.append (element)
                         }
                     }
 
@@ -198,7 +198,7 @@ class ArgumentParser {
                                     .format (__keyName (element)))
                             }
 
-                            lst.add (element)
+                            lst.append (element)
                         }
                     }
                     def.setValueList (lst)
@@ -327,7 +327,7 @@ class ArgumentDefinition {
                 raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
                     .format (item.__name__, self.type.__name__, self.getName ()))
             }
-            self.value.add (result [1])
+            self.value.append (result [1])
         }
     }
 

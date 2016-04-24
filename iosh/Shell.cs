@@ -116,9 +116,16 @@ namespace iosh {
             if (showLogo)
                 Console.WriteLine ("Iosh v{0} (Iodine v{1})", version.ToString (3), iodineversion.ToString (3));
 
-			// Enter the REPL
-			while (!ExitRequested)
-				RunIteration ();
+            // Enter the REPL
+            while (!ExitRequested) {
+
+                try {
+                    RunIteration ();
+                } catch (Exception e) {
+                    Console.WriteLine ("Ye dun fuk'd up.");
+                    Console.WriteLine (e.StackTrace);
+                }
+            }
 		}
 
 		/// <summary>
@@ -343,23 +350,6 @@ namespace iosh {
 				Console.Write (" ]");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
-			case "ByteArray":
-				var bytearr = obj as IodineByteArray;
-				Console.Write ("[ ");
-				for (var i = 0; i < bytearr.Array.Length; i++) {
-					if (i > 0)
-						Console.Write (", ");
-                    if (i > MaxListDisplayLength) {
-                        ConsoleHelper.Write ("{0}", "magenta/...");
-                        break;
-                    }
-                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
-                        Console.Write ("\n  ");
-                    }
-					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytearr.Array [i]));
-				}
-				Console.Write (" ]");
-				break;
 			case "Bytes":
 				var bytes = obj as IodineBytes;
 				Console.Write ("[ ");
@@ -378,7 +368,7 @@ namespace iosh {
 				Console.Write (" ]");
 				break;
 			case "HashMap":
-				var map = obj as IodineHashMap;
+				var map = obj as IodineDictionary;
 				var keys = map.Keys.Reverse ().ToArray ();
 				Console.Write ("{ ");
 				for (var i = 0; i < keys.Length; i++) {

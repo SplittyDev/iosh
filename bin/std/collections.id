@@ -85,7 +85,7 @@ class Array : Collection {
         if (self.length == self.capacity) {
             raise Exception ("Maximum capacity reached.")
         }
-        self.list.add (item)
+        self.list.append (item)
         self.length += 1
     }
 
@@ -148,7 +148,7 @@ class Array : Collection {
      * @param Int i The index
      * @return Object The item at the specified index
      */
-    func __getIndex__ (self, i) {
+    func __getItem__ (self, i) {
         return self.list [i]
     }
 
@@ -157,7 +157,7 @@ class Array : Collection {
      * @param Object item The item
      * @return null
      */
-    func __setIndex__ (self, i, item) {
+    func __setItem__ (self, i, item) {
         self.list [i] = item
     }
     
@@ -264,7 +264,7 @@ class Set : Collection {
         if (self.contains (item)) {
             return null
         }
-        self.list.add (item)
+        self.list.append (item)
         self.cardinality += 1
     }
 
@@ -393,7 +393,7 @@ class Set : Collection {
      * @param Int i The index
      * @return Object The item at the specified index
      */
-    func __getIndex__ (self, i) {
+    func __getItem__ (self, i) {
         return self.list [i]
     }
     
@@ -564,7 +564,7 @@ class Stack : Collection {
         if (self.top == self.capacity) {
             raise Exception ("Maximum capacity reached.")
         }
-        self.list.add (item)
+        self.list.append (item)
         self.top += 1
     }
 
@@ -637,7 +637,7 @@ class Stack : Collection {
      * @param Int i The index
      * @return Object The item at the specified index
      */
-    func __getIndex__ (self, i) {
+    func __getItem__ (self, i) {
         return self.list [self.top - i - 1]
     }
 
@@ -646,7 +646,7 @@ class Stack : Collection {
      * @param Object item The item
      * @return null
      */
-    func __setIndex__ (self, i, item) {
+    func __setItem__ (self, i, item) {
         self.list [self.top - i - 1] = item
     }
     
