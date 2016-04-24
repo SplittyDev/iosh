@@ -1,5 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast from std.builtin
+
 # Any type that can be iterated over
 trait Iterable {
     func __iter__ (self)
@@ -669,7 +671,6 @@ class GenericStack : Stack, Collection {
     func GenericStack (self, **kwargs) {
         super (kwargs);
         self.type = null
-        print (len (kwargs))
         for (key in kwargs) {
             current = kwargs [key]
             match (key) {

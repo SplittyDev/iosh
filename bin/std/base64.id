@@ -1,5 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast, len from std.builtin
+
 class Base64 {
 
     func encode (str) {

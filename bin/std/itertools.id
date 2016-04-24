@@ -4,8 +4,8 @@
 # @param *iterators The iterables
 # @yield Object The items of the chain
 func chain (*iterables) {
-    foreach (iterator in iterables) {
-        foreach (item in iterator) {
+    for (iterator in iterables) {
+        for (item in iterator) {
             yield item
         }
     }
@@ -16,7 +16,7 @@ func chain (*iterables) {
 # @param Object The callback
 # @return null
 func each (iterator, callback) {
-    foreach (item in iterator) {
+    for (item in iterator) {
         callback (item)
     }
 }
@@ -27,7 +27,7 @@ func each (iterator, callback) {
 # @yield Object The elements
 func take (iterator, count) {
     i = 0
-    foreach (item in iterator) {
+    for (item in iterator) {
         if (i < count) {
             yield item
         }
@@ -41,9 +41,10 @@ func take (iterator, count) {
 # @yield Object The elements
 func takeWhile (iterator, callback) {
     stop = false
-    foreach (item in iterator) {
-        if (!stop && !typecast (Bool, callback (item)))
+    for (item in iterator) {
+        if (!stop && !typecast (Bool, callback (item))) {
             stop = true
+        }
         if (stop) {
             continue
         }
@@ -57,7 +58,7 @@ func takeWhile (iterator, callback) {
 # @yield The remaining elements
 func skip (iterator, count) {
     i = 0
-    foreach (item in iterator) {
+    for (item in iterator) {
         if (i >= count) {
             yield item
         }
@@ -71,7 +72,7 @@ func skip (iterator, count) {
 # @yield Object The remaining elements
 func skipWhile (iterator, callback) {
     _skip = true
-    foreach (item in iterator) {
+    for (item in iterator) {
         if (_skip && !typecast (Bool, callback (item))) {
             _skip = false
         }
@@ -90,12 +91,12 @@ func skipWhile (iterator, callback) {
 func sum (iterable, **kwargs) {
     # TODO: Use trait Enumerable/Iterable for iterable
     result = 0
-    foreach (key in kwargs) {
+    for (key in kwargs) {
         match (key) {
             case "start" => result = kwargs [key]
         }
     }
-    foreach (item in iterable) {
+    for (item in iterable) {
         result += item
     }
     return result
@@ -107,7 +108,7 @@ func zip (*iterables) {
     iterators = []
     iteratorIndices = []
     iteratorCounts = []
-    foreach (iterator in iterables) {
+    for (iterator in iterables) {
         iterators.add (iterator)
         iteratorIndices.add (0)
         iteratorCounts.add (len (iterator))
@@ -137,12 +138,12 @@ func reduce (iterable, callback, **kwargs) {
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
     result = 0
-    foreach (key in kwargs) {
+    for (key in kwargs) {
         match (key) {
             case "start" => result = kwargs [key]
         }
     }
-    foreach (item in iterable) {
+    for (item in iterable) {
         result = callback (result, item)
     }
     return result
@@ -157,7 +158,7 @@ func reduce (iterable, callback, **kwargs) {
 func filter (iterable, callback) {
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
-    foreach (item in iterable) {
+    for (item in iterable) {
         if (callback (item)) {
             yield item
         }
@@ -173,7 +174,7 @@ func filter (iterable, callback) {
 func map (iterable, callback) {
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
-    foreach (item in iterable) {
+    for (item in iterable) {
         yield callback (item)
     }
 }

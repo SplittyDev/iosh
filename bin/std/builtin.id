@@ -49,15 +49,15 @@ func repr (object) {
     }
 
     # Check if the object matches the Iterable trait
-    if (object is Iterable) {
+    if (object is Iterable || BuiltinCountables.contains (object.__type__)) {
         i = 0
         accum = StringBuffer ()
         accum.append ("[")
-        foreach (item in itr) {
+        foreach (item in object) {
             if (i > 0) {
                 accum.append (", ")
             }
-            accum.append (this (item))
+            accum.append (repr (item))
             i += 1
         }
         accum.append ("]")
@@ -130,7 +130,10 @@ func len (countable) {
     }
 
     # Check if the countable matches the trait Iterable
-    else if (countable is Iterable || BuiltinCountables.contains (countable.__type__)) {
+    # Includes special cases: Runtime provided, Range iterator
+    else if (countable is Iterable
+        || BuiltinCountables.contains (countable.__type__)
+        || countable.__name__ == "RangeIterator") {
 
         # Iterate over the countable
         # and count the elements
