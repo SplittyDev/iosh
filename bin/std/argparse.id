@@ -1,26 +1,23 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast, len from std.builtin
 use skip, take, takeWhile from std.itertools
 
-func __isset (arg) {
-    # TODO: Replace with Null type-check
-    return arg.__type__ != null.__type__
-}
-
 func __isBuiltinType (arg) {
-    # TODO: Replace with Null type-check
-    # TODO: Replace with Type type-check
-    return __isset (arg) && arg.__type__.__type__ == null.__type__
+    return arg isnot Null && arg.__type__ isnot Null
 }
 
 func __keyName (self, key) {
     accum = StringBuffer ()
     strip = true
-    foreach (c in typecast (Str, key)) {
+    for (c in typecast (Str, key)) {
         match (c) {
             case '-' when !strip => accum.append ('_')
             case '-' => null
-            case _ => (lambda () { strip = false; accum.append (c) }) ()
+            case _ {
+                strip = false;
+                accum.append (c)
+            }
         }
     }
     return Str (accum)
@@ -35,7 +32,7 @@ class ArgumentParser {
         self.epilog     = null
         self.program    = null
         self.version    = null
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             current = kwargs [key]
             match (key) {
                 case "usage"    => self.usage   = typecast (Str, current)
@@ -50,31 +47,31 @@ class ArgumentParser {
     # TODO: Extend the functionality of this
     # TODO: Iterate through the arguments and print the help strings
     func help (self) {
-        if (__isset (self.program)) {
-            version = match (__isset (self.version)) {
+        if (self.program isnot Null) {
+            version = match (self.version isnot Null) {
                 case true   => "({0})".format (self.version)
                 case false  => "(unknown)"
             }
             print ("{0} {1}".format (self.program, version))
-            if (!__isset (self.usage))
+            if (self.usage is Null)
                 print ('') # newline
         }
-        if (__isset (self.usage)) {
+        if (self.usage isnot Null) {
             print ("Usage: {0}".format (self.usage))
             print ('') # newline
         }
-        if (__isset (self.prolog)) {
+        if (self.prolog isnot Null) {
             print (self.prolog)
             print ('') # newline
         }
-        if (__isset (self.epilog)) {
+        if (self.epilog isnot Null) {
             print (self.epilog)
         }
     }
 
     func add (self, name, **kwargs) {
         argdef = ArgumentDefinition (name)
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             current = kwargs [key]
             match (key) {
                 case "type"     => argdef.setType (current)
@@ -176,7 +173,7 @@ class ArgumentParser {
 
                         # Fetch elements that are not actual arguments
                         elements = takeWhile (skip (args, i + 1), lambda (x) => !self.isArgument (x))
-                        foreach (element in elements) {
+                        for (element in elements) {
                             lst.add (element)
                         }
                     }
@@ -192,7 +189,7 @@ class ArgumentParser {
                                 .format (count))
                         }
                         elements = take (skip (args, i + 1), count)
-                        foreach (element in elements) {
+                        for (element in elements) {
 
                             # Raise an exception if one of the fetched elements
                             # is an actual argument
@@ -210,7 +207,7 @@ class ArgumentParser {
         }
 
         # Iterate through the argument definitions
-        foreach (def in self.defs) {
+        for (def in self.defs) {
 
             # Check if the value is required and not set
             # raise an exception
@@ -252,7 +249,7 @@ class ArgumentParser {
     }
 
     func tryGetDefinition (self, key) {
-        foreach (def in self.defs) {
+        for (def in self.defs) {
             if (def.name == key) {
                 return def
             }
@@ -292,8 +289,7 @@ class ArgumentDefinition {
     }
 
     func hasConst (self) {
-        # TODO: Replace with Null type-check
-        return self.const.__type__ != null.__type__
+        return self.const isnot Null
     }
 
     func getConst (self) {
@@ -305,9 +301,8 @@ class ArgumentDefinition {
     }
 
     func hasValue (self) {
-        # TODO: Replace with Null type-check
-        return self.value.__type__ != null.__type__
-    }
+        return self.value isnot Null
+	}
 
     func getValue (self) {
         if (self.hasValue ())
@@ -326,7 +321,7 @@ class ArgumentDefinition {
 
     func setValueList (self, lst) {
         self.value = []
-        foreach (item in lst) {
+        for (item in lst) {
             result = self.tryCast (self.type, item)
             if (!result [0]) {
                 raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
@@ -378,8 +373,7 @@ class ArgumentDefinition {
     }
 
     func hasChoices (self) {
-        # TODO: Replace with Null type-check
-        return self.choices.__type__ != null.__type__ && len (self.choices) > 0
+        return self.choices isnot Null && len (self.choices) > 0
     }
 
     func satisfiesChoices (self) {
@@ -390,7 +384,7 @@ class ArgumentDefinition {
             return false
         }
         value = repr (self.getValue ())
-        foreach (choice in self.choices) {
+        for (choice in self.choices) {
             if (value == repr (choice)) {
                 return true
             }
