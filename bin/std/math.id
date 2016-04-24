@@ -194,7 +194,7 @@ func sin (x, **kwargs) {
     for (key in kwargs) {
         current = kwargs [key]
         match (key) {
-            case "precision" => {
+            case "precision" {
                 if (current is Int) {
                     current = Float (current)
                 }
@@ -242,7 +242,7 @@ func cos (x, **kwargs) {
     for (key in kwargs) {
         current = kwargs [key]
         match (key) {
-            case "precision" => {
+            case "precision" {
                 if (current is Int) {
                     current = Float (current)
                 }
@@ -342,14 +342,16 @@ func abs (x) {
         return fabs (x)
     }
     typecast (Int, x)
-    if (x < 0)
+    if (x < 0) {
         return -x
+    }
     return x
 }
 
 func fabs (x) {
     typecast (Float, x)
-    if (x < 0.0)
+    if (x < 0.0) {
         return -x
+    }
     return x
 }
