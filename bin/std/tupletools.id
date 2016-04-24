@@ -1,5 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast from std.builtin
+
 # Gets the first element of a tuple
 # @param Tuple tpl The tuple
 # @return Object The first element of the tuple

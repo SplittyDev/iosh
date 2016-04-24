@@ -53,14 +53,17 @@ func pow (base, exp) {
 }
 
 func sqrt (x, **kwargs) {
+
     # Make sure that x is a Float
     if (x is Int) {
         x = Float (x)
     }
     typecast (Float, x)
+
     # Default values
     method = "babylonian"
     precision = pow (10, -7) # 1e^-7
+
     # Algorithms
     algorithms = {
         "babylonian": lambda () {
@@ -145,60 +148,70 @@ func sqrt (x, **kwargs) {
             return low
         }
     }
+
     # Handle optional arguments
     for (key in kwargs) {
         current = kwargs [key]
         match (key) {
-            case "method" => (lambda () { 
+            case "method"  { 
                 typecast (Str, current)
-                if (current == 'default')
+                if (current == 'default') {
                     current = method
+                }
                 if (!algorithms.contains (current)) {
                     raise Exception ("Algorithm not found: '{0}'".format (current))
                 }
                 method = current
-            }) ()
-            case "precision" => (lambda () {
+            }
+            case "precision" {
                 typecast (Int, current)
                 precision = max (pow (10, -current), pow (10, -15)) # 1e^-current
-            }) ()
+            }
         }
     }
+
     # Compute the square root
     return algorithms [method] ()
 }
 
 func sin (x, **kwargs) {
+
     # Make sure that x is a Float
     if (x is Int) {
         x = Float (x)
     }
     typecast (Float, x)
+
     # Special case: x = 0
     if (x == 0.0) {
         return x
     }
+
     # Default precision
     precision = 20.0
+
     # Handle optional arguments
     for (key in kwargs) {
         current = kwargs [key]
         match (key) {
-            case "precision" => (lambda () {
+            case "precision" => {
                 if (current is Int) {
                     current = Float (current)
                 }
                 typecast (Float, current)
                 precision = current
-            }) ()
+            }
         }
     }
+
     # Reduce x to range [-2Pi, 2Pi]
     x = x - Float (Int (x * (1.0 / (2.0 * PI)))) * 2.0 * PI
+
     # Reduce x to range [-Pi/2, Pi/2]
     x = min (x, PI - x)
     x = max (x, -PI - x)
     x = min (x, PI - x)
+
     # Taylor series approximation
     sum = 1.0
     x2 = x * x
@@ -210,36 +223,43 @@ func sin (x, **kwargs) {
 }
 
 func cos (x, **kwargs) {
+
     # Make sure that x is a Float
     if (x is Int) {
         x = Float (x)
     }
     typecast (Float, x)
+
     # Special case: x = 0
     if (x == 0.0) {
         return 1.0
     }
+
     # Default precision
     precision = 20.0
+
     # Handle optional arguments
     for (key in kwargs) {
         current = kwargs [key]
         match (key) {
-            case "precision" => (lambda () {
+            case "precision" => {
                 if (current is Int) {
                     current = Float (current)
                 }
                 typecast (Float, current)
                 precision = current
-            }) ()
+            }
         }
     }
+
     # Reduce x to range [-2Pi, 2Pi]
     x = x - Float (Int (x * (1.0 / (2.0 * PI)))) * 2.0 * PI
+
     # Reduce x to range [-Pi/2, Pi/2]
     x = min (x, PI - x)
     x = max (x, -PI - x)
     x = min (x, PI - x)
+    
     # McLaurin series approximation
     sum = 1.0
     x2 = x * x

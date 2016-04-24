@@ -1,7 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
 use Array from std.collections
-use hex from std.builtin
+use typecast, len, hex from std.builtin
 
 class whirlpool {
 
@@ -17,7 +17,7 @@ class whirlpool {
         # TODO: Check for trait Iterable
         else {
             # Assume something iterable
-            foreach (elem in obj) {
+            for (elem in obj) {
                 # TODO: List.add -> List.append
                 self.data.add (elem)
             }
