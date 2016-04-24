@@ -14,13 +14,12 @@ trait Representable {
 }
 
 # A list of builtin countables
-BuiltinCountables = [
+BuiltinIterables = [
     List,
     HashMap,
     Tuple,
     Str,
     Bytes,
-    ByteArray,
 ]
 
 # Returns a string representation of an object
@@ -33,23 +32,8 @@ func repr (object) {
         return object.__repr__ ()
     }
 
-    # Build a table of types that require a special representation
-    dict = {
-        "Str": lambda () => '"' + object + '"',
-        "HashMap": lambda ()
-            => repr_get_hashmap (repr, object),
-    }
-
-    # Get the name of the type
-    typename = Str (object.__type__)
-
-    # Check the table of special representations
-    if (dict.contains (typename)) {
-        return dict [typename] ()
-    }
-
     # Check if the object matches the Iterable trait
-    if (object is Iterable || BuiltinCountables.contains (object.__type__)) {
+    else if (object is Iterable || BuiltinIterables.contains (object.__type__)) {
         i = 0
         accum = StringBuffer ()
         accum.append ("[")
@@ -62,6 +46,20 @@ func repr (object) {
         }
         accum.append ("]")
         return Str (accum)
+    }
+
+    # Get the name of the type
+    typename = Str (object.__type__)
+
+    # Build a table of types that require a special representation
+    dict = {
+        "Str": lambda () => '"' + object + '"',
+        "HashMap": lambda () => repr_get_hashmap (repr, object),
+    }
+
+    # Check the table of special representations
+    if (dict.contains (typename)) {
+        return dict [typename] ()
     }
 
     # If everything else fails, return the
@@ -132,7 +130,7 @@ func len (countable) {
     # Check if the countable matches the trait Iterable
     # Includes special cases: Runtime provided, Range iterator
     else if (countable is Iterable
-        || BuiltinCountables.contains (countable.__type__)
+        || BuiltinIterables.contains (countable.__type__)
         || countable.__name__ == "RangeIterator") {
 
         # Iterate over the countable
