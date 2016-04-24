@@ -23,7 +23,7 @@ namespace iosh {
         /// <summary>
         /// The max list display length.
         /// </summary>
-        const int MaxListDisplayLength = 32;
+        const int MaxListDisplayLength = 64;
 
 		/// <summary>
 		/// The prompt.
@@ -367,7 +367,7 @@ namespace iosh {
 				}
 				Console.Write (" ]");
 				break;
-			case "HashMap":
+			case "Dict":
 				var map = obj as IodineDictionary;
 				var keys = map.Keys.Reverse ().ToArray ();
 				Console.Write ("{ ");
