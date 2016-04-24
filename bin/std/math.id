@@ -1,5 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast from std.builtin
+
 # The Pi constant
 PI = 3.14159265358979
 
@@ -144,7 +146,7 @@ func sqrt (x, **kwargs) {
         }
     }
     # Handle optional arguments
-    foreach (key in kwargs) {
+    for (key in kwargs) {
         current = kwargs [key]
         match (key) {
             case "method" => (lambda () { 
@@ -179,7 +181,7 @@ func sin (x, **kwargs) {
     # Default precision
     precision = 20.0
     # Handle optional arguments
-    foreach (key in kwargs) {
+    for (key in kwargs) {
         current = kwargs [key]
         match (key) {
             case "precision" => (lambda () {
@@ -220,7 +222,7 @@ func cos (x, **kwargs) {
     # Default precision
     precision = 20.0
     # Handle optional arguments
-    foreach (key in kwargs) {
+    for (key in kwargs) {
         current = kwargs [key]
         match (key) {
             case "precision" => (lambda () {
