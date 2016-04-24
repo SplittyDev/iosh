@@ -15,6 +15,16 @@ namespace iosh {
     /// </summary>
     public class Shell {
 
+        /// <summary>
+        /// The max recursion depth.
+        /// </summary>
+        const int MaxRecursionDepth = 3;
+
+        /// <summary>
+        /// The max list display length.
+        /// </summary>
+        const int MaxListDisplayLength = 32;
+
 		/// <summary>
 		/// The prompt.
 		/// </summary>
@@ -40,6 +50,9 @@ namespace iosh {
 		/// </summary>
 		readonly ConsoleColor Background;
 
+        /// <summary>
+        /// Whether exiting the shall was requested.
+        /// </summary>
         bool ExitRequested;
 
         /// <summary>
@@ -83,8 +96,7 @@ namespace iosh {
 		/// <summary>
 		/// Run the REPL shell.
 		/// </summary>
-		public void Run (bool showLogo = true)
-		{
+		public void Run (bool showLogo = true) {
 
 			// Set the culture
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -139,32 +151,11 @@ namespace iosh {
                 return;
 			}
 
-			// Compile the source unit
-			try {
-                IodineModule _;
-				rawvalue = engine.Compile (source, out _);
-			} catch (UnhandledIodineExceptionException e) {
-				var msg = ((IodineString) e.OriginalException.GetAttribute ("message")).Value;
-				Console.WriteLine (msg);
-			    e.PrintStack ();
-			} catch (ModuleNotFoundException e) {
-				ConsoleHelper.WriteLine ("{0}", string.Format ("red/Module not found: {0}", e.Name));
-				Console.WriteLine ("Searched in");
-				foreach (var path in e.SearchPath) {
-					var workingpath = new Uri (Environment.CurrentDirectory);
-					var currentpath = new Uri (path);
-					var relativepath = workingpath.MakeRelativeUri (currentpath).ToString ();
-					Console.WriteLine ("- ./{0}", relativepath);
-				}
-			} catch (SyntaxException e) {
-				foreach (var error in e.ErrorLog) {
-					var location = error.Location;
-					Console.WriteLine ("[{0}: {1}] Error: {2}", location.Line, location.Column, error.Text);
-				}
-				e.ErrorLog.Clear ();
-			} catch (Exception e) {
-				Console.WriteLine ("{0}", e.Message);
-			}
+            // Compile the source unit
+            IodineModule _;
+            if (!engine.TryCompile (source, out _, out rawvalue)) {
+                return;
+            }
 
 			// Print the result
 			if (rawvalue != null) {
@@ -277,19 +268,26 @@ namespace iosh {
 			return accum.ToString ();
 		}
 
-		bool WriteStringRepresentation (IodineObject obj) {
-			
-			// Test if the object or its typedef are undefined
-			if (obj.TypeDef == null && obj != null) {
-				var type = obj.ToString ();
-				ConsoleHelper.Write ("{0}", string.Format ("cyan/[Type: {0}]", type));
-				return true;
-			} else if (obj == null && obj.TypeDef == null) {
-				ConsoleHelper.Write ("{0}", "red/Error: The object or its typedef are undefined");
-				return true;
-			}
+		bool WriteStringRepresentation (IodineObject obj, int depth = 0) {
 
-			var value = obj.ToString ();
+            if (depth > MaxRecursionDepth) {
+                return false;
+            }
+
+            // Test if the typedef is undefined
+            if (obj.TypeDef == null && obj != null) {
+                var type = obj.ToString ();
+                ConsoleHelper.Write ("{0}", string.Format ("cyan/[Type: {0}]", type));
+                return true;
+            }
+
+            // Test if the object is undefined
+            if (obj == null && obj.TypeDef == null) {
+                ConsoleHelper.Write ("{0}", "red/Error: The object or its typedef are undefined");
+                return true;
+            }
+
+            var value = obj.ToString ();
 			switch (obj.TypeDef.ToString ()) {
 			case "Null":
 				//ConsoleHelper.Write ("{0}", "gray/null");
@@ -308,7 +306,14 @@ namespace iosh {
 				for (var i = 0; i < tpl.Objects.Count (); i++) {
 					if (i > 0)
 						Console.Write (", ");
-					WriteStringRepresentation (tpl.Objects [i]);
+                    if (i > MaxListDisplayLength) {
+                        ConsoleHelper.Write ("{0}", "magenta/...");
+                        break;
+                    }
+                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
+                        Console.Write ("\n  ");
+                    }
+					WriteStringRepresentation (tpl.Objects [i], depth + 1);
 				}
 				Console.Write (" )");
 				ConsoleHelper.Write ("{0}", "cyan/]");
@@ -326,7 +331,14 @@ namespace iosh {
 				for (var i = 0; i < lst.Objects.Count; i++) {
 					if (i > 0)
 						Console.Write (", ");
-					WriteStringRepresentation (lst.Objects [i]);
+                    if (i > MaxListDisplayLength) {
+                        ConsoleHelper.Write ("{0}", "magenta/...");
+                        break;
+                    }
+                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
+                        Console.Write ("\n  ");
+                    }
+					WriteStringRepresentation (lst.Objects [i], depth + 1);
 				}
 				Console.Write (" ]");
 				ConsoleHelper.Write ("{0}", "cyan/]");
@@ -337,6 +349,13 @@ namespace iosh {
 				for (var i = 0; i < bytearr.Array.Length; i++) {
 					if (i > 0)
 						Console.Write (", ");
+                    if (i > MaxListDisplayLength) {
+                        ConsoleHelper.Write ("{0}", "magenta/...");
+                        break;
+                    }
+                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
+                        Console.Write ("\n  ");
+                    }
 					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytearr.Array [i]));
 				}
 				Console.Write (" ]");
@@ -347,6 +366,13 @@ namespace iosh {
 				for (var i = 0; i < bytes.Value.Length; i++) {
 					if (i > 0)
 						Console.Write (", ");
+                    if (i > MaxListDisplayLength) {
+                        ConsoleHelper.Write ("{0}", "magenta/...");
+                        break;
+                    }
+                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
+                        Console.Write ("\n  ");
+                    }
 					ConsoleHelper.Write ("{0}", string.Format ("darkyellow/{0}", bytes.Value [i]));
 				}
 				Console.Write (" ]");
@@ -358,11 +384,18 @@ namespace iosh {
 				for (var i = 0; i < keys.Length; i++) {
 					if (i > 0)
 						Console.Write (", ");
+                    if (i > MaxListDisplayLength) {
+                        ConsoleHelper.Write ("{0}", "magenta/...");
+                        break;
+                    }
+                    if (Console.CursorLeft > (Console.WindowWidth * 0.2)) {
+                        Console.Write ("\n  ");
+                    }
 					var key = keys [i];
 					var val = map.Get (key);
-					WriteStringRepresentation (key);
+					WriteStringRepresentation (key, depth + 1);
 					Console.Write (" = ");
-					WriteStringRepresentation (val);
+					WriteStringRepresentation (val, depth + 1);
 				}
 				Console.Write (" }");
 				break;
@@ -404,19 +437,23 @@ namespace iosh {
 				ConsoleHelper.Write ("{0}", "cyan/[Function: ");
 				Console.Write ("{0} ", instancefunc.Method.Name);
 				if (instancefunc.Method.ParameterCount > 0) {
-					Console.Write (" (");
+					Console.Write ("(");
 					for (var i = 0; i < instancefunc.Method.ParameterCount; i++) {
 						var arg = instancefunc.Method.Parameters.ElementAt (i);
 						if (i > 0)
 							Console.Write (", ");
 						ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", arg.Key));
 					}
-					Console.Write (")");
+					Console.Write (") ");
 				}
-				ConsoleHelper.Write ("{0}", "magenta/(bound)");
+                ConsoleHelper.Write ("{0}", "magenta/(bound)");
 				ConsoleHelper.Write ("{0}", "cyan/]");
 				break;
 			case "Module":
+                // Don't recursively list modules
+                if (depth > 0) {
+                    return true;
+                }
 				var module = obj as IodineModule;
 				ConsoleHelper.Write ("{0}", "cyan/[Module: ");
 				Console.Write (module.Name);
@@ -429,7 +466,7 @@ namespace iosh {
 						continue;
 					Console.WriteLine ();
 					Console.Write ("{0}: ", attr.Key);
-					WriteStringRepresentation (attr.Value);
+					WriteStringRepresentation (attr.Value, depth + 1);
 				}
 				break;
 			case "Generator":
@@ -499,7 +536,7 @@ namespace iosh {
 							continue;
 						Console.WriteLine ();
 						Console.Write ("{0}: ", attr.Key);
-						WriteStringRepresentation (attr.Value);
+						WriteStringRepresentation (attr.Value, depth + 1);
 					}
 					Console.WriteLine ();
 					ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end class {0}", iodineClass.Name));
@@ -518,7 +555,7 @@ namespace iosh {
 						continue;
 					Console.WriteLine ();
 					Console.Write ("{0}: ", attr.Key);
-					WriteStringRepresentation (attr.Value);
+					WriteStringRepresentation (attr.Value, depth + 1);
 				}
 				Console.WriteLine ();
 				ConsoleHelper.Write ("{0}", string.Format ("darkgray/# end type {0}", obj.TypeDef.Name));

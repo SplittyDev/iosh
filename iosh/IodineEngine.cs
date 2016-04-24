@@ -46,12 +46,13 @@ namespace iosh {
 				IncludeFolder(path);
 		}
 
-        public IodineObject Compile (string source, out IodineModule module) {
-            IodineObject result = IodineNull.Instance;
+        public bool TryCompile (string source, out IodineModule module, out IodineObject result) {
+            result = IodineNull.Instance;
             if (TryCompileModule (source, out module)) {
-                TryInvokeModule (module, out result);
+                if (TryInvokeModule (module, out result))
+                    return true;
             }
-            return result;
+            return false;
         }
 
         public bool TryInvokeModule (IodineModule module, out IodineObject result) {
