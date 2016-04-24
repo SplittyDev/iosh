@@ -1,0 +1,15 @@
+# Author: SplittyDev (github.com/splittydev)
+
+use sin, cos, sqrt from std.math
+
+func fastsqrt (x) {
+    return sqrt (x, method: 'newtons2', precision: 1)
+}
+
+func fastsin (x) {
+    return sin (x, precision: 1)
+}
+
+func fastcos (x) {
+    return cos (x, precision: 1)
+}

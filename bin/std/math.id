@@ -6,27 +6,328 @@ PI = 3.14159265358979
 # The E constant
 E = 2.71828182845905
 
-func pow (base, exponent) {
-    base = typecast (Int, base)
-    exponent = typecast (Int, exponent)
-    current = 1
-    for (i = 0; i < exponent; i += 1) {
-        current *= base
+# The square root of 2
+SQRT2 = 1.41421356237309
+
+# Logarithm of e to base 2
+LOG2E = 1.44269504088896
+
+# Logarithm of e to base 10
+LOG10E = 0.43429448190325
+
+func log2 (v) {
+    b = [0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000, 0xFFFFFFFF00000000]
+    S = [1, 2, 4, 8, 16, 32]
+    r = 0
+    for (i = 5; i >= 0; i -= 1) {
+        if (v & b [i]) {
+            v >>= S [i]
+            r |= S [i]
+        }
     }
-    return current
+    return r
+}
+
+func pow (base, exp) {
+    typecast (Int, base)
+    typecast (Int, exp)
+    flag = 0
+    if (exp < 0) {
+        flag = 1
+        exp = abs (exp)
+    }
+    result = 1
+    while (exp > 0) {
+        if ((exp & 1) == 1) {
+            result *= base
+        }
+        exp >>= 1
+        base *= base
+    }
+    if (flag == 0) {
+        return result
+    }
+    return (1.0 / Float (result))
+}
+
+func sqrt (x, **kwargs) {
+    # Make sure that x is a Float
+    if (x is Int) {
+        x = Float (x)
+    }
+    typecast (Float, x)
+    # Default values
+    method = "babylonian"
+    precision = pow (10, -7) # 1e^-7
+    # Algorithms
+    algorithms = {
+        "babylonian": lambda () {
+            n = x / 2.0
+            last = 0.0
+            while (n != last) {
+                last = n
+                n = (n + (x / n)) / 2.0
+            }
+            return n
+        },
+        "babylonian2": lambda () {
+            i = 0.0
+            while ((i * i) < x) {
+                i += 0.1
+            }
+            x1 = i
+            x2 = 0.0
+            for (j = 0; j < 10; j += 1) {
+                x2 = x
+                x2 /= x1
+                x2 += x1
+                x2 /= 2.0
+                x1 = x2
+            }
+            return x2
+        },
+        "bakhsali": lambda () {
+            i = 0.0
+            while ((i * i) <= x) {
+                i += 1.0
+            }
+            i -= 1.0
+            d = x - (i * i)
+            p = d / (2.0 * i)
+            a = i + p
+            return a - (p * p) / (2.0 * a)
+        },
+        "newtons": lambda () {
+            lower = 0.0
+            upper = 0.0
+            guess = 0.0
+            if (x < 1.0) {
+                lower = x
+                upper = 1.0
+            } else {
+                lower = 1.0
+                upper = x
+            }
+            while ((upper - lower) > precision) {
+                guess = (lower + upper) / 2.0
+                if ((guess * guess) > x) {
+                    upper = guess
+                } else {
+                    lower = guess
+                }
+            }
+            return (lower + upper) / 2.0
+        },
+        "newtons2": lambda () {
+            if (2.0 > x) {
+                return x
+            }
+            n = 0.0
+            p = 0.0
+            low = 0.0
+            high = x
+            while (high > low + precision) {
+                n = (high + low) / 2.0
+                p = n * n
+                if (x < p) {
+                    high = n
+                } else if (x > p) {
+                    low = n
+                } else {
+                    break
+                }
+            }
+            if (x == p) {
+                return n
+            }
+            return low
+        }
+    }
+    # Handle optional arguments
+    foreach (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "method" => (lambda () { 
+                typecast (Str, current)
+                if (current == 'default')
+                    current = method
+                if (!algorithms.contains (current)) {
+                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                }
+                method = current
+            }) ()
+            case "precision" => (lambda () {
+                typecast (Int, current)
+                precision = max (pow (10, -current), pow (10, -15)) # 1e^-current
+            }) ()
+        }
+    }
+    # Compute the square root
+    return algorithms [method] ()
+}
+
+func sin (x, **kwargs) {
+    # Make sure that x is a Float
+    if (x is Int) {
+        x = Float (x)
+    }
+    typecast (Float, x)
+    # Special case: x = 0
+    if (x == 0.0) {
+        return x
+    }
+    # Default precision
+    precision = 20.0
+    # Handle optional arguments
+    foreach (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "precision" => (lambda () {
+                if (current is Int) {
+                    current = Float (current)
+                }
+                typecast (Float, current)
+                precision = current
+            }) ()
+        }
+    }
+    # Reduce x to range [-2Pi, 2Pi]
+    x = x - Float (Int (x * (1.0 / (2.0 * PI)))) * 2.0 * PI
+    # Reduce x to range [-Pi/2, Pi/2]
+    x = min (x, PI - x)
+    x = max (x, -PI - x)
+    x = min (x, PI - x)
+    # Taylor series approximation
+    sum = 1.0
+    x2 = x * x
+    for (n = precision - 1.0; n >= 0.0; n -= 1.0) {
+        n2 = 2.0 * n
+        sum = 1.0 - x2 / (n2 + 2.0) / (n2 + 3.0) * sum
+    }
+    return x * sum
+}
+
+func cos (x, **kwargs) {
+    # Make sure that x is a Float
+    if (x is Int) {
+        x = Float (x)
+    }
+    typecast (Float, x)
+    # Special case: x = 0
+    if (x == 0.0) {
+        return 1.0
+    }
+    # Default precision
+    precision = 20.0
+    # Handle optional arguments
+    foreach (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "precision" => (lambda () {
+                if (current is Int) {
+                    current = Float (current)
+                }
+                typecast (Float, current)
+                precision = current
+            }) ()
+        }
+    }
+    # Reduce x to range [-2Pi, 2Pi]
+    x = x - Float (Int (x * (1.0 / (2.0 * PI)))) * 2.0 * PI
+    # Reduce x to range [-Pi/2, Pi/2]
+    x = min (x, PI - x)
+    x = max (x, -PI - x)
+    x = min (x, PI - x)
+    # McLaurin series approximation
+    sum = 1.0
+    x2 = x * x
+    for (n = precision - 1.0; n >= 0; n -= 1.0) {
+        n2 = 2.0 * n
+        sum = 1.0 - x2 / (n2 + 2.0) / (n2 + 1.0) * sum
+    }
+    return sum
+}
+
+func zs_sin (x) {
+    t0 = lambda (x) => 1.0
+    t1 = lambda (x) => x
+    t2 = lambda (x) => 2.0 * x * x - 1.0
+    t3 = lambda (x) => 4.0 * x * x * x - 3.0 * x
+    t4 = lambda (x) => 8.0 * x * x * x * x - 8.0 * x * x + 1.0
+    t5 = lambda (x) => 16.0 * x * x * x * x * x - 20.0 * x * x * x + 5.0 * x
+    c0 =  1.276278962
+    c1 = -0.285261569
+    c2 =  0.009118016
+    c3 = -0.000136587
+    c4 =  0.000001185
+    c5 = -0.000000007
+    p = lambda (z) =>
+          c0 * t0 (z)
+        + c1 * t1 (z)
+        + c2 * t2 (z)
+        + c3 * t3 (z)
+        + c4 * t4 (z)
+        + c5 * t5 (z)
+    w = 4.0 * x
+    z = 2.0 * w * w - 1.0
+    return p (z) * w
+}
+
+func min (x, y) {
+    if (x isnot Int && x isnot Float) {
+        raise Exception ("x has to be of type Int or Float!")
+    } else if (y isnot Int && y isnot Float) {
+        raise Exception ("y has to be of type Int or Float!")
+    }
+    if (x is Float && y isnot Float) {
+        y = Float (y)
+    } else if (y is Float && x isnot Float) {
+        x = Float (x)
+    }
+    if (x < y) {
+        return x
+    }
+    return y
+}
+
+func max (x, y) {
+    if (x isnot Int && x isnot Float) {
+        raise Exception ("x has to be of type Int or Float!")
+    } else if (y isnot Int && y isnot Float) {
+        raise Exception ("y has to be of type Int or Float!")
+    }
+    if (x is Float && y isnot Float) {
+        y = Float (y)
+    } else if (y is Float && x isnot Float) {
+        x = Float (x)
+    }
+    if (x > y) {
+        return x
+    }
+    return y
+}
+
+func floor (x) {
+    if (x is Int) {
+        return x
+    }
+    typecast (Float, x)
+    return Int (x)
 }
 
 func abs (x) {
+    if (x is Float) {
+        return fabs (x)
+    }
+    typecast (Int, x)
     if (x < 0)
         return -x
     return x
 }
 
-func toFloat (x) {
-    if (x is Float) {
-        return x
-    } else if (x is Int) {
-        return Float (x)
-    }
-    throw Exception ("Unable to convert {0} to 'Float'".format (x))
+func fabs (x) {
+    typecast (Float, x)
+    if (x < 0.0)
+        return -x
+    return x
 }

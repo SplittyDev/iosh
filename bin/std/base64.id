@@ -1,7 +1,5 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use each, skipWhile from itertools
-
 class Base64 {
 
     func encode (str) {

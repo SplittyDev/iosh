@@ -181,6 +181,18 @@ class Array : ICollection {
             arr [i] = filler
         return arr
     }
+
+    func clear (src, src_start, length) {
+        for (i = 0; i < length; i += 1) {
+            src [src_start + i] = 0
+        }
+    }
+
+    func copy (src, src_start, dst, dst_start, length) {
+        for (i = 0; i < length; i += 1) {
+            dst [dst_start + i] = src [src_start + i]
+        }
+    }
 }
 
 class Set : ICollection {

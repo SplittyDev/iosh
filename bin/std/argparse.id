@@ -1,6 +1,6 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use skip, take, takeWhile from itertools
+use skip, take, takeWhile from std.itertools
 
 func __isset (arg) {
     # TODO: Replace with Null type-check
