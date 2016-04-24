@@ -1,9 +1,16 @@
 # Author: SplittyDev (github.com/splittydev)
 
+# Any type that can be iterated over
 trait Iterable {
-    func __iter__ (self);
+    func __iter__ (self)
 }
 
+# Any type that can be counted
+trait Countable {
+    func __len__ (self)
+}
+
+# A collection
 contract Collection {
     func clear (self)
     func count (self)
