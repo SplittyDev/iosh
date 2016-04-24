@@ -9,6 +9,7 @@ The formatting of results is pretty much the same- so you should feel familiar w
 - Easy and intuitive to use
 - On the fly evaluation of expressions and statements
 - Intelligent line continuation mode for multiline expressions
+- Interpreter for Iodine sources
 - Beautifully colored and formatted representations of any type
 
 ## Supported representations
@@ -20,8 +21,8 @@ The formatting of results is pretty much the same- so you should feel familiar w
 - Float
 - Generator
 - Generic
-- HashMap
-- InstanceMethod
+- Dict
+- BoundMethod
 - Int
 - List
 - Method
