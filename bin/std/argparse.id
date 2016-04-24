@@ -98,11 +98,6 @@ class ArgumentParser {
         for (i = 0; i < argcount; i += 1) {
             key = args [i]
 
-            # Continue if the current string is not an argument
-            if (!self.isArgument (key)) {
-                continue
-            }
-
             # Get the argument definition for the current string
             # Continue if no argument definition is found
             def = null
