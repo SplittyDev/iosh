@@ -1,13 +1,10 @@
 # Author: SplittyDev (github.com/splittydev)
 
-/* TODO: Change to trait Iterable
-interface IEnumerable {
+trait Iterable {
     func __iter__ (self);
 }
-*/
 
-# TODO: Change to contract Collection
-interface ICollection {
+contract Collection {
     func clear (self)
     func count (self)
     func empty (self)
@@ -16,7 +13,7 @@ interface ICollection {
     func contains (self, item)
 }
 
-class Array : ICollection {
+class Array : Collection {
 
     /* Constructor
      * @param **Object kwargs Optional arguments
@@ -28,20 +25,23 @@ class Array : ICollection {
         self.list = []
         self.length = 0
         self.capacity = -1
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             match (key) {
                 case "capacity" => self.capacity = typecast (Int, kwargs [key])
-                case "items" => (lambda () {
-                    foreach (i in typecast (List, kwargs [key]))
+                case "items" {
+                    for (i in typecast (List, kwargs [key])) {
                         self.add (i)
-                    }) ()
-                case "prealloc" => (lambda () {
+                    }
+                }
+                case "prealloc" {
                     maxfill = typecast (Int, kwargs [key])
-                    if (maxfill > self.capacity)
+                    if (maxfill > self.capacity) {
                         raise Exception ("Preallocating overflows the capacity.")
-                    for (i = 0; i < maxfill; i += 1)
+                    }
+                    for (i = 0; i < maxfill; i += 1) {
                         self.add (null)
-                    }) ()
+                    }
+                }
             }
         }
     }
@@ -73,8 +73,9 @@ class Array : ICollection {
      * @return null
      */
     func add (self, item) {
-        if (self.length == self.capacity)
+        if (self.length == self.capacity) {
             raise Exception ("Maximum capacity reached.")
+        }
         self.list.add (item)
         self.length += 1
     }
@@ -85,7 +86,7 @@ class Array : ICollection {
      */
     func remove (self, item) {
         i = 0
-        foreach (x in self.list) {
+        for (x in self.list) {
             if (x == item) {
                 self.list.removeAt (i)
                 self.length -= 1
@@ -155,8 +156,9 @@ class Array : ICollection {
      * @yield Object The items
      */
     func __iter__ (self) {
-        for (i = 0; i < self.length; i += 1)
+        for (i = 0; i < self.length; i += 1) {
             yield self.list [i]
+        }
     }
 
     /* Fills an array with zeros
@@ -165,8 +167,9 @@ class Array : ICollection {
      */
     func zeroFill (arr) {
         typecast (Array, arr)
-        for (i = 0; i < arr.length; i += 1)
+        for (i = 0; i < arr.length; i += 1) {
             arr [i] = 0
+        }
         return arr
     }
 
@@ -177,8 +180,9 @@ class Array : ICollection {
      */
     func fill (arr, filler) {
         typecast (Array, arr)
-        for (i = 0; i < arr.length; i += 1)
+        for (i = 0; i < arr.length; i += 1) {
             arr [i] = filler
+        }
         return arr
     }
 
@@ -195,7 +199,7 @@ class Array : ICollection {
     }
 }
 
-class Set : ICollection {
+class Set : Collection {
 
     /* Constructor
      * @param **Object kwargs Optional arguments
@@ -206,13 +210,14 @@ class Set : ICollection {
         self.list = []
         self.cardinality = 0
         self.capacity = -1
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             match (key) {
                 case "capacity" => self.capacity = typecast (Int, kwargs [key])
-                case "items" => (lambda () {
-                    foreach (i in typecast (List, kwargs [key]))
+                case "items" {
+                    for (i in typecast (List, kwargs [key])) {
                         self.add (i)
-                }) ()
+                    }
+                }
             }
         }
     }
@@ -244,10 +249,12 @@ class Set : ICollection {
      * @return null
      */
     func add (self, item) {
-        if (self.cardinality == self.capacity)
+        if (self.cardinality == self.capacity) {
             raise Exception ("Maximum capacity reached.")
-        if (self.contains (item))
+        }
+        if (self.contains (item)) {
             return null
+        }
         self.list.add (item)
         self.cardinality += 1
     }
@@ -258,7 +265,7 @@ class Set : ICollection {
      */
     func remove (self, item) {
         i = 0
-        foreach (x in self.list) {
+        for (x in self.list) {
             if (x == item) {
                 self.list.removeAt (i)
                 self.cardinality -= 1
@@ -276,9 +283,10 @@ class Set : ICollection {
     func union (self, other) {
         typecast (Set, other)
         set = Set (items: other.list)
-        foreach (item in self.list) {
-            if (!other.contains (item))
+        for (item in self.list) {
+            if (!other.contains (item)) {
                 set.add (item)
+            }
         }
         return set
     }
@@ -290,9 +298,10 @@ class Set : ICollection {
     func intersection (self, other) {
         typecast (Set, other)
         set = Set ()
-        foreach (item in self.list) {
-            if (other.contains (item))
+        for (item in self.list) {
+            if (other.contains (item)) {
                 set.add (item)
+            }
         }
         return set
     }
@@ -304,9 +313,10 @@ class Set : ICollection {
     func difference (self, other) {
         typecast (Set, other)
         set = Set ()
-        foreach (item in self.list) {
-            if (!other.contains (item))
+        for (item in self.list) {
+            if (!other.contains (item)) {
                 set.add (item)
+            }
         }
         return set
     }
@@ -318,9 +328,10 @@ class Set : ICollection {
     func superset (self, other) {
         typecast (Set, other)
         i = 0
-        foreach (item in self.list) {
-            if (other.contains (item))
+        for (item in self.list) {
+            if (other.contains (item)) {
                 i += 1
+            }
         }
         return other.cardinality == i
     }
@@ -332,9 +343,10 @@ class Set : ICollection {
     func subset (self, other) {
         typecast (Set, other)
         i = 0
-        foreach (item in other.list) {
-            if (self.contains (item))
+        for (item in other.list) {
+            if (self.contains (item)) {
                 i += 1
+            }
         }
         return self.cardinality == i
     }
@@ -380,8 +392,9 @@ class Set : ICollection {
      * @yield Object The items
      */
     func __iter__ (self) {
-        for (i = 0; i < self.cardinality; i += 1)
+        for (i = 0; i < self.cardinality; i += 1) {
             yield self.list [i]
+        }
     }
     
     /* Creates a new set from a list
@@ -438,7 +451,7 @@ class Set : ICollection {
     }
 }
 
-class GenericSet : Set, ICollection {
+class GenericSet : Set, Collection {
 
     /* Constructor
      * @param **Object kwargs Optional arguments
@@ -449,7 +462,7 @@ class GenericSet : Set, ICollection {
     func GenericSet (self, **kwargs) {
         super (kwargs);
         self.type = null
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             print (key)
             current = kwargs [key]
             match (key) {
@@ -481,7 +494,7 @@ class GenericSet : Set, ICollection {
     }
 }
 
-class Stack : ICollection {
+class Stack : Collection {
 
     /* Constructor
      * @param **Object kwargs Optional arguments
@@ -492,13 +505,14 @@ class Stack : ICollection {
         self.list = []
         self.top = 0
         self.capacity = -1
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             match (key) {
                 case "capacity" => self.capacity = typecast (Int, kwargs [key])
-                case "items" => (lambda () {
-                    foreach (i in typecast (List, kwargs [key]))
+                case "items" {
+                    for (i in typecast (List, kwargs [key])) {
                         self.push (i)
-                }) ()
+                    }
+                }
             }
         }
     }
@@ -538,8 +552,9 @@ class Stack : ICollection {
      * @return null
      */
     func push (self, item) {
-        if (self.top == self.capacity)
+        if (self.top == self.capacity) {
             raise Exception ("Maximum capacity reached.")
+        }
         self.list.add (item)
         self.top += 1
     }
@@ -548,8 +563,9 @@ class Stack : ICollection {
      * @return Object The item that was popped from the stack
      */
     func pop (self) {
-        if (self.top == 0)
+        if (self.top == 0) {
             raise Exception ("There are no elements on the stack.")
+        }
         self.top -= 1
         item = self.list [self.top]
         self.list.removeAt (self.top)
@@ -635,7 +651,7 @@ class Stack : ICollection {
     }
 }
 
-class GenericStack : Stack, ICollection {
+class GenericStack : Stack, Collection {
 
     /* Constructor
      * @param **Object kwargs Optional arguments
@@ -647,7 +663,7 @@ class GenericStack : Stack, ICollection {
         super (kwargs);
         self.type = null
         print (len (kwargs))
-        foreach (key in kwargs) {
+        for (key in kwargs) {
             current = kwargs [key]
             match (key) {
                 case "T" => self.type = current
