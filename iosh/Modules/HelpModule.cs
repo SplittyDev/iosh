@@ -2,6 +2,9 @@
 using System.Linq;
 using System.Reflection;
 using Iodine.Runtime;
+using static System.Console;
+using static System.ConsoleColor;
+using static iosh.ConsoleHelper;
 
 namespace iosh {
 
@@ -22,10 +25,10 @@ namespace iosh {
 			var builtin = arguments [0] as BuiltinMethodCallback;
 			if (str != null) {
 				if (!tryInvokeHelpAction (str.Value))
-					Console.WriteLine ("No documentation found for '{0}'.", str.Value);
+                    WriteLine ("No documentation found for '{0}'.", str.Value);
 			} else if (builtin != null) {
 				if (!tryInvokeHelpAction (builtin.Callback.Method.Name))
-					Console.WriteLine ("No documentation found for '{0}'.", builtin.Callback.Method.Name);
+                    WriteLine ("No documentation found for '{0}'.", builtin.Callback.Method.Name);
 			} else {
 				vm.RaiseException (new IodineTypeException ("Str or BuiltinMethodCallback"));
 				return IodineNull.Instance;
@@ -439,72 +442,66 @@ namespace iosh {
 		#region Documentation helpers
 
 		static void br () {
-			Console.WriteLine ();
+            WriteLine ();
 		}
 
 		static void section (string name) {
-			Console.WriteLine ("{0}:", name);
+            WriteLine ("{0}:", name);
 		}
 
 		static void modulefunc (string module, string name, params Action[] arguments) {
-			ConsoleHelper.Write ("{0}", "cyan/func ");
-			ConsoleHelper.Write ("{0}", string.Format ("magenta/{0}.", module));
-			Console.Write ("{0} (", name);
+            Writec (Cyan, "func ");
+            Writec (Magenta, module, ".");
+            Write ("{0} (", name);
 			for (var i = 0; i < arguments.Length; i++) {
 				if (i > 0)
-					Console.Write (", ");
+                    Write (", ");
 				arguments [i] ();
 			}
-			Console.Write (")");
-			Console.WriteLine ();
+            Write (")");
+            WriteLine ();
 		}
 
 		static void func (string name, params Action[] arguments) {
-			ConsoleHelper.Write ("{0}", "cyan/func");
-			Console.Write (" {0} (", name);
+			Writec (Cyan, "func ");
+            Write ("{0} (", name);
 			for (var i = 0; i < arguments.Length; i++) {
 				if (i > 0)
-					Console.Write (", ");
+                    Write (", ");
 				arguments [i] ();
 			}
-			Console.Write (")");
-			Console.WriteLine ();
+            Write (")");
+            WriteLine ();
 		}
 
 		static void begindoc () {
-			Console.WriteLine ("Documentation:");
+            WriteLine ("Documentation:");
 		}
 
 		static void beginargs () {
-			Console.WriteLine ("Arguments:");
+            WriteLine ("Arguments:");
 		}
 
 		static void args (Action elem, string description) {
-			Console.Write ("   ");
+            Write ("   ");
 			elem ();
-			Console.Write (": ");
-			Console.WriteLine (description);
+            Write (": ");
+            WriteLine (description);
 		}
 
 		static Action arg (string name) {
-			return new Action (() => ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", name)));
+			return new Action (() => Writec (Yellow, name));
 		}
 
 		static Action optional (string name) {
 			return new Action (() => {
-				ConsoleHelper.Write ("{0}", "magenta/[");
-				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", name));
-				ConsoleHelper.Write ("{0}", "magenta/]");
+                Writec (Magenta, "[", Yellow, name, Magenta, "]");
 			});
 		}
 
 		static Action optionaldefault (string name, object _default) {
 			return new Action (() => {
-				ConsoleHelper.Write ("{0}", "magenta/[");
-				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", name));
-				Console.Write (" = ");
-				ConsoleHelper.Write ("{0}", string.Format ("yellow/{0}", _default));
-				ConsoleHelper.Write ("{0}", "magenta/]");
+                Writec (Magenta, "[", Yellow, name, null, " = ", Yellow, _default, Magenta, "]");
 			});
 		}
 
@@ -513,8 +510,8 @@ namespace iosh {
 		}
 
 		static void doc (params string[] arguments) {
-			foreach (var str in arguments)
-				ConsoleHelper.WriteLine ("   {0}", string.Format ("green/{0}", str));
+            foreach (var str in arguments)
+                WriteLinec ("   ", Green, str);
 		}
 
 		#endregion

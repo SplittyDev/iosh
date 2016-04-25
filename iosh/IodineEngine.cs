@@ -86,7 +86,7 @@ namespace iosh {
                 Console.WriteLine (msg);
                 e.PrintStack ();
             } catch (ModuleNotFoundException e) {
-                ConsoleHelper.WriteLine ("{0}", string.Format ("red/Module not found: {0}", e.Name));
+                ConsoleHelper.WriteLinec (ConsoleColor.Red, "Module not found: ", e.Name);
                 Console.WriteLine ("Searched in");
                 foreach (var path in e.SearchPath) {
                     var workingpath = new Uri (Environment.CurrentDirectory);

@@ -8,18 +8,26 @@ namespace iosh {
 	/// </summary>
 	public static class ConsoleHelper {
 
-		public static void Write (string format, params ColoredString[] args) {
-			var c = Console.ForegroundColor;
-			Console.Write (format, args);
-			Console.ForegroundColor = c;
-		}
+        public static void Writec (params object [] args) {
+            var c = Console.ForegroundColor;
+            foreach (var arg in args) {
+                if (arg is ConsoleColor) {
+                    Console.ForegroundColor = (ConsoleColor)arg;
+                    continue;
+                }
+                if (arg == null) {
+                    Console.ForegroundColor = c;
+                    continue;
+                }
+                Console.Write (arg);
+            }
+            Console.ForegroundColor = c;
+        }
 
-		public static void WriteLine (string format, params ColoredString[] args) {
-			var c = Console.ForegroundColor;
-			Console.Write (format, args);
-			Console.ForegroundColor = c;
-			Console.WriteLine ();
-		}
+        public static void WriteLinec (params object [] args) {
+            Writec (args);
+            Console.WriteLine ();
+        }
 	}
 
 	public class ColoredString {
