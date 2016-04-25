@@ -99,6 +99,11 @@ func pow (base, exp, **kwargs) {
     # Make sure that exp is of type Int
     typecast (Int, exp)
 
+    # Make sure that base is either of type Int or Float
+    if (base isnot Int && base isnot Float) {
+        raise TypeException ("base", "Int|Float")
+    }
+
     # Work with positive exponent
     # if, and only if, base is of type Int
     sign = false
@@ -118,7 +123,7 @@ func pow (base, exp, **kwargs) {
     }
 
     # Default algorithm
-    method = "optimized"
+    method = "fastpow"
 
     # Use floatpow algorithm if base is of type Float
     if (base is Float) {
@@ -127,12 +132,13 @@ func pow (base, exp, **kwargs) {
 
     # Use fast shift algorithm if base equals 2
     else if (base == 2) {
-        method = "fastshift"
+        method = "shiftpow"
     }
 
     # Algorithms
     algorithms = {
-        "default": lambda () {
+        "intpow": lambda () {
+            typecast (Int, base)
             result = 1
             while (exp > 0) {
                 if ((exp & 1) == 1) {
@@ -142,6 +148,14 @@ func pow (base, exp, **kwargs) {
                 base *= base
             }
             return result
+        },
+        "altpow": lambda () {
+            typecast (Int, base)
+            tmp = pow (base, exp / 2)
+            if (exp % 2 == 0) {
+                return tmp * tmp
+            }
+            return base * tmp * tmp
         },
         "floatpow": lambda () {
             tmp = Float (pow (base, exp / 2))
@@ -153,13 +167,15 @@ func pow (base, exp, **kwargs) {
             }
             return base * tmp * tmp
         },
-        "fastshift": lambda () {
+        "shiftpow": lambda () {
+            typecast (Int, base)
             if (base != 2) {
-                raise Exception ("The 'fastshift' algorithm only works when 'base' equals 2")
+                raise Exception ("The 'shiftpow' algorithm only works when 'base' equals 2")
             }
             return 1 << exp
         },
-        "optimized": lambda () {
+        "fastpow": lambda () {
+            typecast (Int, base)
             lut = [
                 0, 1, 2, 2, 3, 3, 3, 3,
                 4, 4, 4, 4, 4, 4, 4, 4,
