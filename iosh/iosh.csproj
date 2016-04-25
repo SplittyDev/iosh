@@ -42,7 +42,7 @@
       <HintPath>..\packages\Codeaddicts.libArgument.0.2.5942.9023\lib\codeaddicts.libArgument.dll</HintPath>
     </Reference>
     <Reference Include="LibIodine">
-      <HintPath>..\packages\libIodine.0.10.0.37530\lib\net45\LibIodine.dll</HintPath>
+      <HintPath>..\..\Iodine\bin\lib\LibIodine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

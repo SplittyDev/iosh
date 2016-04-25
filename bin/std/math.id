@@ -1,6 +1,7 @@
 # Author: SplittyDev (github.com/splittydev)
 
 use typecast from std.builtin
+use ArgumentException, TypeException from std.exceptions
 
 # The Pi constant
 PI = 3.14159265358979
@@ -35,7 +36,7 @@ func exp (x, **kwargs) {
     # Special case: x ~> 702
     # 702.2884533631839199...
     if (x > 702.2884533631839) {
-        raise Exception ("The value is too big, the result would exceed the bounds of Float.")
+        raise ArgumentException ("x", "Value too big; Result would exceed the bounds of Float")
     }
 
     # Default algorithm
@@ -65,7 +66,7 @@ func exp (x, **kwargs) {
             case "method"  { 
                 typecast (Str, current)
                 if (!algorithms.contains (current)) {
-                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
                 method = current
             }
@@ -108,11 +109,16 @@ func ipow (base, exp, **kwargs) {
 
     # Verify that the exponent fits into an unsigned byte
     if (exp > 255) {
-        raise Exception ("The exponent exceeds the 8-bit bounds")
+        raise ArgumentException ("exp", "Exponent exceeds the allowed 8-bit bounds")
     }
 
     # Default algorithm
     method = "optimized"
+
+    # Use fast shift if base equals 2
+    if (base == 2) {
+        method = "fastshift"
+    }
 
     # Algorithms
     algorithms = {
@@ -126,6 +132,12 @@ func ipow (base, exp, **kwargs) {
                 base *= base
             }
             return result
+        },
+        "fastshift": lambda () {
+            if (base != 2) {
+                raise Exception ("The 'fastshift' algorithm only works when 'base' equals 2")
+            }
+            return 1 << exp
         },
         "optimized": lambda () {
             lut = [
@@ -236,7 +248,7 @@ func ipow (base, exp, **kwargs) {
             case "method"  { 
                 typecast (Str, current)
                 if (!algorithms.contains (current)) {
-                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
                 method = current
             }
@@ -259,8 +271,10 @@ func sqrt (x, **kwargs) {
     }
     typecast (Float, x)
 
-    # Default values
+    # Default algorithm
     method = "babylonian"
+
+    # Default precision
     precision = ipow (10, -7) # 1e^-7
 
     # Algorithms
@@ -358,7 +372,7 @@ func sqrt (x, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
                 method = current
             }
@@ -496,9 +510,9 @@ func zs_sin (x) {
 
 func min (x, y) {
     if (x isnot Int && x isnot Float) {
-        raise Exception ("x has to be of type Int or Float!")
+        raise TypeException ("x", "Int|Float")
     } else if (y isnot Int && y isnot Float) {
-        raise Exception ("y has to be of type Int or Float!")
+        raise TypeException ("y", "Int|Float")
     }
     if (x is Float && y isnot Float) {
         y = Float (y)
@@ -513,9 +527,9 @@ func min (x, y) {
 
 func max (x, y) {
     if (x isnot Int && x isnot Float) {
-        raise Exception ("x has to be of type Int or Float!")
+        raise TypeException ("x", "Int|Float")
     } else if (y isnot Int && y isnot Float) {
-        raise Exception ("y has to be of type Int or Float!")
+        raise TypeException ("y", "Int|Float")
     }
     if (x is Float && y isnot Float) {
         y = Float (y)
@@ -537,19 +551,10 @@ func floor (x) {
 }
 
 func abs (x) {
-    if (x is Float) {
-        return fabs (x)
+    if (x isnot Int && x isnot Float) {
+        raise TypeException ("x", "Int|Float")
     }
-    typecast (Int, x)
     if (x < 0) {
-        return -x
-    }
-    return x
-}
-
-func fabs (x) {
-    typecast (Float, x)
-    if (x < 0.0) {
         return -x
     }
     return x

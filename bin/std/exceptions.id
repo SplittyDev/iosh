@@ -1,0 +1,29 @@
+# Author: SplittyDev (github.com/splittydev)
+
+use typecast from std.builtin
+
+class ArgumentException : Exception {
+
+    func ArgumentException (self, argument, message) {
+        super ("Argument '{0}': {1}".format (argument,  message))
+    }
+}
+
+class TypeException : Exception {
+
+    func TypeException (self, argument, expectedType) {
+        super (TypeException.buildMessage (argument, expectedType))
+    }
+
+    func buildMessage (argument, types) {
+        typecast (Str, argument)
+        typecast (Str, types)
+        if (types.contains ("|")) {
+            if ((r = types.rfind ("|")) != types.find ("|")) {
+                types = "{0} or {1}".format (types [:r], types [r + 1:])
+            }
+            types = types.replace ("|", ", ")
+        }
+        return "Expected '{0}' to be of type {1}".format (argument, types)
+    }
+}
