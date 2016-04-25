@@ -94,17 +94,22 @@ func log2 (v) {
     return r
 }
 
-func ipow (base, exp, **kwargs) {
+func pow (base, exp, **kwargs) {
 
-    # Make sure that base and exp are of type Int
-    typecast (Int, base)
+    # Make sure that exp is of type Int
     typecast (Int, exp)
 
     # Work with positive exponent
+    # if, and only if, base is of type Int
     sign = false
-    if (exp < 0) {
+    if (base is Int && exp < 0) {
         sign = true
         exp = abs (exp)
+    }
+
+    # Special case: exp == 0
+    if (exp == 0) {
+        return 1
     }
 
     # Verify that the exponent fits into an unsigned byte
@@ -115,8 +120,13 @@ func ipow (base, exp, **kwargs) {
     # Default algorithm
     method = "optimized"
 
-    # Use fast shift if base equals 2
-    if (base == 2) {
+    # Use floatpow algorithm if base is of type Float
+    if (base is Float) {
+        method = "floatpow"
+    }
+
+    # Use fast shift algorithm if base equals 2
+    else if (base == 2) {
         method = "fastshift"
     }
 
@@ -132,6 +142,16 @@ func ipow (base, exp, **kwargs) {
                 base *= base
             }
             return result
+        },
+        "floatpow": lambda () {
+            tmp = Float (pow (base, exp / 2))
+            if (exp % 2 == 0) {
+                return tmp * tmp
+            }
+            if (exp < 0) {
+                return (tmp * tmp) / base
+            }
+            return base * tmp * tmp
         },
         "fastshift": lambda () {
             if (base != 2) {
