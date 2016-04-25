@@ -18,6 +18,59 @@ LOG2E = 1.44269504088896
 # Logarithm of e to base 10
 LOG10E = 0.43429448190325
 
+func factorial (x, **kwargs) {
+
+    # Make sure that x is of type Int
+    typecast (Int, x)
+
+    # Default algorithm
+    method = "naive"
+
+    # Special case: x == 0
+    if (x == 0) {
+        return 1
+    }
+
+    # Special case: x < 3
+    if (x < 3) {
+        return x
+    }
+
+    # Algorithms
+    algorithms = {
+        "naive": lambda () {
+            # Naive algorithm
+            sum = 1
+            for (i = 1; i <= x; i += 1) {
+                sum *= i
+            }
+            return sum
+        },
+        # Stirling's approximation
+        "stirling": lambda () {
+            # Added one to the result to simulate ceiling behavior
+            return 1 + Int (pow (E, -x) * Float (pow (x, x)) * Float (sqrt (PI * Float ((2 * x)))))
+        },
+    }
+
+    # Handle optional arguments
+    for (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "method"  { 
+                typecast (Str, current)
+                if (!algorithms.contains (current)) {
+                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                }
+                method = current
+            }
+        }
+    }
+
+    # Compute the factorial
+    return algorithms [method] ()
+}
+
 func exp (x, **kwargs) {
 
     # Make sure that x is a Float
@@ -311,7 +364,7 @@ func sqrt (x, **kwargs) {
     method = "babylonian"
 
     # Default precision
-    precision = ipow (10, -7) # 1e^-7
+    precision = pow (10, -7) # 1e^-7
 
     # Algorithms
     algorithms = {
@@ -414,7 +467,7 @@ func sqrt (x, **kwargs) {
             }
             case "precision" {
                 typecast (Int, current)
-                precision = max (ipow (10, -current), ipow (10, -15)) # 1e^-current
+                precision = max (pow (10, -current), pow (10, -15)) # 1e^-current
             }
         }
     }

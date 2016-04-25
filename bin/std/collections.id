@@ -44,7 +44,7 @@ class Array : Collection {
                 }
                 case "prealloc" {
                     maxfill = typecast (Int, kwargs [key])
-                    if (maxfill > self.capacity) {
+                    if (self.capacity >= 0 && maxfill > self.capacity) {
                         raise Exception ("Preallocating overflows the capacity.")
                     }
                     for (i = 0; i < maxfill; i += 1) {
@@ -121,6 +121,14 @@ class Array : Collection {
      */
     func contains (self, item) {
         return self.list.contains (item)
+    }
+
+    /* Fills the collection with a value
+     * @param Object filler The value
+     * @return Array The updated collection
+     */
+    func fill (self, filler) {
+        return Array.fill (self, filler)
     }
 
     /* Gets the length

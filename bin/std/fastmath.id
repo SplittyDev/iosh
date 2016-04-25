@@ -1,15 +1,39 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use sin, cos, sqrt from std.math
+use sin, cos, sqrt, factorial from std.math
 
+/* Fast square root function
+ * Algorithm: Low-precision modified Newton's equation
+ * @param Int|Float x
+ * @return Float The square root approximation
+ */
 func fastsqrt (x) {
     return sqrt (x, method: 'newtons2', precision: 1)
 }
 
+/* Fast sine function
+ * Algorithm: Low-precision Taylor series
+ * @param Int|Float x
+ * @return Float The sine approximation
+ */
 func fastsin (x) {
     return sin (x, precision: 1)
 }
 
+/* Fast cosine function
+ * Algorithm: Low-precision McLaurin series
+ * @param Int|Float x
+ * @return Float The cosine approximation
+ */
 func fastcos (x) {
     return cos (x, precision: 1)
+}
+
+/* Fast factorial function
+ * Algorithm: Modified Stirling's approximation
+ * @param Int x
+ * @return Int The factorial approximation
+ */
+func fastfact (x) {
+    return factorial (x, method: 'stirling')
 }
