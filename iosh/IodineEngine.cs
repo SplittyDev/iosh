@@ -10,7 +10,7 @@ namespace iosh {
 	public class IodineEngine {
 
         public static bool UseStableStdlib = true;
-        public static bool UseUntestedStdlib = false;
+        public static bool UseExtraStdlib = false;
 
         public static string AssemblyDirectory {
             get {
@@ -127,20 +127,20 @@ namespace iosh {
             context.SearchPath.Add (AssemblyDirectory);
             if (UseStableStdlib) {
                 ImportModules (
-                    Std.Base64,
                     Std.Builtin,
                     Std.Collections,
                     Std.Exceptions,
-                    Std.Tupletools,
-                    Std.Crypto.Whirlpool
+                    Std.Tupletools
                 );
             }
-            if (UseUntestedStdlib) {
+            if (UseExtraStdlib) {
                 ImportModules (
+                    Std.Base64,
                     Std.Argparse,
                     Std.Math,
                     Std.Fastmath,
-                    Std.Itertools
+                    Std.Itertools,
+                    Std.Crypto.Whirlpool
                 );
             }
         }
