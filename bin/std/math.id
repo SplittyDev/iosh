@@ -17,6 +17,69 @@ LOG2E = 1.44269504088896
 # Logarithm of e to base 10
 LOG10E = 0.43429448190325
 
+func exp (x, **kwargs) {
+
+    # Make sure that x is a Float
+    if (x is Int) {
+        x = Float (x)
+    }
+    typecast (Float, x)
+
+    # Work with positive values
+    sign = false
+    if (x < 0.0) {
+        sign = true
+        x = abs (x)
+    }
+
+    # Special case: x ~> 702
+    # 702.2884533631839199...
+    if (x > 702.2884533631839) {
+        raise Exception ("The value is too big, the result would exceed the bounds of Float.")
+    }
+
+    # Default algorithm
+    method = "default"
+
+    # Algorithms
+    algorithms = {
+        "default": lambda () {
+            eps = 0.0000000000000000001
+            elem = 1.0
+            sum = 0.0
+            i = 1.0
+            do {
+                sum += elem
+                elem *= x / i
+                i += 1.0
+            } while (elem >= eps)
+            return sum
+        },
+        "pade": lambda () => 1.0 + x * (6.0 + x) / (6.0 - 2.0 * x),
+    }
+
+    # Handle optional arguments
+    for (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "method"  { 
+                typecast (Str, current)
+                if (!algorithms.contains (current)) {
+                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                }
+                method = current
+            }
+        }
+    }
+
+    # Compute the exponential
+    sum = algorithms [method] ()
+    if (sign) {
+        return 1.0 / sum
+    }
+    return sum
+}
+
 func log2 (v) {
     b = [0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000]
     S = [1, 2, 4, 8, 16]
@@ -30,26 +93,162 @@ func log2 (v) {
     return r
 }
 
-func pow (base, exp) {
+func ipow (base, exp, **kwargs) {
+
+    # Make sure that base and exp are of type Int
     typecast (Int, base)
     typecast (Int, exp)
-    flag = 0
+
+    # Work with positive exponent
+    sign = false
     if (exp < 0) {
-        flag = 1
+        sign = true
         exp = abs (exp)
     }
-    result = 1
-    while (exp > 0) {
-        if ((exp & 1) == 1) {
-            result *= base
+
+    # Verify that the exponent fits into an unsigned byte
+    if (exp > 255) {
+        raise Exception ("The exponent exceeds the 8-bit bounds")
+    }
+
+    # Default algorithm
+    method = "optimized"
+
+    # Algorithms
+    algorithms = {
+        "default": lambda () {
+            result = 1
+            while (exp > 0) {
+                if ((exp & 1) == 1) {
+                    result *= base
+                }
+                exp >>= 1
+                base *= base
+            }
+            return result
+        },
+        "optimized": lambda () {
+            lut = [
+                0, 1, 2, 2, 3, 3, 3, 3,
+                4, 4, 4, 4, 4, 4, 4, 4,
+                5, 5, 5, 5, 5, 5, 5, 5,
+                5, 5, 5, 5, 5, 5, 5, 5,
+                6, 6, 6, 6, 6, 6, 6, 6,
+                6, 6, 6, 6, 6, 6, 6, 6,
+                6, 6, 6, 6, 6, 6, 6, 6,
+                6, 6, 6, 6, 6, 6, 6, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255,
+            ]
+            result = 1
+            current = 0
+            while (true) {
+                endloop = false
+                match (lut [exp]) {
+                    case 255 {
+                        endloop = true
+                        if (base == 1) {
+                            result = 1
+                        } else if (base == -1) {
+                            result = 1 - 2 * (exp & 1)
+                        }
+                        result = 0
+                    }
+                    case 6 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        exp >>= 1
+                        base *= base
+                    }
+                    case 5 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        exp >>= 1
+                        base *= base
+                    }
+                    case 4 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        exp >>= 1
+                        base *= base
+                    }
+                    case 3 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        exp >>= 1
+                        base *= base
+                    }
+                    case 2 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        exp >>= 1
+                        base *= base
+                    }
+                    case 1 {
+                        if (exp & 1) {
+                            result *= base
+                        }
+                        endloop = true
+                    }
+                    case _ {
+                        endloop = true
+                    }
+                }
+                if (endloop) {
+                    break
+                }
+            }
+            return result
+        },
+    }
+
+    # Handle optional arguments
+    for (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "method"  { 
+                typecast (Str, current)
+                if (!algorithms.contains (current)) {
+                    raise Exception ("Algorithm not found: '{0}'".format (current))
+                }
+                method = current
+            }
         }
-        exp >>= 1
-        base *= base
     }
-    if (flag == 0) {
-        return result
+
+    # Compute the integer power
+    result = algorithms [method] ()
+    if (sign) {
+        return 1.0 / Float (result)
     }
-    return (1.0 / Float (result))
+    return result
 }
 
 func sqrt (x, **kwargs) {
@@ -62,7 +261,7 @@ func sqrt (x, **kwargs) {
 
     # Default values
     method = "babylonian"
-    precision = pow (10, -7) # 1e^-7
+    precision = ipow (10, -7) # 1e^-7
 
     # Algorithms
     algorithms = {
@@ -165,7 +364,7 @@ func sqrt (x, **kwargs) {
             }
             case "precision" {
                 typecast (Int, current)
-                precision = max (pow (10, -current), pow (10, -15)) # 1e^-current
+                precision = max (ipow (10, -current), ipow (10, -15)) # 1e^-current
             }
         }
     }
