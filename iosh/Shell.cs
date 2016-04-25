@@ -54,7 +54,7 @@ namespace iosh {
 		readonly ConsoleColor Background;
 
         /// <summary>
-        /// Whether exiting the shall was requested.
+        /// Whether exiting the shell was requested.
         /// </summary>
         bool ExitRequested;
 
