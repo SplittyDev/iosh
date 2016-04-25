@@ -9,6 +9,9 @@ using Iodine.Runtime;
 namespace iosh {
 	public class IodineEngine {
 
+        public static bool UseStableStdlib = true;
+        public static bool UseUntestedStdlib = false;
+
         public static string AssemblyDirectory {
             get {
                 var codeBase = Assembly.GetExecutingAssembly ().CodeBase;
@@ -122,6 +125,34 @@ namespace iosh {
         void Init () {
             context = new IodineContext ();
             context.SearchPath.Add (AssemblyDirectory);
+            if (UseStableStdlib) {
+                ImportModules (
+                    Std.Base64,
+                    Std.Builtin,
+                    Std.Collections,
+                    Std.Exceptions,
+                    Std.Tupletools,
+                    Std.Crypto.Whirlpool
+                );
+            }
+            if (UseUntestedStdlib) {
+                ImportModules (
+                    Std.Argparse,
+                    Std.Math,
+                    Std.Fastmath,
+                    Std.Itertools
+                );
+            }
+        }
+
+        bool ImportModules (params string[] modules) {
+            IodineModule _module;
+            IodineObject _result;
+            bool result = true;
+            foreach (var module in modules) {
+                result &= TryCompile (string.Format ("use * from {0}", module), out _module, out _result);
+            }
+            return result;
         }
 	}
 }

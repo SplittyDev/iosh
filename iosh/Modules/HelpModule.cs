@@ -23,14 +23,19 @@ namespace iosh {
 			}
 			var str = arguments [0] as IodineString;
 			var builtin = arguments [0] as BuiltinMethodCallback;
+            var stdfunc = arguments [0] as IodineMethod;
 			if (str != null) {
 				if (!tryInvokeHelpAction (str.Value))
                     WriteLine ("No documentation found for '{0}'.", str.Value);
 			} else if (builtin != null) {
 				if (!tryInvokeHelpAction (builtin.Callback.Method.Name))
                     WriteLine ("No documentation found for '{0}'.", builtin.Callback.Method.Name);
-			} else {
-				vm.RaiseException (new IodineTypeException ("Str or BuiltinMethodCallback"));
+            } else if (stdfunc != null) {
+                if (!tryInvokeHelpAction (stdfunc.Name)) {
+                    WriteLine ("No documentation found for '{0}'.", builtin.Callback.Method.Name);
+                }
+            } else {
+				vm.RaiseException (new IodineTypeException ("Str, IodineMethod or BuiltinMethodCallback"));
 				return IodineNull.Instance;
 			}
 			return IodineNull.Instance;
@@ -114,7 +119,7 @@ namespace iosh {
 		}
 
 		static void helpLen () {
-			var arg0 = arg ("object");
+			var arg0 = arg ("countable");
 			func ("len", arg0);
 			begindoc ();
 			doc (

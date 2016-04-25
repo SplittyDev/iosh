@@ -11,7 +11,6 @@ namespace iosh {
 			"class",
 			"use",
 			"self",
-			"foreach",
 			"in",
 			"true",
 			"false",
@@ -28,10 +27,12 @@ namespace iosh {
 			"is",
 			"isnot",
 			"as",
-			"switch",
+            "match",
 			"case",
 			"default",
-			"with"
+			"with",
+            "trait",
+            "contract",
 		};
 	}
 }

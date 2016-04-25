@@ -57,6 +57,7 @@
     <Compile Include="IodineConstants.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Std.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
