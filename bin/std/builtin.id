@@ -16,14 +16,6 @@ trait Representable {
     func __repr__ (self)
 }
 
-# A list of builtin iterables
-BuiltinIterables = [
-    Dict,
-    Tuple,
-    Str,
-    Bytes,
-]
-
 /* Returns a string representation of an object
  * @param Object object The object to be represented
  * @raise TypeException
@@ -166,9 +158,7 @@ func len (countable) {
 
     # Check if the countable matches the trait Iterable
     # Includes special cases: Runtime provided, Range iterator
-    else if (countable is Iterable
-        || BuiltinIterables.contains (countable.__type__)
-        || countable.__name__ == "RangeIterator") {
+    else if (countable is Iterable) {
 
         # Iterate over the countable
         # and count the elements
