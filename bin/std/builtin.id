@@ -1,30 +1,34 @@
 # Author: SplittyDev (github.com/splittydev)
 
-# ! func print (*object)
-# ! func invoke (function, [dict])
-# ! func eval (source)
-# ! func open (file, mode)
-# ! func input ([prompt])
+/* The following functions can't be implemented in pure Iodine:
+ * ! func print (*object)
+ * ! func invoke (function, [dict])
+ * ! func eval (source)
+ * ! func open (file, mode)
+ * ! func input ([prompt])
+ */
 
-use Iterable, Countable, Collection from std.collections
+use ArgumentException, TypeException from std.exceptions
+use Collection, Countable, Iterable from std.collections
 
 # Any type that has a string representation
 trait Representable {
     func __repr__ (self)
 }
 
-# A list of builtin countables
+# A list of builtin iterables
 BuiltinIterables = [
-    List,
     Dict,
     Tuple,
-    Bytes,
     Str,
+    Bytes,
 ]
 
-# Returns a string representation of an object
-# @param Object object The object to be represented
-# @return Str The string representation of the specified object
+/* Returns a string representation of an object
+ * @param Object object The object to be represented
+ * @raise TypeException
+ * @return Str The string representation of the specified object
+ */
 func repr (object) {
 
     # Check if the object matches the trait representable
@@ -34,8 +38,42 @@ func repr (object) {
 
     # Build a table of types that require a special representation
     dict = {
-        "Str": lambda () => '"' + object + '"',
-        "Dict": lambda () => repr_get_dict (repr, object),
+        "Str": lambda () {
+            typecast (Str, object)
+            return '"{0}"'.format (object)
+        },
+        "Tuple": lambda () {
+            typecast (Tuple, object)
+            i = 0
+            accum = StringBuffer ()
+            accum.append ("(")
+            for (key in object) {
+                if (i > 0) {
+                    accum.append (", ")
+                }
+                accum.append (repr (key))
+                i += 1
+            }
+            accum.append (")")
+            return Str (accum)
+        },
+        "Dict": lambda () {
+            typecast (Dict, object)
+            i = 0
+            accum = StringBuffer ()
+            accum.append ("{")
+            for (key in object) {
+                if (i > 0) {
+                    accum.append (", ")
+                }
+                accum.append (repr (key))
+                accum.append (" = ")
+                accum.append (repr (object [key]))
+                i += 1
+            }
+            accum.append ("}")
+            return Str (accum)
+        },
     }
 
     # Check the table of special representations
@@ -45,11 +83,11 @@ func repr (object) {
     }
 
     # Check if the object matches the Iterable trait
-    if (object is Iterable || BuiltinIterables.contains (object.__type__)) {
+    if (object is Iterable) {
         i = 0
         accum = StringBuffer ()
         accum.append ("[")
-        foreach (item in object) {
+        for (item in object) {
             if (i > 0) {
                 accum.append (", ")
             }
@@ -65,54 +103,55 @@ func repr (object) {
     return Str (object)
 }
 
-# Builds the string representation of a dict
-# @param Object this The repr function
-# @param Dict dict The dict
-# @return Str The string representation
-func repr_get_dict (this, dict) {
-    i = 0
-    accum = StringBuffer ()
-    accum.append ("{")
-    foreach (key in dict) {
-        if (i > 0) {
-            accum.append (", ")
-        }
-        accum.append (this (key))
-        accum.append (" = ")
-        accum.append (this (dict [key]))
-        i += 1
-    }
-    accum.append ("}")
-    return Str (accum)
-}
-
-# Returns the type of an object
-# @param Object object The object whose type is to be returned
-# @return Type The type of the specified object
+/* Returns the type of an object
+ * @param Object object The object whose type is to be returned
+ * @return Null|Type The type of the specified object
+ */
 func type (object) {
     return object.__type__
 }
 
-# Returns an iterable covering a range
-# @param *Object args The parameters
-# @return Range An iterable covering the specified range
-# @yield Object The whole numbers that lie within the specified range
-func range (*args) {
-    result = match (len (args)) {
-        case 1 => 0 .. args [0]
-        case 2 => args [0] .. args [1]
+/* Returns an iterable covering a range
+ * @param Int start The inclusive start
+ * @param Int end The exclusive end
+ * @param **Object kwargs Optional arguments
+ * @optional Int step The step
+ * @raise TypeException If start is not of type Int
+ * @raise TypeException If end is not of type Int
+ * @raise TypeException If the optional step value is not of type Int
+ * @yield Int The whole numbers that lie within the specified range
+ */
+func range (start, end, **kwargs) {
+    typecast (Int, start)
+    typecast (Int, end)
+
+    # Default step value
+    step = 1
+
+    # Handle optional arguments
+    for (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "step" {
+                typecast (Int, current)
+                step = current
+            }
+        }
     }
-    if (result != null) {
-        return result
-    }
-    for (i = args [0]; i < args [1]; i += args [2]) {
-        yield i
+
+    # Yield the values within the desired range
+    for (i in start .. end) {
+        if ((start + i) % step == 0) {
+            yield i
+        }
     }
 }
 
-# Returns the length of a countable object
-# @param Object countable The countable object
-# @return Int The length of the specified object
+/* Returns the length of a countable object
+ * @param Object|Collection|Countable countable The countable object
+ * @raise ArgumentException If the object is not countable
+ * @return Int The length of the specified object
+ */
 func len (countable) {
 
     # Check if the countable implements Collection
@@ -147,13 +186,15 @@ func len (countable) {
 
     # The countable doesn't seem to be countable at all
     # Raise an exception
-    raise Exception ("The specified object is not countable.")
+    raise ArgumentException ("countable", "The object is not countable.")
 }
 
-# Casts an object to a type
-# @param Type The type
-# @param Object object The object
-# @return Object The object casted to the specified type
+/* Verifies that an object is of a specific type
+ * @param Type The type
+ * @param Object object The object
+ * @raise TypeException If the object is not of the specified type
+ * @return Object The object
+ */
 func typecast (type, object) {
     if (object isnot type) {
         raise TypeException (Str (type))
@@ -161,9 +202,11 @@ func typecast (type, object) {
     return object
 }
 
-# Returns the hex representation of an iterable
-# @param Iterable arr The iterable
-# @return Str The hex representation of the specified iterable
+/* Returns the hex representation of an iterable
+ * @param Iterable arr The iterable
+ * @raise Exception|TypeException
+ * @return Str The hex representation of the specified iterable
+ */
 func hex (arr) {
     typecast (Iterable, arr)
 
