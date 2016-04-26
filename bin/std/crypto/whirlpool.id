@@ -24,8 +24,7 @@ class whirlpool {
     func digest (self) {
         WhirlpoolImpl.NESSIE_Add (self.data, 0, len (self.data))
         buffer = Array (
-            capacity: WhirlpoolImpl.DIGEST_BYTES,
-            prealloc: WhirlpoolImpl.DIGEST_BYTES
+            capacity: WhirlpoolImpl.DIGEST_BYTES
         )
         WhirlpoolImpl.NESSIE_Finalize (buffer)
         return buffer
@@ -41,9 +40,9 @@ class WhirlpoolImpl {
     func NESSIE_Init () {
         WhirlpoolImpl.buffer_pos  = 0
         WhirlpoolImpl.buffer_bits = 0
-        Array.zeroFill (WhirlpoolImpl.hash)
-        Array.zeroFill (WhirlpoolImpl.buffer)
-        Array.zeroFill (WhirlpoolImpl.bitlength)
+        WhirlpoolImpl.hash.fill (0)
+        WhirlpoolImpl.buffer.fill (0)
+        WhirlpoolImpl.bitlength.fill (0)
     }
 
     func NESSIE_Add (src, src_pos, src_len) {
@@ -155,7 +154,7 @@ class WhirlpoolImpl {
         if (buf_pos > WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES) {
 
             if (buf_pos < WhirlpoolImpl.WBLOCK_BYTES) {
-                Array.clear (buf, buf_pos, WhirlpoolImpl.WBLOCK_BYTES - buf_pos)
+                buf.clearRange (buf_pos, WhirlpoolImpl.WBLOCK_BYTES - buf_pos)
             }
 
             # Process block
@@ -166,13 +165,13 @@ class WhirlpoolImpl {
         }
 
         if (buf_pos < WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES) {
-            Array.clear (buf, buf_pos, (WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES) - buf_pos)
+            buf.clearRange (buf_pos, (WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES) - buf_pos)
         }
 
         buf_pos = WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES
 
         # Append length
-        Array.copy (bit_len, 0, buf, WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES, WhirlpoolImpl.LENGTH_BYTES)
+        Array.Copy (bit_len, 0, buf, WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES, WhirlpoolImpl.LENGTH_BYTES)
 
         # Process block
         WhirlpoolImpl.ProcessBlock ()
@@ -196,10 +195,10 @@ class WhirlpoolImpl {
     func ProcessBlock () {
         i = 0
         r = 0
-        K = Array (capacity: 8, prealloc: 8)
-        block = Array (capacity: 8, prealloc: 8)
-        state = Array (capacity: 8, prealloc: 8)
-        L = Array (capacity: 8, prealloc: 8)
+        K = Array (capacity: 8)
+        block = Array (capacity: 8)
+        state = Array (capacity: 8)
+        L = Array (capacity: 8)
         buf = WhirlpoolImpl.buffer
         offset = 0
 
@@ -432,20 +431,17 @@ WhirlpoolImpl.buffer_pos    = 0
 
 # The number of hashed bits
 WhirlpoolImpl.bitlength     = Array (
-    capacity: WhirlpoolImpl.LENGTH_BYTES,
-    prealloc: WhirlpoolImpl.LENGTH_BYTES
+    capacity: WhirlpoolImpl.LENGTH_BYTES
 )
 
 # The buffer
 WhirlpoolImpl.buffer        = Array (
-    capacity: WhirlpoolImpl.WBLOCK_BYTES,
-    prealloc: WhirlpoolImpl.WBLOCK_BYTES
+    capacity: WhirlpoolImpl.WBLOCK_BYTES
 )
 
 # The state
 WhirlpoolImpl.hash          = Array (
-    capacity: WhirlpoolImpl.WBLOCK_LONG,
-    prealloc: WhirlpoolImpl.WBLOCK_LONG
+    capacity: WhirlpoolImpl.WBLOCK_LONG
 )
 
 WhirlpoolImpl.RC = [

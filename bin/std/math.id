@@ -18,6 +18,125 @@ LOG2E = 1.44269504088896
 # Logarithm of e to base 10
 LOG10E = 0.43429448190325
 
+func fibonacci (x, **kwargs) {
+
+    # Make sure that x is of type Int
+    typecast (Int, x)
+
+    # Special case: x < 0
+    if (x < 0) {
+        raise ArgumentException ("x", "Value has to be non-negative")
+    }
+
+    # Default algorithm
+    method = "fastdoubling"
+
+    # Algorithms
+    algorithms = {
+        /* Naive algorithm
+         * Easy to implement, but extremely slow.
+         * Details:
+         * F(n + 2) = F(n + 1) + F(n)
+         */
+        "naive": lambda () {
+            a = 0
+            b = 1
+            for (i = 0; i < x; i += 1) {
+                c = a + b
+                a = b
+                b = c
+            }
+            return a
+        },
+        /* Fast matrix algorithm
+         * Way faster than the naive algorithm, but has
+         * a constant factor slowdown compared to the
+         * fast doubling algorithm.
+         * Details:
+         * [1  1] ^ n   [F(n + 1)  F(n - 0)]
+         * [1  0]     = [F(n + 0)  F(n - 1)]
+         */
+        /* Currently not working
+        "fastmatrix": lambda () {
+            matrix = [1, 1, 1, 0]
+            result = [1, 0, 0, 1]
+            while (x != 0) {
+                if ((x % 2) == 0) {
+                    print ("x mod 2 == 0")
+                    print ("Current result: " + repr (result))
+                    result = [
+                        (result [0] * matrix [0]) +
+                        (result [1] * matrix [2]),
+                        (result [0] * matrix [1]) +
+                        (result [1] * matrix [3]),
+                        (result [2] * matrix [0]) +
+                        (result [3] * matrix [2]),
+                        (result [2] * matrix [1]) +
+                        (result [3] * matrix [3])
+                    ]
+                    print ("Updated result: " + repr (result))
+                }
+                x /= 2
+                matrix = [
+                    (matrix [0] * matrix [0]) +
+                    (matrix [1] * matrix [2]),
+                    (matrix [0] * matrix [1]) +
+                    (matrix [1] * matrix [3]),
+                    (matrix [2] * matrix [0]) +
+                    (matrix [3] * matrix [2]),
+                    (matrix [2] * matrix [1]) +
+                    (matrix [3] * matrix [3])
+                ]
+                print ("New matrix: " + repr (matrix))
+            }
+            print ("Result matrix: " + repr (result))
+            return result [1]
+        }, */
+        /* Extremely fast doubling algorithm
+         * This one is even faster than the matrix algorithm.
+         * Details:
+         * F(2n + 0) = F(n + 0) * (2 * F(n + 1) - F(n))
+         * F(2n + 1) = F(n + 1) ^  2 + F(n + 0) ^ 2
+         */
+        "fastdoubling": lambda () {
+            a = 0
+            b = 1
+            for (i = 31; i >= 0; i -= 1) {
+                d = a * (b * 2 - a)
+                e = a * a + b * b
+                a = d
+                b = e
+                if (((x >> i) & 1) != 0) {
+                    c = a + b
+                    a = b
+                    b = c
+                }
+            }
+            return a
+        }
+    }
+
+    # Handle optional arguments
+    for (key in kwargs) {
+        current = kwargs [key]
+        match (key) {
+            case "method"  { 
+                typecast (Str, current)
+                if (current == "default") {
+                    current = method
+                }
+                if (!algorithms.contains (current)) {
+                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                }
+                method = current
+            }
+        }
+    }
+
+    # Compute the fibonacci series
+    return algorithms [method] ()
+}
+
 func factorial (x, **kwargs) {
 
     # Make sure that x is of type Int
@@ -38,6 +157,9 @@ func factorial (x, **kwargs) {
 
     # Algorithms
     algorithms = {
+        /* The naive algorithm.
+         * Easy to implement and accurate, but slow.
+         */
         "naive": lambda () {
             # Naive algorithm
             sum = 1
@@ -46,7 +168,9 @@ func factorial (x, **kwargs) {
             }
             return sum
         },
-        # Stirling's approximation
+        /* Stirling's approximation
+         * Very fast but also very inaccurate.
+         */
         "stirling": lambda () {
             # Added one to the result to simulate ceiling behavior
             return 1 + Int (pow (E, -x) * Float (pow (x, x)) * Float (sqrt (PI * Float ((2 * x)))))
@@ -59,6 +183,9 @@ func factorial (x, **kwargs) {
         match (key) {
             case "method"  { 
                 typecast (Str, current)
+                if (current == "default") {
+                    current = method
+                }
                 if (!algorithms.contains (current)) {
                     raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
@@ -118,6 +245,9 @@ func exp (x, **kwargs) {
         match (key) {
             case "method"  { 
                 typecast (Str, current)
+                if (current == "default") {
+                    current = method
+                }
                 if (!algorithms.contains (current)) {
                     raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
@@ -157,17 +287,22 @@ func pow (base, exp, **kwargs) {
         raise TypeException ("base", "Int|Float")
     }
 
+    # Special case: exp == 0
+    if (exp == 0) {
+        return 1
+    }
+
+    # Special case: exp == 2
+    if (exp == 2) {
+        return base * base
+    }
+
     # Work with positive exponent
     # if, and only if, base is of type Int
     sign = false
     if (base is Int && exp < 0) {
         sign = true
         exp = abs (exp)
-    }
-
-    # Special case: exp == 0
-    if (exp == 0) {
-        return 1
     }
 
     # Verify that the exponent fits into an unsigned byte
@@ -336,6 +471,9 @@ func pow (base, exp, **kwargs) {
         match (key) {
             case "method"  { 
                 typecast (Str, current)
+                if (current == "default") {
+                    current = method
+                }
                 if (!algorithms.contains (current)) {
                     raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
                 }
@@ -457,7 +595,7 @@ func sqrt (x, **kwargs) {
         match (key) {
             case "method"  { 
                 typecast (Str, current)
-                if (current == 'default') {
+                if (current == "default") {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
