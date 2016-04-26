@@ -10,6 +10,7 @@ using Iodine.Runtime;
 using static iosh.ConsoleHelper;
 using static System.Console;
 using static System.ConsoleColor;
+using System.Diagnostics;
 
 namespace iosh {
 
@@ -152,7 +153,7 @@ namespace iosh {
             case ":clear":
                 Clear ();
 				return;
-            case ":exit":
+            case ":q":
                 ExitRequested = true;
                 return;
 			}

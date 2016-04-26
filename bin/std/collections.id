@@ -27,28 +27,26 @@ class Array : Collection {
     /* Constructor
      * @param **Object kwargs Optional arguments
      * @optional Int capacity The capacity
-     * @optional List items The elements to initialize the Array with
+     * @optional Iterable items The elements to initialize the Array with
      * @optional Int prealloc The amount of space to be preallocated
+     * @raise Exception|TypeException
      */
     func Array (self, **kwargs) {
         self.list = []
         self.length = 0
         self.capacity = -1
         for (key in kwargs) {
+            current = kwargs [key]
             match (key) {
-                case "capacity" => self.capacity = typecast (Int, kwargs [key])
-                case "items" {
-                    for (i in typecast (List, kwargs [key])) {
-                        self.add (i)
+                case "capacity" {
+                    self.capacity = typecast (Int, current)
+                    for (i in 0 .. self.capacity) {
+                        self.add (null)
                     }
                 }
-                case "prealloc" {
-                    maxfill = typecast (Int, kwargs [key])
-                    if (self.capacity >= 0 && maxfill > self.capacity) {
-                        raise Exception ("Preallocating overflows the capacity.")
-                    }
-                    for (i = 0; i < maxfill; i += 1) {
-                        self.add (null)
+                case "items" {
+                    for (i in typecast (Iterable, current)) {
+                        self.add (i)
                     }
                 }
             }
@@ -61,6 +59,10 @@ class Array : Collection {
     func clear (self) {
         self.list.clear ()
         self.length = 0
+    }
+
+    func clearRange (self, src_start, length) {
+        return self.fillRange (src_start, length, 0)
     }
 
     /* Counts the elements in the collection
@@ -124,11 +126,21 @@ class Array : Collection {
     }
 
     /* Fills the collection with a value
-     * @param Object filler The value
-     * @return Array The updated collection
+     * @param Object filler The object that the collection is to be filled with
+     * @return Array The modified collection
      */
     func fill (self, filler) {
-        return Array.fill (self, filler)
+        for (i = 0; i < self.length; i += 1) {
+            self [i] = filler
+        }
+        return self
+    }
+
+    func fillRange (self, src_start, length, filler) {
+        for (i = 0; i < length; i += 1) {
+            self [src_start + i] = filler
+        }
+        return self
     }
 
     /* Gets the length
@@ -178,38 +190,7 @@ class Array : Collection {
         }
     }
 
-    /* Fills an array with zeros
-     * @param Array arr The array to be filled with zeros
-     * @return Array The array
-     */
-    func zeroFill (arr) {
-        typecast (Array, arr)
-        for (i = 0; i < arr.length; i += 1) {
-            arr [i] = 0
-        }
-        return arr
-    }
-
-    /* Fills an array with an object
-     * @param Array arr The array to be filled with the specified object
-     * @param Object filler The object that the array is to be filled with
-     * @return Array The array
-     */
-    func fill (arr, filler) {
-        typecast (Array, arr)
-        for (i = 0; i < arr.length; i += 1) {
-            arr [i] = filler
-        }
-        return arr
-    }
-
-    func clear (src, src_start, length) {
-        for (i = 0; i < length; i += 1) {
-            src [src_start + i] = 0
-        }
-    }
-
-    func copy (src, src_start, dst, dst_start, length) {
+    func Copy (src, src_start, dst, dst_start, length) {
         for (i = 0; i < length; i += 1) {
             dst [dst_start + i] = src [src_start + i]
         }
