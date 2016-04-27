@@ -1,7 +1,8 @@
 # Author: SplittyDev (github.com/splittydev)
 
 use Iterable, Array from std.collections
-use BuiltinIterables, typecast, len, hex from std.builtin
+use typecast, len, hex from std.builtin
+use uint8 from std.ints
 
 class whirlpool {
 
@@ -13,7 +14,7 @@ class whirlpool {
     func update (self, obj) {
         if (obj is Str) {
             self.update (Bytes (obj))
-        } else if (obj is Iterable || obj is Str || BuiltinIterables.contains (obj.__type__)) {
+        } else if (obj is Iterable || obj is Str) {
             for (elem in obj) {
                 self.data.append (elem)
             }
@@ -46,22 +47,21 @@ class WhirlpoolImpl {
     }
 
     func NESSIE_Add (src, src_pos, src_len) {
+        i           = 0
+        b           = 0
+        carry       = 0
         src_bits    = src_len * 8
         src_gap     = (8 - (src_bits & 7)) & 7
         buf         = WhirlpoolImpl.buffer
         buf_rem     = WhirlpoolImpl.buffer_bits & 7
         buf_bits    = WhirlpoolImpl.buffer_bits
         buf_pos     = WhirlpoolImpl.buffer_pos
-
-        i = 0
-        b = 0
-        carry = 0
         bit_len     = WhirlpoolImpl.bitlength
+        value       = src_bits
 
-        value = src_bits
         for (i = 31; i > 0 && (carry != 0 || value != 0); i -= 1) {
-            carry += bit_len [1] + (value & 0xFF)
-            bit_len [i] = carry & 0xFF
+            carry += bit_len [1] + uint8 (value)
+            bit_len [i] = uint8 (carry)
             carry >>= 8
             value >>= 8
         }
@@ -71,12 +71,12 @@ class WhirlpoolImpl {
 
             # Current byte
             b = (
-                ((src [src_pos + 0] << src_gap) & 0xFF) |
-                ((src [src_pos + 1]             & 0xFF) >> (8 - src_gap))
+                (uint8 (src [src_pos + 0] << src_gap)) |
+                (uint8 (src [src_pos + 1]) >> (8 - src_gap))
             )
 
             # Process byte
-            buf [buf_pos] |= (b >> buf_rem) & 0xFF
+            buf [buf_pos] |= uint8 (b >> buf_rem)
             buf_pos += 1
             buf_bits += 8 - buf_rem
 
@@ -90,7 +90,7 @@ class WhirlpoolImpl {
                 WhirlpoolImpl.buffer_pos = 0
             }
 
-            buf [buf_pos] = (b << (8 - buf_rem)) & 0xFF
+            buf [buf_pos] = uint8 (b << (8 - buf_rem))
             buf_bits += buf_rem
 
             src_bits -= 8
@@ -100,10 +100,10 @@ class WhirlpoolImpl {
         if (src_bits > 0) {
 
             # Current byte
-            b = (src [src_pos] << src_gap) & 0xFF
+            b = uint8 (src [src_pos] << src_gap)
 
             # Process byte
-            buf [buf_pos] |= (b >> buf_rem) & 0xFF
+            buf [buf_pos] |= uint8 (b >> buf_rem)
         } else {
 
             # Current byte
@@ -129,7 +129,7 @@ class WhirlpoolImpl {
                 buf_pos = 0
             }
 
-            buf [buf_pos] = (b << (8 - buf_rem)) & 0xFF
+            buf [buf_pos] = uint8 (b << (8 - buf_rem))
             buf_bits += src_bits # int
         }
 
@@ -148,7 +148,7 @@ class WhirlpoolImpl {
         digest = result
         offset = 0
 
-        buf [buf_pos] |= (0x80 >> (buf_bits & 7)) & 0xFF
+        buf [buf_pos] |= uint8 (0x80 >> (buf_bits & 7))
         buf_pos += 1
 
         if (buf_pos > WhirlpoolImpl.WBLOCK_BYTES - WhirlpoolImpl.LENGTH_BYTES) {
@@ -177,14 +177,14 @@ class WhirlpoolImpl {
         WhirlpoolImpl.ProcessBlock ()
 
         for (i = 0; i < WhirlpoolImpl.DIGEST_LONG; i += 1) {
-            digest [offset + 0] = (WhirlpoolImpl.hash [i] >> 56) & 0xFF
-            digest [offset + 1] = (WhirlpoolImpl.hash [i] >> 48) & 0xFF
-            digest [offset + 2] = (WhirlpoolImpl.hash [i] >> 40) & 0xFF
-            digest [offset + 3] = (WhirlpoolImpl.hash [i] >> 32) & 0xFF
-            digest [offset + 4] = (WhirlpoolImpl.hash [i] >> 24) & 0xFF
-            digest [offset + 5] = (WhirlpoolImpl.hash [i] >> 16) & 0xFF
-            digest [offset + 6] = (WhirlpoolImpl.hash [i] >>  8) & 0xFF
-            digest [offset + 7] = (WhirlpoolImpl.hash [i]      ) & 0xFF
+            digest [offset + 0] = uint8 (WhirlpoolImpl.hash [i] >> 56)
+            digest [offset + 1] = uint8 (WhirlpoolImpl.hash [i] >> 48)
+            digest [offset + 2] = uint8 (WhirlpoolImpl.hash [i] >> 40)
+            digest [offset + 3] = uint8 (WhirlpoolImpl.hash [i] >> 32)
+            digest [offset + 4] = uint8 (WhirlpoolImpl.hash [i] >> 24)
+            digest [offset + 5] = uint8 (WhirlpoolImpl.hash [i] >> 16)
+            digest [offset + 6] = uint8 (WhirlpoolImpl.hash [i] >>  8)
+            digest [offset + 7] = uint8 (WhirlpoolImpl.hash [i]      )
             offset += 8
         }
 
@@ -205,14 +205,14 @@ class WhirlpoolImpl {
         # Create block from buffer
         for (i = 0; i < 8; i += 1) {
             block [i] =
-                 (buf [offset + 0]         << 56) ^
-                ((buf [offset + 1] & 0xFF) << 48) ^
-                ((buf [offset + 2] & 0xFF) << 40) ^
-                ((buf [offset + 3] & 0xFF) << 32) ^
-                ((buf [offset + 4] & 0xFF) << 24) ^
-                ((buf [offset + 5] & 0xFF) << 16) ^
-                ((buf [offset + 6] & 0xFF) <<  8) ^
-                 (buf [offset + 7] & 0xFF)
+                       (buf [offset + 0]  << 56) ^
+                (uint8 (buf [offset + 1]) << 48) ^
+                (uint8 (buf [offset + 2]) << 40) ^
+                (uint8 (buf [offset + 3]) << 32) ^
+                (uint8 (buf [offset + 4]) << 24) ^
+                (uint8 (buf [offset + 5]) << 16) ^
+                (uint8 (buf [offset + 6]) <<  8) ^
+                 uint8 (buf [offset + 7])
             offset += 8
         }
 
@@ -226,85 +226,85 @@ class WhirlpoolImpl {
 
             # K^r = K^{r-1}
             L [0] =
-                WhirlpoolImpl.C0 [(K [0] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [7] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [6] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [5] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [4] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [3] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [2] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [1])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (K [0] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [7] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [6] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [5] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [4] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [3] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [2] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [1])      ] ^
                 WhirlpoolImpl.RC [r]
 
             L [1] =
-                WhirlpoolImpl.C0 [(K [1] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [0] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [7] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [6] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [5] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [4] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [3] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [2])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [1] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [0] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [7] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [6] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [5] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [4] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [3] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [2])      ]
 
             L [2] =
-                WhirlpoolImpl.C0 [(K [2] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [1] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [0] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [7] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [6] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [5] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [4] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [3])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [2] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [1] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [0] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [7] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [6] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [5] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [4] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [3])      ]
 
             L [3] =
-                WhirlpoolImpl.C0 [(K [3] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [2] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [1] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [0] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [7] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [6] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [5] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [4])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [3] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [2] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [1] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [0] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [7] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [6] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [5] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [4])      ]
 
             L [4] =
-                WhirlpoolImpl.C0 [(K [4] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [3] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [2] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [1] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [0] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [7] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [6] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [5])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [4] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [3] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [2] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [1] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [0] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [7] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [6] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [5])      ]
 
             L [5] =
-                WhirlpoolImpl.C0 [(K [5] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [4] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [3] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [2] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [1] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [0] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [7] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [6])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [5] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [4] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [3] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [2] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [1] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [0] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [7] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [6])      ]
 
             L [6] =
-                WhirlpoolImpl.C0 [(K [6] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [5] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [4] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [3] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [2] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [1] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [0] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [7])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [6] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [5] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [4] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [3] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [2] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [1] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [0] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [7])      ]
 
             L [7] =
-                WhirlpoolImpl.C0 [(K [7] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(K [6] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(K [5] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(K [4] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(K [3] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(K [2] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(K [1] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(K [0])       & 0xFF]
+                WhirlpoolImpl.C0 [uint8 (K [7] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (K [6] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (K [5] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (K [4] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (K [3] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (K [2] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (K [1] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (K [0])      ]
 
             for (x = 0; x < 8; x += 1) {
                 K [x] = L [x]
@@ -312,91 +312,91 @@ class WhirlpoolImpl {
 
             # r-th round transformation
             L [0] =
-                WhirlpoolImpl.C0 [(state [0] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [7] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [6] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [5] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [4] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [3] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [2] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [1])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [0] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [7] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [6] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [5] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [4] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [3] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [2] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [1])      ] ^
                 K  [0]
 
             L [1] =
-                WhirlpoolImpl.C0 [(state [1] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [0] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [7] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [6] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [5] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [4] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [3] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [2])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [1] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [0] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [7] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [6] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [5] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [4] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [3] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [2])      ] ^
                 K  [1]
 
             L [2] =
-                WhirlpoolImpl.C0 [(state [2] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [1] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [0] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [7] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [6] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [5] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [4] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [3])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [2] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [1] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [0] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [7] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [6] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [5] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [4] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [3])      ] ^
                 K  [2]
 
             L [3] =
-                WhirlpoolImpl.C0 [(state [3] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [2] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [1] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [0] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [7] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [6] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [5] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [4])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [3] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [2] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [1] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [0] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [7] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [6] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [5] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [4])      ] ^
                 K  [3]
 
             L [4] =
-                WhirlpoolImpl.C0 [(state [4] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [3] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [2] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [1] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [0] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [7] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [6] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [5])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [4] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [3] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [2] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [1] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [0] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [7] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [6] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [5])      ] ^
                 K  [4]
 
             L [5] =
-                WhirlpoolImpl.C0 [(state [5] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [4] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [3] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [2] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [1] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [0] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [7] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [6])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [5] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [4] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [3] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [2] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [1] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [0] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [7] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [6])      ] ^
                 K  [5]
 
             L [6] =
-                WhirlpoolImpl.C0 [(state [6] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [5] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [4] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [3] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [2] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [1] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [0] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [7])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [6] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [5] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [4] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [3] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [2] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [1] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [0] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [7])      ] ^
                 K  [6]
 
             L [7] =
-                WhirlpoolImpl.C0 [(state [7] >> 56) & 0xFF] ^
-                WhirlpoolImpl.C1 [(state [6] >> 48) & 0xFF] ^
-                WhirlpoolImpl.C2 [(state [5] >> 40) & 0xFF] ^
-                WhirlpoolImpl.C3 [(state [4] >> 32) & 0xFF] ^
-                WhirlpoolImpl.C4 [(state [3] >> 24) & 0xFF] ^
-                WhirlpoolImpl.C5 [(state [2] >> 16) & 0xFF] ^
-                WhirlpoolImpl.C6 [(state [1] >> 8 ) & 0xFF] ^
-                WhirlpoolImpl.C7 [(state [0])       & 0xFF] ^
+                WhirlpoolImpl.C0 [uint8 (state [7] >> 56)] ^
+                WhirlpoolImpl.C1 [uint8 (state [6] >> 48)] ^
+                WhirlpoolImpl.C2 [uint8 (state [5] >> 40)] ^
+                WhirlpoolImpl.C3 [uint8 (state [4] >> 32)] ^
+                WhirlpoolImpl.C4 [uint8 (state [3] >> 24)] ^
+                WhirlpoolImpl.C5 [uint8 (state [2] >> 16)] ^
+                WhirlpoolImpl.C6 [uint8 (state [1] >> 8 )] ^
+                WhirlpoolImpl.C7 [uint8 (state [0])      ] ^
                 K  [7]
 
             for (x = 0; x < 8; x += 1) {
