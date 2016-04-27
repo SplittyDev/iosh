@@ -1,5 +1,8 @@
 # Author: SplittyDev (github.com/splittydev)
 
+use typecast from std.builtin
+use Iterable from std.collections
+
 # Chains multiply iterables to one
 # @param *iterators The iterables
 # @yield Object The items of the chain
@@ -89,7 +92,6 @@ func skipWhile (iterator, callback) {
 # @optional Object start The result to start with
 # @return Object The result
 func sum (iterable, **kwargs) {
-    # TODO: Use trait Enumerable/Iterable for iterable
     result = 0
     for (key in kwargs) {
         match (key) {
@@ -156,7 +158,6 @@ func reduce (iterable, callback, **kwargs) {
 # @param Object callback The callback
 # @return List The filtered items
 func filter (iterable, callback) {
-    # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         if (callback (item)) {

@@ -58,6 +58,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Std.cs" />
+    <Compile Include="Representer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

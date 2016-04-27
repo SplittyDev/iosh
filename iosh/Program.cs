@@ -41,9 +41,11 @@ namespace iosh {
                 Environment.Exit (1);
             }
             IodineModule module;
-            IodineObject _;
+            IodineObject obj;
             var engine = new IodineEngine ();
-            engine.TryCompile (File.ReadAllText (filename), out module, out _);
+            engine.TryCompile (File.ReadAllText (filename), out module, out obj);
+            if (Representer.WriteStringRepresentation (obj))
+                Console.WriteLine ();
             engine.TryInvokeModule (module);
             var iodineArgs = args.Skip (1).Select (s => new IodineString (s));
             engine.TryInvokeModuleAttribute (module, "main", iodineArgs.ToArray ());
