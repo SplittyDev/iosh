@@ -1,0 +1,31 @@
+# Author: SplittyDev (github.com/splittydev)
+
+use type from std.builtin
+
+NullType            = Null
+ObjectType          = Object
+IntType             = Int
+FloatType           = Float
+BooleanType         = Bool
+StringType          = Str
+TupleType           = Tuple
+ListType            = List
+DictType            = Dict
+ExceptionType       = Exception
+BuiltinFunctionType = type (print)
+RangeType           = type (0 .. 0)
+BuiltinMethodType   = type ([].append)
+TypeType            = type (type (type))
+LambdaType          = type (lambda () => null)
+FuncType            = type (__typeInternal.f)
+MethodType          = type (__typeInternal.m)
+GeneratorType       = type (__typeInternal.g ())
+
+class __typeInternal {
+
+    func f () { }
+    func g () {
+        yield null
+    }
+    func m (self) { }
+}
