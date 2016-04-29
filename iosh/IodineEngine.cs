@@ -117,13 +117,14 @@ namespace iosh {
         public bool TryCompileModule (SourceUnit unit, out IodineModule module) {
             module = null;
             var result = TryIodineOperation (() => unit.Compile (Context), out module);
-            if (result)
-                module = unit.Compile (Context);
+            if (result) {
+                module.IsAnonymous = true;
+            }
             return result;
         }
 
         void Init () {
-            context = new IodineContext ();
+            context = IodineContext.Create ();
             context.SearchPath.Add (AssemblyDirectory);
             if (UseStableStdlib) {
                 ImportModules (

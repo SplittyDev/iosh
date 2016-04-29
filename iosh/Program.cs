@@ -35,20 +35,29 @@ namespace iosh {
 		}
 
         static void Interpret (string[] args) {
+
+            // Check file
             var filename = Path.GetFullPath (args [0]);
             if (!File.Exists (filename)) {
                 Console.WriteLine ("Error: Invalid filename.");
                 Environment.Exit (1);
             }
+
             IodineModule module;
             IodineObject obj;
+
+            // Create engine
             var engine = new IodineEngine ();
-            engine.TryCompile (File.ReadAllText (filename), out module, out obj);
-            if (Representer.WriteStringRepresentation (obj))
-                Console.WriteLine ();
-            engine.TryInvokeModule (module);
+
+            // Compile and invoke module
+            engine.TryCompileModule (File.ReadAllText (filename), out module);
+            engine.TryInvokeModule (module, out obj);
+
+            // Invoke main
             var iodineArgs = args.Skip (1).Select (s => new IodineString (s));
             engine.TryInvokeModuleAttribute (module, "main", iodineArgs.ToArray ());
+
+            // Enter shell
             var shell = new Shell (engine);
             shell.Run (showLogo: false);
         }
