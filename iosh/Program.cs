@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Codeaddicts.libArgument;
+using Iodine.Compiler;
 using Iodine.Runtime;
 
 namespace iosh {
@@ -50,8 +51,15 @@ namespace iosh {
             var engine = new IodineEngine ();
 
             // Compile and invoke module
-            engine.TryCompileModule (File.ReadAllText (filename), out module);
-            engine.TryInvokeModule (module, out obj);
+            // engine.TryCompileModule (File.ReadAllText (filename), out module);
+            // engine.TryInvokeModule (module, out obj);
+            var code = SourceUnit.CreateFromFile (filename);
+            engine.TryIodineOperation (() => code.Compile (engine.Context), out module);
+            engine.TryIodineOperation (() => engine.Context.Invoke (module, new IodineObject [0]), out obj);
+            if (!(obj is IodineClosure)) {
+                Representer.WriteStringRepresentation (obj);
+                Console.WriteLine ();
+            }
 
             // Invoke main
             var iodineArgs = args.Skip (1).Select (s => new IodineString (s));

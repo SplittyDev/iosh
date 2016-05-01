@@ -1,1 +1,22 @@
 # Author: SplittyDev (github.com/splittydev)
+
+use repr from std.builtin
+
+/* Decorator to achieve automatic memoization.
+ * Kinda like python's lru_cache decorator.
+ */
+func memoize (f) {
+    f.cache = Dict ()
+    f.hits = 0
+    f.misses = 0
+    func wrapper (*args) {
+        key = args
+        if (f.cache.contains (key)) {
+            f.hits += 1
+            return f.cache [key]
+        }
+        f.misses += 1
+        return (f.cache [key] = f (*args))
+    }
+    return wrapper
+}
