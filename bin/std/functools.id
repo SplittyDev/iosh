@@ -6,17 +6,17 @@ use repr from std.builtin
  * Kinda like python's lru_cache decorator.
  */
 func memoize (f) {
-    f.cache = Dict ()
-    f.hits = 0
-    f.misses = 0
+    cache = Dict ()
+    hits = 0
+    misses = 0
     func wrapper (*args) {
         key = args
-        if (f.cache.contains (key)) {
-            f.hits += 1
-            return f.cache [key]
+        if (cache.contains (key)) {
+            hits += 1
+            return cache [key]
         }
-        f.misses += 1
-        return (f.cache [key] = f (*args))
+        misses += 1
+        return (cache [key] = f (*args))
     }
     return wrapper
 }
