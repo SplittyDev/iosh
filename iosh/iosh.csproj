@@ -65,6 +65,7 @@
     <Compile Include="TokenClass.cs" />
     <Compile Include="Analyzer.cs" />
     <Compile Include="AnalyzerSource.cs" />
+    <Compile Include="SemanticMatcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

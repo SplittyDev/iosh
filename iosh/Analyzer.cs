@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Iodine.Compiler;
 
 namespace iosh {
@@ -8,6 +9,7 @@ namespace iosh {
     public class Analyzer {
 
         AnalyzerSource source;
+        SemanticMatcher matcher;
 
         Analyzer (string source) {
             List<Lexeme> lexemes;
@@ -17,7 +19,8 @@ namespace iosh {
                 Console.WriteLine ($"Syntax error: {e.Message}");
                 return;
             }
-            this.source = new AnalyzerSource (lexemes);
+            this.source = new AnalyzerSource (lexemes.Where (l => l.Type != TokenClass.Whitespace));
+            matcher = new SemanticMatcher (this.source);
         }
 
         public static Analyzer Create (string source) {
@@ -32,34 +35,39 @@ namespace iosh {
 
         public void Run () {
 
-            while (source.See (1)) {
-                if (source.See (3)
-                    && (source.Peek (0).Is (TokenClass.StringLiteral)
-                        || source.Peek (0).Is (TokenClass.InterpolatedStringLiteral))
-                    && source.Peek (1).Is (".")
-                    && source.Peek (2).Is ("format")) {
-                    Recommend (source.Peek (1), $"Use string interpolation syntax instead of format");
+            if (source == null)
+                return;
+            
+            while (source.See ()) {
+
+                if (matcher.IsMatch ("[any] . __type__")) {
+                    var identifier = matcher.GetMatch ().First ();
+                    Recommend (matcher.GetMatch ().Last (), $"use type({identifier.Value}) instead of {identifier.Value}.__type__");
+                } else if (matcher.IsMatch ("[any] . __len__")) {
+                    var identifier = matcher.GetMatch ().First ();
+                    Recommend (matcher.GetMatch ().Last (), $"use len({identifier.Value}) instead of {identifier.Value}.__len__");
+                } else if (matcher.IsMatch ("[any] . __name__")) {
+                    var identifier = matcher.GetMatch ().First ();
+                    Recommend (matcher.GetMatch ().Last (), $"use Str(type({identifier.Value})) instead of {identifier.Value}.__name__");
+                } else if (matcher.IsMatch ("[str] . format (")) {
+                    Recommend (matcher.GetMatch ().Last (), $"use string interpolation syntax instead of format");
+                } else if (matcher.IsMatch ("foreach (")) {
+                    Warn (matcher.GetMatch ().First (), $"foreach is deprecated, use for instead");
+                } else if (matcher.IsMatch ("given (") || matcher.IsMatch ("when [any]")) {
+                    Warn (matcher.GetMatch ().First (), $"given/when is deprecated, use match/case instead");
                 }
-                if (source.See (2)
-                    && source.Peek (0).Is (TokenClass.Identifier)
-                    && source.Peek (1).Is (".")
-                    && source.Peek (2).Is (TokenClass.Identifier)) {
-                    var obj = source.Peek ();
-                    var identifier = source.Peek (2);
-                    if (identifier.Is ("__type__")) {
-                        Recommend (identifier, $"Use type({obj.Value}) instead of {obj.Value}.__type__");
-                    } else if (identifier.Is ("__len__")) {
-                        Recommend (identifier, $"Use len({obj.Value}) instead of {obj.Value}.__len__");
-                    }
-                    source.Skip (3);
-                }
+
                 if (source.See ())
                     source.Skip ();
             }
         }
 
         void Recommend (Lexeme lex, string what) {
-            Console.WriteLine ($"{lex.Location}: {what}");
+            Console.WriteLine ($"[Recommended at {lex.Location}]: {what}");
+        }
+
+        void Warn (Lexeme lex, string what) {
+            Console.WriteLine ($"[Warning at {lex.Location}]: {what}");
         }
     }
 }

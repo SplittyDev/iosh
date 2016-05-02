@@ -30,6 +30,10 @@ namespace iosh {
         public bool Is (string str) {
             return Value == str;
         }
+
+        public override string ToString () {
+            return $"[Lexeme: Type={Type.ToString ()}, Value={Value}]";
+        }
     }
 }
 

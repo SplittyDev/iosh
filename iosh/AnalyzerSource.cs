@@ -19,7 +19,7 @@ namespace iosh {
             pos += n;
         }
 
-        public bool See (int lookahead = 0) => pos + lookahead < source.Length;
+        public bool See (int lookahead = 1) => pos + lookahead < source.Length;
 
         public Lexeme Peek (int lookahead = 0) {
             Contract.Ensures (Contract.Result<Lexeme> () != null);

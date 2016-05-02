@@ -8,10 +8,12 @@ namespace iosh {
         int pos;
         int line;
         int linepos;
+        int bracebalance;
         string source;
 
         public int Line => line;
         public int Linepos => linepos;
+        public int BraceBalance => bracebalance;
 
         public LexerSource (string source) {
             line = 1;
@@ -19,6 +21,9 @@ namespace iosh {
         }
 
         public string Location => $"{line}:{linepos}";
+
+        public void OpenBrace () => bracebalance++;
+        public void CloseBrace () => bracebalance--;
 
         public void Skip (int n = 1) {
             Contract.Assert (See (n));
@@ -44,7 +49,7 @@ namespace iosh {
                 Skip ();
         }
 
-        public bool See (int lookahead = 0) => pos + lookahead < source.Length;
+        public bool See (int lookahead = 1) => pos + lookahead < source.Length;
 
         public char Peek (int lookahead = 0) {
             Contract.Assert (See (lookahead));

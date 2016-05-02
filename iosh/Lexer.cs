@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Linq;
+using System.Diagnostics;
 
 namespace iosh {
 
@@ -54,26 +55,31 @@ namespace iosh {
         }
 
         public List<Lexeme> Scan () {
-            while (source.See (1)) {
-                var c = source.Peek ();
-                if (char.IsWhiteSpace (source.Peek ())) {
-                    source.SkipWhitespace ();
-                    lexemes.Add (new Lexeme (TokenClass.Whitespace, source, string.Empty));
-                    continue;
-                }
-                if (source.See (2) && source.Peeks (2) == "0x") {
-                    ReadHexNumber ();
-                    continue;
-                }
-                if (char.IsDigit (c)) {
-                    ReadNumber ();
-                    continue;
-                }
-                if (OperatorChars.Contains (c)) {
-                    ReadOperator ();
-                    continue;
-                }
-                var dict = new Dictionary<char, TokenClass> {
+            while (source.See (1))
+                ScanToken ();
+            return lexemes;
+        }
+
+        void ScanToken () {
+            var c = source.Peek ();
+            if (char.IsWhiteSpace (source.Peek ())) {
+                source.SkipWhitespace ();
+                lexemes.Add (new Lexeme (TokenClass.Whitespace, source, string.Empty));
+                return;
+            }
+            if (source.See (2) && source.Peeks (2) == "0x") {
+                ReadHexNumber ();
+                return;
+            }
+            if (char.IsDigit (c)) {
+                ReadNumber ();
+                return;
+            }
+            if (OperatorChars.Contains (c)) {
+                ReadOperator ();
+                return;
+            }
+            var dict = new Dictionary<char, TokenClass> {
                     { '{', TokenClass.OpenBrace },
                     { '}', TokenClass.CloseBrace },
                     { '(', TokenClass.OpenParen },
@@ -84,34 +90,36 @@ namespace iosh {
                     { ':', TokenClass.Colon },
                     { ',', TokenClass.Comma }
                 };
-                if (dict.ContainsKey (c)) {
-                    if (source.See (1))
-                        source.Skip ();
-                    lexemes.Add (new Lexeme (dict [c], source, c));
-                    continue;
-                }
-                switch (c) {
-                case '#':
+            if (dict.ContainsKey (c)) {
+                if (source.See (1))
                     source.Skip ();
-                    source.SkipLine ();
-                    break;
-                case '\'':
-                case '"':
-                    ReadString ();
-                    break;
-                default:
-                    if (source.See (1) && c == 'b' && (source.Peek (1) == '\"' || source.Peek (1) == '\'')) {
-                        ReadBinaryString ();
-                        break;
-                    }
-                    if (char.IsLetter (c) || c == '_') {
-                        ReadIdentifier ();
-                        break;
-                    }
-                    throw new Exception ($"Unexpected token: '{c}' at {source.Location}");
-                }
+                if (c == '{')
+                    source.OpenBrace ();
+                else if (c == '}')
+                    source.CloseBrace ();
+                lexemes.Add (new Lexeme (dict [c], source, c));
+                return;
             }
-            return lexemes;
+            switch (c) {
+            case '#':
+                source.Skip ();
+                source.SkipLine ();
+                break;
+            case '\'':
+            case '"':
+                ReadString ();
+                break;
+            default:
+                if (source.See (1) && c == 'b' && (source.Peek (1) == '\"' || source.Peek (1) == '\'')) {
+                    ReadBinaryString ();
+                    break;
+                }
+                if (char.IsLetter (c) || c == '_') {
+                    ReadIdentifier ();
+                    break;
+                }
+                throw new Exception ($"Unexpected token: '{c}' at {source.Location}");
+            }
         }
 
         string JustReadString (out char delimiter) {
@@ -121,7 +129,7 @@ namespace iosh {
             while (source.See () && c != delimiter) {
                 c = source.Read ();
                 if (c == '\\') {
-                    var next = source.Peek (1);
+                    var next = source.Peek ();
                     switch (next) {
                     case '\"':
                     case '\'':
@@ -146,6 +154,13 @@ namespace iosh {
                         throw new Exception ($"Unrecognized escape sequence: '\\{next}'");
                     }
                     source.Skip ();
+                } else if (delimiter == '"' && c == '#' && source.Peek () == '{') {
+                    source.Skip ();
+                    var balance = source.BraceBalance;
+                    while (!lexemes.Last ().Is ("}") && source.BraceBalance - balance == 0)
+                        ScanToken ();
+                    source.Skip ();
+                    continue;
                 }
                 accum.Append (c);
                 c = source.Peek ();
@@ -158,6 +173,9 @@ namespace iosh {
         }
 
         void ReadString () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             char delimiter;
             var str = JustReadString (out delimiter);
             var tokenclass = delimiter == '"' ? TokenClass.InterpolatedStringLiteral : TokenClass.StringLiteral;
@@ -165,12 +183,18 @@ namespace iosh {
         }
 
         void ReadBinaryString () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             char _;
             var str = JustReadString (out _);
             lexemes.Add (new Lexeme (TokenClass.BinaryStringLiteral, source, str));
         }
 
         void ReadNumber () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             var accum = new StringBuilder ();
             var c = source.Peek ();
             var isfloat = false;
@@ -191,6 +215,9 @@ namespace iosh {
         }
 
         void ReadHexNumber () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             var accum = new StringBuilder ();
             source.Skip (2);
             var c = source.Peek ();
@@ -203,6 +230,9 @@ namespace iosh {
         }
 
         void ReadOperator () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             var op = source.Peek ();
             string op2 = source.Peeks (2);
             string op3 = source.Peeks (3);
@@ -259,6 +289,9 @@ namespace iosh {
         }
 
         void ReadIdentifier () {
+#if DEBUG
+            Console.WriteLine (new StackFrame ().GetMethod ().Name);
+#endif
             var accum = new StringBuilder ();
             var c = source.Peek ();
             while (char.IsLetterOrDigit (c) || c == '_') {
