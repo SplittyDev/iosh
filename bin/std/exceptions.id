@@ -5,7 +5,7 @@ use typecast from std.builtin
 class ArgumentException : Exception {
 
     func ArgumentException (self, argument, message) {
-        super ("Argument '{0}': {1}".format (argument,  message))
+        super ("Argument '#{argument}': #{message}")
     }
 }
 
@@ -20,10 +20,10 @@ class TypeException : Exception {
         typecast (Str, types)
         if (types.contains ("|")) {
             if ((r = types.rfind ("|")) != types.find ("|")) {
-                types = "{0} or {1}".format (types [:r], types [r + 1:])
+                types = "#{types [:r]} or #{types [r + 1:]}"
             }
             types = types.replace ("|", ", ")
         }
-        return "Expected '{0}' to be of type {1}".format (argument, types)
+        return "Expected '#{argument}' to be of type #{types}"
     }
 }

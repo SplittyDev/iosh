@@ -129,7 +129,7 @@ func fibonacci (x, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
                 }
                 method = current
             }
@@ -190,7 +190,7 @@ func factorial (x, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
                 }
                 method = current
             }
@@ -252,7 +252,7 @@ func exp (x, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
                 }
                 method = current
             }
@@ -266,6 +266,27 @@ func exp (x, **kwargs) {
     }
     return sum
 }
+
+/*
+func log (x) {
+    if (x is Int) {
+        x = Float (x)
+    }
+    typecast (Float, x)
+    # x - x^2/2 + x^3/3 - ...
+    x -= 1.0
+    tmp = x
+    sum = 0.0
+    for (i = 2; i < 17; i += 1) {
+        if (i == 2) {
+            sum = x - Float (pow (x, i)) / Float (i)
+            continue
+        }
+        sum += Float (pow (x, i)) / Float (i)
+    }
+    return sum
+}
+*/
 
 func log2 (v) {
     b = [0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000]
@@ -478,7 +499,7 @@ func pow (base, exp, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
                 }
                 method = current
             }
@@ -602,7 +623,7 @@ func sqrt (x, **kwargs) {
                     current = method
                 }
                 if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '{0}' not found".format (current))
+                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
                 }
                 method = current
             }

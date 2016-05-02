@@ -32,7 +32,7 @@ func repr (object) {
     dict = {
         "Str": lambda () {
             typecast (Str, object)
-            return '"{0}"'.format (object)
+            return "\"#{object}\""
         },
         "Tuple": lambda () {
             typecast (Tuple, object)
@@ -242,7 +242,7 @@ func hex (arr) {
 
         # Make sure that the element lies within [0 ... 255]
         if (current < 0 || current > 255) {
-            raise Exception ("The {0}-th element exceeds the bounds of a byte.".format (i))
+            raise Exception ("The #{i}-th element exceeds the bounds of a byte.")
         }
         accum.append (lut [current])
     }

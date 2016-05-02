@@ -59,6 +59,12 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Std.cs" />
     <Compile Include="Representer.cs" />
+    <Compile Include="Lexer.cs" />
+    <Compile Include="LexerSource.cs" />
+    <Compile Include="Lexeme.cs" />
+    <Compile Include="TokenClass.cs" />
+    <Compile Include="Analyzer.cs" />
+    <Compile Include="AnalyzerSource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

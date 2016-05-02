@@ -54,12 +54,13 @@ namespace iosh {
             // engine.TryCompileModule (File.ReadAllText (filename), out module);
             // engine.TryInvokeModule (module, out obj);
             var code = SourceUnit.CreateFromFile (filename);
+
+            // Run analyzer
+            Analyzer.Create (code).Run ();
+
+            // Compile module
             engine.TryIodineOperation (() => code.Compile (engine.Context), out module);
             engine.TryIodineOperation (() => engine.Context.Invoke (module, new IodineObject [0]), out obj);
-            if (!(obj is IodineClosure)) {
-                Representer.WriteStringRepresentation (obj);
-                Console.WriteLine ();
-            }
 
             // Invoke main
             var iodineArgs = args.Skip (1).Select (s => new IodineString (s));

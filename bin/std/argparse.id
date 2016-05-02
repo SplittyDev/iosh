@@ -1,10 +1,10 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use typecast, len from std.builtin
+use type, typecast, len from std.builtin
 use skip, take, takeWhile from std.itertools
 
 func __isBuiltinType (arg) {
-    return arg isnot Null && arg.__type__ isnot Null
+    return arg isnot Null && type (arg) isnot Null
 }
 
 func __keyName (self, key) {
@@ -49,15 +49,15 @@ class ArgumentParser {
     func help (self) {
         if (self.program isnot Null) {
             version = match (self.version isnot Null) {
-                case true   => "({0})".format (self.version)
+                case true   => "(#{self.version})"
                 case false  => "(unknown)"
             }
-            print ("{0} {1}".format (self.program, version))
+            print ("#{self.program} #{version}")
             if (self.usage is Null)
                 print ('') # newline
         }
         if (self.usage isnot Null) {
-            print ("Usage: {0}".format (self.usage))
+            print ("Usage: #{self.usage}")
             print ('') # newline
         }
         if (self.prolog isnot Null) {
@@ -148,8 +148,7 @@ class ArgumentParser {
 
                         # If that fails, raise an exception
                         else {
-                            raise Exception ("Unable to assign a value to argument '{0}'"
-                                .format (def.getName ()))
+                            raise Exception ("Unable to assign a value to argument '#{def.getName ()}'")
                         }
                         continue
                     }
@@ -158,8 +157,7 @@ class ArgumentParser {
                     # Only if nargs is ONE_OR_MORE
                     else if (nargs == def.ONE_OR_MORE && ((i + 1) == argcount
                         || (i + 1) < argcount && self.isArgument (args [i + 1]))) {
-                        raise Exception ("Unable to assign value to argument '{0}'"
-                            .format (def.getName ()))
+                        raise Exception ("Unable to assign value to argument '#{def.getName ()}'")
                         continue
                     }
 
@@ -180,8 +178,7 @@ class ArgumentParser {
                         # Raise an exception if more items are requested
                         # than there are elements available
                         if (argcount >= (i + 1 + count)) {
-                            raise Exception ("Requested {0} elements; only {1} more available!"
-                                .format (count))
+                            raise Exception ("Requested #{count} elements; only #{argcount} more available!")
                         }
                         elements = take (skip (args, i + 1), count)
                         for (element in elements) {
@@ -189,8 +186,7 @@ class ArgumentParser {
                             # Raise an exception if one of the fetched elements
                             # is an actual argument
                             if (self.isArgument (element)) {
-                                raise Exception ("Fetched argument '{0}'' when element was expected!"
-                                    .format (__keyName (element)))
+                                raise Exception ("Fetched argument '#{__keyName (element)}' when element was expected!")
                             }
 
                             lst.append (element)
@@ -207,7 +203,7 @@ class ArgumentParser {
             # Check if the value is required and not set
             # raise an exception
             if (def.isRequired () && !def.hasValue () && !def.hasDefault ()) {
-                raise Exception ("Required argument {0} not set!".format (def.getName ()))
+                raise Exception ("Required argument #{def.getName ()} not set!")
             }
 
             # Check if the value is required and has no value
@@ -308,8 +304,7 @@ class ArgumentDefinition {
     func setValue (self, str) {
         result = self.tryCast (self.type, str)
         if (!result [0]) {
-            raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
-                .format (str.__name__, self.type.__name__, self.getName ()))
+            raise Exception ("Cast from '#{str.__name__}' to '#{self.type.__name__}' failed for '#{self.getName ()}'.")
         }
         self.value = result [1]
     }
@@ -319,8 +314,7 @@ class ArgumentDefinition {
         for (item in lst) {
             result = self.tryCast (self.type, item)
             if (!result [0]) {
-                raise Exception ("Cast from '{0}' to '{1}' failed for '{2}'."
-                    .format (item.__name__, self.type.__name__, self.getName ()))
+                raise Exception ("Cast from '#{item.__name__}' to '#{self.type.__name__}' failed for '#{self.getName ()}'.")
             }
             self.value.append (result [1])
         }

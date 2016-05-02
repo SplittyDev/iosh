@@ -474,9 +474,8 @@ class GenericSet : Set, Collection {
      * @return null
      */
     func add (self, item) {
-        # TODO: Replace with Null type-check
-        if (self.type.__type__ == null.__type__) {
-            self.type = item.__type__
+        if (self.type is Null) {
+            self.type = type (item)
         }
         typecast (self.type, item)
         self.__super__.add (item)
@@ -673,9 +672,8 @@ class GenericStack : Stack, Collection {
      * @return null
      */
     func push (self, item) {
-        # TODO: Replace with Null type-check
-        if (self.type.__type__ == null.__type__) {
-            self.type = item.__type__
+        if (self.type is Null) {
+            self.type = type (item)
         }
         typecast (self.type, item)
         self.__super__.push (item)
