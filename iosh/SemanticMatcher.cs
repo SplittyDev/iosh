@@ -22,7 +22,8 @@ namespace iosh {
         ///    String     :  [str]
         ///    Number     :  [num]
         ///    Anything   :  [any]
-        ///    Literal    :  '...'
+        ///    Separator  :  space
+        ///    Literal    :   ...
         /// </remarks>
         /// <param name="patternString">Pattern.</param>
         public bool IsMatch (string patternString) {

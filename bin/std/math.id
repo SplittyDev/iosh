@@ -176,7 +176,7 @@ func factorial (x, **kwargs) {
          */
         "stirling": lambda () {
             # Added one to the result to simulate ceiling behavior
-            return 1 + Int (pow (E, -x) * Float (pow (x, x)) * Float (sqrt (PI * Float ((2 * x)))))
+            return 1 + Int (Float (sqrt (2.0 * PI * x)) * pow ((Float (x) / E), x))
         },
     }
 
