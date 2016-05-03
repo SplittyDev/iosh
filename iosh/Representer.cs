@@ -39,6 +39,7 @@ namespace iosh {
                 break;
             case "IodineInteger":
             case "IodineFloat":
+            case "IodineBigInt":
                 Writec (DarkYellow, value);
                 break;
             case "IodineTuple":

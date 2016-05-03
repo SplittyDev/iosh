@@ -1,38 +1,52 @@
 # Author: SplittyDev (github.com/splittydev)
 
-use typecast from std.builtin
+use TypeException from std.exceptions
 
 func int8 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0x7F
 }
 
 func uint8 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0xFF
 }
 
 func int16 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0x7FFF
 }
 
 func uint16 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0xFFFF
 }
 
 func int32 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0x7FFFFFFF
 }
 
 func uint32 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0xFFFFFFFF
 }
 
 func int64 (x) {
-    typecast (Int, x)
+    if (x isnot Int && x isnot BigInt) {
+        raise TypeException ("x", "Int|BigInt")
+    }
     return x & 0x7FFFFFFFFFFFFFFF
 }
