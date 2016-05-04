@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides classes for computing Whirlpool hashes
+ * @module std/crypto/whirlpool
+ * @author SplittyDev
+ */
 
 use Iterable, Array from std.collections
 use typecast, len, hex from std.builtin

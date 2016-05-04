@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides implementations of common math algorithms
+ * @module std/math
+ * @author SplittyDev
+ */
 
 use typecast from std.builtin
 use ArgumentException, TypeException from std.exceptions

@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides functions for base64 coding
+ * @module std/base64
+ * @author SplittyDev
+ */
 
 use typecast, len from std.builtin
 

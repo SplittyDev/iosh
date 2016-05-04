@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides classes for raising specific exceptions
+ * @module std/exceptions
+ * @author SplittyDev
+ */
 
 use typecast from std.builtin
 

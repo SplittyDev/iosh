@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides functions for iterating over items of any iterable
+ * @module std/builtin
+ * @author SplittyDev
+ */
 
 use typecast from std.builtin
 use Iterable from std.collections
@@ -7,7 +11,9 @@ use Iterable from std.collections
 # @param *iterators The iterables
 # @yield Object The items of the chain
 func chain (*iterables) {
+    typecast (Iterable, iterables)
     for (iterator in iterables) {
+        typecast (Iterable, iterator)
         for (item in iterator) {
             yield item
         }
@@ -19,6 +25,7 @@ func chain (*iterables) {
 # @param Object The callback
 # @return null
 func each (iterator, callback) {
+    typecast (Iterable, iterator)
     for (item in iterator) {
         callback (item)
     }
@@ -29,6 +36,7 @@ func each (iterator, callback) {
 # @param Int count The number of elements to take
 # @yield Object The elements
 func take (iterator, count) {
+    typecast (Iterable, iterator)
     i = 0
     for (item in iterator) {
         if (i < count) {
@@ -43,6 +51,7 @@ func take (iterator, count) {
 # @param Object callback The condition
 # @yield Object The elements
 func takeWhile (iterator, callback) {
+    typecast (Iterable, iterator)
     stop = false
     for (item in iterator) {
         if (!stop && !typecast (Bool, callback (item))) {
@@ -60,6 +69,7 @@ func takeWhile (iterator, callback) {
 # @param Int The number of elements to skip
 # @yield The remaining elements
 func skip (iterator, count) {
+    typecast (Iterable, iterator)
     i = 0
     for (item in iterator) {
         if (i >= count) {
@@ -74,6 +84,7 @@ func skip (iterator, count) {
 # @param Object callback The condition
 # @yield Object The remaining elements
 func skipWhile (iterator, callback) {
+    typecast (Iterable, iterator)
     _skip = true
     for (item in iterator) {
         if (_skip && !typecast (Bool, callback (item))) {
@@ -92,6 +103,7 @@ func skipWhile (iterator, callback) {
 # @optional Object start The result to start with
 # @return Object The result
 func sum (iterable, **kwargs) {
+    typecast (Iterable, iterable)
     result = 0
     for (key in kwargs) {
         match (key) {
@@ -105,12 +117,14 @@ func sum (iterable, **kwargs) {
 }
 
 func zip (*iterables) {
+    typecast (Iterable, iterables)
     result = []
     iteratorCount = len (iterables)
     iterators = []
     iteratorIndices = []
     iteratorCounts = []
     for (iterator in iterables) {
+        typecast (Iterable, iterator)
         iterators.append (iterator)
         iteratorIndices.append (0)
         iteratorCounts.append (len (iterator))
@@ -137,7 +151,7 @@ func zip (*iterables) {
 # @optional Object start The result to start with
 # @return Object The result of the reduction
 func reduce (iterable, callback, **kwargs) {
-    # TODO: Use trait Enumerable/Iterable for iterable
+    typecast (Iterable, iterable)
     # TODO: Use trait Callable/Invokable for callback
     result = 0
     for (key in kwargs) {
@@ -158,6 +172,7 @@ func reduce (iterable, callback, **kwargs) {
 # @param Object callback The callback
 # @return List The filtered items
 func filter (iterable, callback) {
+    typecast (Iterable, iterable)
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         if (callback (item)) {
@@ -173,6 +188,7 @@ func filter (iterable, callback) {
 # @param Object callback The callback
 # @return List The mapped items
 func map (iterable, callback) {
+    typecast (Iterable, iterable)
     # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {

@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides function decorators for various purposes
+ * @module std/functools
+ * @author SplittyDev
+ */
 
 use repr from std.builtin
 

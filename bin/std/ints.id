@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides functions for restricting integer bounds
+ * @module std/ints
+ * @author SplittyDev
+ */
 
 use TypeException from std.exceptions
 

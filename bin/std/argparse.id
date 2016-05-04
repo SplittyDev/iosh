@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides classes for parsing command-line arguments
+ * @module std/argparse
+ * @author SplittyDev
+ */
 
 use type, typecast, len from std.builtin
 use skip, take, takeWhile from std.itertools

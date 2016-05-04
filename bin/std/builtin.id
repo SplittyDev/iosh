@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides essential core functionality
+ * @module std/builtin
+ * @author SplittyDev
+ */
 
 /* The following functions can't be implemented in pure Iodine:
  * ! func print (*object)

@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides classes for working with collections
+ * @module std/collections
+ * @author SplittyDev
+ */
 
 use typecast from std.builtin
 

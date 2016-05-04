@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides functions for working with tuples and n-tuples
+ * @module std/tupletools
+ * @author SplittyDev
+ */
 
 use typecast from std.builtin
 

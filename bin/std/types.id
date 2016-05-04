@@ -1,4 +1,8 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides type definitions of the most common Iodine types
+ * @module std/types
+ * @author SplittyDev
+ */
 
 use type from std.builtin
 

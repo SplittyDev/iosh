@@ -1,4 +1,10 @@
-# Author: SplittyDev (github.com/splittydev)
+/**
+ * Provides fast and less accurate math functions.
+ * Used for games and other performance-critical code,
+ * that doesn't depend on high accuracy.
+ * @module std/fastmath
+ * @author SplittyDev
+ */
 
 use sin, cos, sqrt, factorial from std.math
 
