@@ -1,0 +1,16 @@
+/**
+ * Provides basic contracts for cryptographic classes
+ * @module std/crypto/core
+ * @author SplittyDev
+ */
+
+contract hashProvider {
+    func update (self, data)
+    func digest (self)
+    func hexdigest (self)
+}
+
+contract encryptionProvider {
+    func encrypt (self, key, data)
+    func decrypt (self, key, data)
+}

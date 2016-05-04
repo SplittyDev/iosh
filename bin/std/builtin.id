@@ -241,14 +241,15 @@ func hex (arr) {
         # fetched more than once, for performance and predictability
         current = arr [i]
 
-        # Make sure that the element is an Int
-        typecast (Int, current)
+        if (current isnot Int && current isnot BigInt) {
+            raise ArgumentException ("arr", "Array contains non-integer values.")
+        }
 
         # Make sure that the element lies within [0 ... 255]
         if (current < 0 || current > 255) {
             raise Exception ("The #{i}-th element exceeds the bounds of a byte.")
         }
-        accum.append (lut [current])
+        accum.append (lut [Int (current)])
     }
     return Str (accum)
 }

@@ -1,0 +1,51 @@
+/**
+ * Provides classes for RC4-based encryption and decryption
+ * @module std/crypto/rc4
+ * @author SplittyDev
+ */
+
+use uint8 from std.ints
+use encryptionProvider from std.crypto.core
+
+class rc4 : encryptionProvider {
+
+    func rc4 (self) { }
+
+    func encrypt (self, key, str) {
+        typecast (Str, key)
+        typecast (Str, str)
+        return RC4Impl.core (key, str)
+    }
+
+    func decrypt (self, key, str) {
+        return self.encrypt (key, str)
+    }
+}
+
+class RC4Impl {
+
+    func core (key, str) {
+        typecast (Str, key)
+        typecast (Str, str)
+        s, j, x, res = (Array (capacity: 256), 0, "", StringBuffer ())
+        for (i = 0; i < 256; i += 1) {
+            s [i] = i
+        }
+        for (i = 0; i < 256; i += 1) {
+            j = (j + s [i] + ord (key [i % len (key)])) % 256
+            x = s [i]
+            s [i] = s [j]
+            s [j] = x
+        }
+        i, j = (0, 0)
+        for (y = 0; y < len (str); y += 1) {
+            i = uint8 (i + 1)
+            j = uint8 (j + s [i])
+            x = s [i]
+            s [i] = s [j]
+            s [j] = x
+            res.append (chr (ord (str [y]) ^ s [(s [i] + s [j]) % 256]))
+        }
+        return Str (res)
+    }
+}

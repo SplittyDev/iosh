@@ -7,8 +7,9 @@
 use Iterable, Array from std.collections
 use typecast, len, hex from std.builtin
 use uint8 from std.ints
+use hashProvider from std.crypto.core
 
-class whirlpool {
+class whirlpool : hashProvider {
 
     func whirlpool (self) {
         self.data = []
