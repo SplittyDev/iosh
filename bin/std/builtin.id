@@ -209,7 +209,7 @@ func typecast (type, object) {
  * @raise TypeException If the object is not of integer type
  * @return Object The object
  */
-func integer (object) {
+func intcast (object) {
     if (object isnot Int && object isnot BigInt) {
         raise TypeException (Str (object), "Int|BigInt")
     }
