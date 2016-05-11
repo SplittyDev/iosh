@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iosh", "iosh\iosh.csproj", "{C948A694-56DE-413F-A995-A39C93F88745}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "future", "Future\future.csproj", "{6ABE4738-FCCB-4996-99B4-90FCA02A8184}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Future", "Future", "{45E21289-2894-41CE-A2E5-6A68AF02C8BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +17,10 @@ Global
 		{C948A694-56DE-413F-A995-A39C93F88745}.Debug|x86.Build.0 = Debug|x86
 		{C948A694-56DE-413F-A995-A39C93F88745}.Release|x86.ActiveCfg = Release|x86
 		{C948A694-56DE-413F-A995-A39C93F88745}.Release|x86.Build.0 = Release|x86
+		{6ABE4738-FCCB-4996-99B4-90FCA02A8184}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6ABE4738-FCCB-4996-99B4-90FCA02A8184}.Debug|x86.Build.0 = Debug|Any CPU
+		{6ABE4738-FCCB-4996-99B4-90FCA02A8184}.Release|x86.ActiveCfg = Release|Any CPU
+		{6ABE4738-FCCB-4996-99B4-90FCA02A8184}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
@@ -30,5 +38,8 @@ Global
 		$3.inheritsSet = Mono
 		$3.inheritsScope = text/x-csharp
 		$3.scope = text/x-csharp
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6ABE4738-FCCB-4996-99B4-90FCA02A8184} = {45E21289-2894-41CE-A2E5-6A68AF02C8BA}
 	EndGlobalSection
 EndGlobal

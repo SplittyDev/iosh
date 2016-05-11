@@ -50,11 +50,13 @@ namespace iosh {
                     var identifier = matcher.GetMatch ().First ();
                     Recommend (matcher.GetMatch ().Last (), $"use Str(type({identifier.Value})) instead of {identifier.Value}.__name__");
                 } else if (matcher.IsMatch ("[str] . format (")) {
-                    Recommend (matcher.GetMatch ().Last (), $"use string interpolation syntax instead of format");
+                    Recommend (matcher.GetMatch ().Last (), "use string interpolation syntax instead of format");
                 } else if (matcher.IsMatch ("foreach (")) {
-                    Warn (matcher.GetMatch ().First (), $"foreach is deprecated, use for instead");
+                    Warn (matcher.GetMatch ().First (), "foreach is deprecated, use for instead");
                 } else if (matcher.IsMatch ("given (") || matcher.IsMatch ("when [any]")) {
-                    Warn (matcher.GetMatch ().First (), $"given/when is deprecated, use match/case instead");
+                    Warn (matcher.GetMatch ().First (), "given/when is deprecated, use match/case instead");
+                } else if (matcher.IsMatch ("= { }")) {
+                    Recommend (matcher.GetMatch ().First (), "Use Dict() instead of {} to create an empty dictionary");
                 }
 
                 if (source.See ())

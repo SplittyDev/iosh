@@ -154,20 +154,24 @@ namespace iosh {
                         throw new Exception ($"Unrecognized escape sequence: '\\{next}'");
                     }
                     source.Skip ();
-                } else if (delimiter == '"' && c == '#' && source.Peek () == '{') {
+                }
+                /*
+                else if (delimiter == '"' && c == '#' && source.Peek () == '{') {
                     source.Skip ();
                     var balance = source.BraceBalance;
-                    while (!lexemes.Last ().Is ("}") && source.BraceBalance - balance == 0)
+                    while (lexemes.Last ().Value != "}" && source.BraceBalance - balance == 0)
                         ScanToken ();
                     source.Skip ();
+                    source.CloseBrace ();
                     continue;
                 }
+                */
                 accum.Append (c);
                 c = source.Peek ();
             }
             if (c != delimiter)
                 throw new Exception ($"Unterminated string literal at {source.Location}");
-            if (source.See (1))
+            if (source.See ())
                 source.Skip ();
             return accum.ToString ();
         }
