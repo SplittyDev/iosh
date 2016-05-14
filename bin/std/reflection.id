@@ -1,0 +1,27 @@
+/**
+ * Provides reflection
+ * @module std/reflection
+ * @author SplittyDev
+ */
+
+ # TODO: Fix weird string behavior
+ # type(Str)?
+
+func istypedef (obj) {
+    return nameof (TypeDef) == nameof (obj)
+}
+
+func instance (obj) {
+    return istypedef (type (type (obj)))
+}
+
+func instanceof (T, obj) {
+    if (!istypedef (T)) {
+        raise TypeException ("T", "TypeDef")
+    }
+    return type (T) != type (obj) && nameof (T) == nameof (obj)
+}
+
+func nameof (a) {
+    return a.__name__
+}
