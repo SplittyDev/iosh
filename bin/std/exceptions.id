@@ -4,8 +4,9 @@
  * @author SplittyDev
  */
 
-use typecast from std.builtin
-
+/**
+ * Argument Exception
+ */
 class ArgumentException : Exception {
 
     func ArgumentException (self, argument, message) {
@@ -13,6 +14,9 @@ class ArgumentException : Exception {
     }
 }
 
+/**
+ * Type Exception
+ */
 class TypeException : Exception {
 
     func TypeException (self, argument, expectedType) {

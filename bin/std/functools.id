@@ -4,10 +4,9 @@
  * @author SplittyDev
  */
 
-use repr from std.builtin
-
-/* Decorator to achieve automatic memoization.
- * Kinda like python's lru_cache decorator.
+/**
+ * Decorator to achieve automatic memoization
+ * by caching the return values.
  */
 func memoize (f) {
     cache = Dict ()

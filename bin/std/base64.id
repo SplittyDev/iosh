@@ -4,10 +4,17 @@
  * @author SplittyDev
  */
 
-use typecast, len from std.builtin
-
+/**
+ * Base64 class
+ * Provides Base64 encoding and decoding
+ */
 class Base64 {
 
+    /**
+     * Encodes a string as base64
+     * @param Str str The string to be encoded
+     * @return Str The base64 encoded string
+     */
     func encode (str) {
         typecast (Str, str)
         length = len (str)
@@ -36,6 +43,11 @@ class Base64 {
         return Str (encoded)
     }
 
+    /**
+     * Decodes a base64 encoded string
+     * @param Str str The base64 encoded string
+     * @return Str The decoded string
+     */
     func decode (str) {
         typecast (Str, str)
         length = len (str)

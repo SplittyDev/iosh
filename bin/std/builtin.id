@@ -4,25 +4,37 @@
  * @author SplittyDev
  */
 
-/* The following functions can't be implemented in pure Iodine:
+/*
+ * The intention behind this module is to provide
+ * a pure Iodine implementation of all builtin functions
+ * that are currently hardcoded into the runtime.
+ *
+ * This module must work under all Iodine runtime implementations
+ * and is thus suitable for testing alternative Iodine runtimes.
+ *
+ * The following functions can't be implemented in pure Iodine:
  * ! func print (*object)
  * ! func invoke (function, [dict])
  * ! func eval (source)
  * ! func open (file, mode)
  * ! func input ([prompt])
+ *
+ * Actually, print and input CAN BE implemented in Iodine
+ * using the runtime-provided stdout and stdin objects.
  */
 
 use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
+use instanceof from std.reflection
 
 # Any type that has a string representation
 trait Representable {
     func __repr__ (self)
 }
 
-/* Returns a string representation of an object
+/**
+ * Returns a string representation of an object
  * @param Object object The object to be represented
- * @raise TypeException
  * @return Str The string representation of the specified object
  */
 func repr (object) {
@@ -99,7 +111,8 @@ func repr (object) {
     return Str (object)
 }
 
-/* Returns the type of an object
+/**
+ * Returns the type of an object
  * @param Object object The object whose type is to be returned
  * @return Null|Type The type of the specified object
  */
@@ -107,15 +120,12 @@ func type (object) {
     return object.__type__
 }
 
-/* Returns an iterable covering a range
+/**
+ * Returns an iterable covering a range
  * @param Int start The inclusive start
  * @param Int end The exclusive end
  * @param **Object kwargs Optional arguments
  * @optional Int step The step
- * @raise Exception
- * @raise TypeException If start is not of type Int
- * @raise TypeException If end is not of type Int
- * @raise TypeException If step value is not of type Int
  * @yield Int The whole numbers that lie within the specified range
  */
 func range (*args, **kwargs) {
@@ -151,9 +161,9 @@ func range (*args, **kwargs) {
     }
 }
 
-/* Returns the length of a countable object
+/**
+ * Returns the length of a countable object
  * @param Object|Collection|Countable countable The countable object
- * @raise ArgumentException If the object is not countable
  * @return Int The length of the specified object
  */
 func len (countable) {
@@ -191,10 +201,10 @@ func len (countable) {
     raise ArgumentException ("countable", "The object is not countable.")
 }
 
-/* Verifies that an object is of a specific type
+/**
+ * Verifies that an object is of a specific type
  * @param Type The type
  * @param Object object The object
- * @raise TypeException If the object is not of the specified type
  * @return Object The object
  */
 func typecast (type, object) {
@@ -204,9 +214,9 @@ func typecast (type, object) {
     return object
 }
 
-/* Verifies that an object is of integer type
+/**
+ * Verifies that an object is of integer type
  * @param Object object The object
- * @raise TypeException If the object is not of integer type
  * @return Object The object
  */
 func intcast (object) {
@@ -216,9 +226,9 @@ func intcast (object) {
     return object
 }
 
-/* Returns the hex representation of an iterable
+/**
+ * Returns the hex representation of an iterable
  * @param Iterable arr The iterable
- * @raise Exception|TypeException
  * @return Str The hex representation of the specified iterable
  */
 func hex (arr) {

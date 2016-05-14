@@ -4,7 +4,17 @@
  * @author SplittyDev
  */
 
-use type, typecast, len from std.builtin
+/*
+ * This module is highly experimental, unstable
+ * and probably very buggy. Do not use it in
+ * a production environment and make sure to test
+ * the results to be sure that your configuration works.
+ *
+ * It is also completely undocumented and poorly written.
+ * If you are planning to refactor this code, go ahead,
+ * it is definitely needed. ;)
+ */
+
 use skip, take, takeWhile from std.itertools
 
 func __isBuiltinType (arg) {

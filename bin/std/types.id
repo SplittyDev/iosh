@@ -4,8 +4,6 @@
  * @author SplittyDev
  */
 
-use type from std.builtin
-
 NullType            = Null
 ObjectType          = Object
 IntType             = Int

@@ -4,53 +4,48 @@
  * @author SplittyDev
  */
 
+/*
+ * This module contains functions to force
+ * any integer to lie within a specific range
+ * using bitwise AND.
+ *
+ * To create an arbitrarily large integer, whose size
+ * is only bound by the available memory, use the BigInt type.
+ */
+
 use TypeException from std.exceptions
 
-func int8 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0x7F
-}
+/**
+ * Forces an integer into signed byte bounds
+ */
+func int8 (x) => intcast (x) & 0x7F
 
-func uint8 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0xFF
-}
+/**
+ * Forces an integer into unsigned byte bounds
+ */
+func uint8 (x) => intcast (x) & 0xFF
 
-func int16 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0x7FFF
-}
+/**
+ * Forces an integer into signed short bounds
+ */
+func int16 (x) => intcast (x) & 0x7FFF
 
-func uint16 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0xFFFF
-}
+/**
+ * Forces an integer into unsigned short bounds
+ */
+func uint16 (x) => intcast (x) & 0xFFFF
 
-func int32 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0x7FFFFFFF
-}
+/**
+ * Forces an integer into signed word bounds
+ */
+func int32 (x) => intcast (x) & 0x7FFFFFFF
 
-func uint32 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0xFFFFFFFF
-}
+/**
+ * Forces an integer into unsigned word bounds
+ */
+func uint32 (x) => intcast (x) & 0xFFFFFFFF
 
-func int64 (x) {
-    if (x isnot Int && x isnot BigInt) {
-        raise TypeException ("x", "Int|BigInt")
-    }
-    return x & 0x7FFFFFFFFFFFFFFF
-}
+/**
+ * Forces an integer into signed qword bounds
+ */
+func int64 (x) => intcast (x) & 0x7FFFFFFFFFFFFFFF

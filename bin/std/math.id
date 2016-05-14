@@ -4,26 +4,37 @@
  * @author SplittyDev
  */
 
-use typecast from std.builtin
 use ArgumentException, TypeException from std.exceptions
 use memoize from std.functools
 
-# The Pi constant
+/**
+ * The Pi constant
+ */
 PI = 3.14159265358979
 
-# The E constant
+/**
+ * The E constant
+ */
 E = 2.71828182845905
 
-# The Phi constant
+/**
+ * The Phi constant
+ */
 PHI = 1.61803398874989
 
-# The square root of 2
+/**
+ * The square root of 2
+ */
 SQRT2 = 1.41421356237309
 
-# Logarithm of e to base 2
+/**
+ * Logarithm of e to base 2
+ */
 LOG2E = 1.44269504088896
 
-# Logarithm of e to base 10
+/**
+ * Logarithm of e to base 10
+ */
 LOG10E = 0.43429448190325
 
 func fibonacci (x, **kwargs) {
@@ -294,6 +305,7 @@ func log (x) {
 */
 
 func log2 (v) {
+    intcast (v)
     b = [0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000]
     S = [1, 2, 4, 8, 16]
     r = 0
@@ -307,7 +319,6 @@ func log2 (v) {
 }
 
 func bigpow (base, exp) {
-
     if (base is Int) {
         base = BigInt (base)
     }
@@ -776,6 +787,7 @@ func cos (x, **kwargs) {
     return sum
 }
 
+/*
 func zs_sin (x) {
     t0 = lambda (x) => 1.0
     t1 = lambda (x) => x
@@ -800,6 +812,7 @@ func zs_sin (x) {
     z = 2.0 * w * w - 1.0
     return p (z) * w
 }
+*/
 
 func min (x, y) {
     if (x isnot Int && x isnot Float) {

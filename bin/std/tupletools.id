@@ -4,28 +4,32 @@
  * @author SplittyDev
  */
 
-use typecast from std.builtin
-
-# Gets the first element of a tuple
-# @param Tuple tpl The tuple
-# @return Object The first element of the tuple
+/**
+ * Gets the first element of a tuple
+ * @param Tuple tpl The tuple
+ * @return Object The first element of the tuple
+ */
 func fst (tpl) {
     typecast (Tuple, tpl)
     return tpl [0]
 }
 
-# Gets the second element of a tuple
-# @param Tuple tpl The tuple
-# @return Object The second element of the tuple
+/**
+ * Gets the second element of a tuple
+ * @param Tuple tpl The tuple
+ * @return Object The second element of the tuple
+ */
 func snd (tpl) {
     typecast (Tuple, tpl)
     return tpl [1]
 }
 
-# Gets the n-th element of a tuple
-# @param Tuple tpl The tuple
-# @param Int n The 1-based index
-# @return Object The n-th element of the tuple
+/**
+ * Gets the n-th element of a tuple
+ * @param Tuple tpl The tuple
+ * @param Int n The 1-based index
+ * @return Object The n-th element of the tuple
+ */
 func nth (tpl, n) {
     typecast (Tuple, tpl)
     return tpl [n - 1]
