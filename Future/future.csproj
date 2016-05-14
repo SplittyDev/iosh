@@ -37,6 +37,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NativeInteropClass.cs" />
     <Compile Include="FutureModule.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

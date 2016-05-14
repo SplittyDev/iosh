@@ -74,6 +74,13 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Future\future.csproj">
+      <Project>{6ABE4738-FCCB-4996-99B4-90FCA02A8184}</Project>
+      <Name>future</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>

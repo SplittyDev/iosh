@@ -109,7 +109,6 @@ namespace iosh {
             return false;
         }
 
-
         public bool TryCompileModule (string source, out IodineModule module) {
             return TryCompileModule (SourceUnit.CreateFromSource (source), out module);
         }
@@ -127,20 +126,11 @@ namespace iosh {
             context = IodineContext.Create ();
             context.SearchPath.Add (AssemblyDirectory);
             if (UseStableStdlib) {
-                ImportModules (
-                    Std.Builtin,
-                    Std.Collections,
-                    Std.Exceptions,
-                    Std.Tupletools
-                );
+                ImportModules (Std.AllModules);
             }
             if (UseExtraStdlib) {
                 ImportModules (
-                    Std.Base64,
-                    Std.Argparse,
-                    Std.Math,
-                    Std.Fastmath,
-                    Std.Itertools,
+                    Std.Crypto.RC4,
                     Std.Crypto.Whirlpool
                 );
             }

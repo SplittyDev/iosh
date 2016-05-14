@@ -3,13 +3,13 @@ using Iodine.Runtime;
 
 namespace Future {
 
-    [IodineBuiltinModule ("future", false)]
-    public partial class FutureModule : IodineModule {
+    [IodineBuiltinModule ("future")]
+    public class FutureModule : IodineModule {
         
         public FutureModule () 
             : base ("future") {
 
-            SetAttribute ("NativeInterop", new NativeInteropClass ());
+            SetAttribute ("NativeInterop", NativeInteropClass.TypeDefinition);
         }
     }
 }

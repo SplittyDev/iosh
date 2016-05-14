@@ -6,15 +6,34 @@ using Iodine.Runtime;
 
 namespace Future {
 
-    public class NativeInteropClass : IodineClass {
-
-        static readonly IodineTypeDefinition NativeInteropTypeDef = new IodineTypeDefinition ("NativeInterop");
+    public class NativeInteropClass : IodineObject {
+        
+        public static readonly NativeInteropTypeDef TypeDefinition = new NativeInteropTypeDef ();
 
         public NativeInteropClass ()
-            : base ("NativeInterop", null, null) {
-            SetType (NativeInteropTypeDef);
-            SetAttribute ("loadLibrary", new BuiltinMethodCallback (loadLibrary, this));
-            SetAttribute ("freeLibrary", new BuiltinMethodCallback (freeLibrary, this));
+            : base (TypeDefinition) {
+            SetAttribute ("loadlib", new BuiltinMethodCallback (loadLibrary, this));
+            SetAttribute ("freelib", new BuiltinMethodCallback (freeLibrary, this));
+            SetAttribute ("getproc", new BuiltinMethodCallback (getProcAddress, this));
+        }
+
+        public class NativeInteropTypeDef : IodineTypeDefinition {
+            public NativeInteropTypeDef ()
+                : base ("NativeInterop") {
+            }
+
+            public override IodineObject Invoke (VirtualMachine vm, IodineObject [] arguments) {
+                return new NativeInteropClass ();
+            }
+        }
+
+        public class NativeInteropDelegate : IodineObject {
+
+            static readonly IodineTypeDefinition NativeInteropDelegateTypeDef = new IodineTypeDefinition ("NativeInteropDelegate");
+
+            public NativeInteropDelegate ()
+            : base (NativeInteropDelegateTypeDef) {
+            }
         }
 
         IodineObject loadLibrary (VirtualMachine vm, IodineObject self, params IodineObject [] args) {
@@ -26,6 +45,26 @@ namespace Future {
             }
             var handle = NativeLoadLibrary (str.Value);
             return new IodineInteger (handle.ToInt64 ());
+        }
+
+        IodineObject getProcAddress (VirtualMachine vm, IodineObject self, params IodineObject [] args) {
+            if (args.Length > 2) {
+                vm.RaiseException ("Expected 2 arguments of type: Int, Str");
+                return IodineNull.Instance;
+            }
+            var handle = args [0] as IodineInteger;
+            var procname = args [1] as IodineString;
+            if (handle == null) {
+                vm.RaiseException ("Expected first argument to be of type: Int");
+                return IodineNull.Instance;
+            }
+            if (procname == null) {
+                vm.RaiseException ("Expected second argument to be of type: Str");
+                return IodineNull.Instance;
+            }
+            var hptr = new IntPtr (handle.Value);
+            var hproc = NativeGetProcAddress (hptr, procname.Value);
+            return new IodineInteger (hproc.ToInt64 ());
         }
 
         IodineObject freeLibrary (VirtualMachine vm, IodineObject self, params IodineObject [] args) {
@@ -66,13 +105,8 @@ namespace Future {
             return Marshal.GetDelegateForFunctionPointer (functionAddress, typeof (T));
         }
 
-        public class NativeInteropDelegate : IodineObject {
-
-            static readonly IodineTypeDefinition NativeInteropDelegateTypeDef = new IodineTypeDefinition ("NativeInteropDelegate");
-
-            public NativeInteropDelegate ()
-            : base (NativeInteropDelegateTypeDef) {
-            }
+        public override string ToString () {
+            return TypeDefinition.Name;
         }
     }
 }
