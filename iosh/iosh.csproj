@@ -69,6 +69,7 @@
     <Compile Include="DocParser.cs" />
     <Compile Include="DocParameter.cs" />
     <Compile Include="DocElement.cs" />
+    <Compile Include="Modules\DocModule.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

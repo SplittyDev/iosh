@@ -13,7 +13,7 @@ use nameof from std.reflection
 class TraceNode {
     func TraceNode (self, f) {
         self.f = f
-        self.fname = Str (f)
+        self.fname = nameof (f)
         self.fsig = null
         self.fresult = null
         self.fchilds = List ()

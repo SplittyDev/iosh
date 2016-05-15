@@ -19,7 +19,7 @@ namespace iosh {
                     var match = Regex.Match (line, @"
                     (?<pre>@[a-z]+)\s+
                     (?<type>
-                        (?:[a-z_](?:[a-z_]|\d)+)
+                        (?:[a-z_](?:[a-z_]|\d)*)
                         (?:\|(?:[a-z_](?:[a-z_]|\d)+))*
                     )\s+
                     (?<description>.*)$", RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
@@ -48,12 +48,12 @@ namespace iosh {
                     var match = Regex.Match (line, @"
                     (?<pre>@[a-z]+)\s+
                     (?<name>
-                        (?:\*{1,2})?[a-z_](?:[a-z_]|\d)+
+                        (?:\*{1,2})?[a-z_](?:[a-z_]|\d)*
                     )\s+
                     (?::\s+
                     (?<type>
-                        (?:[a-z_](?:[a-z_]|\d)+)
-                        (?:\|(?:[a-z_](?:[a-z_]|\d)+))*
+                        (?:[a-z_](?:[a-z_]|\d)*)
+                        (?:\|(?:[a-z_](?:[a-z_]|\d)*))*
                     )\s+)?
                     (?<description>.*)$", RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
                     if (!match.Groups ["name"].Success) {

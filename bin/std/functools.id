@@ -7,19 +7,20 @@
 /**
  * Decorator to achieve automatic memoization
  * by caching the return values.
+ * @param f The function
  */
 func memoize (f) {
-    cache = Dict ()
-    hits = 0
-    misses = 0
     func wrapper (*args) {
         key = args
-        if (cache.contains (key)) {
-            hits += 1
-            return cache [key]
+        if (wrapper.cache.contains (key)) {
+            wrapper.hits += 1
+            return wrapper.cache [key]
         }
-        misses += 1
-        return (cache [key] = f (*args))
+        wrapper.misses += 1
+        return (wrapper.cache [key] = f (*args))
     }
+    wrapper.cache = Dict ()
+    wrapper.hits = 0
+    wrapper.misses = 0
     return wrapper
 }

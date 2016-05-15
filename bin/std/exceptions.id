@@ -27,9 +27,8 @@ class TypeException : Exception {
         typecast (Str, argument)
         typecast (Str, types)
         if (types.contains ("|")) {
-            if ((r = types.rfind ("|")) != types.find ("|")) {
-                types = "#{types [:r]} or #{types [r + 1:]}"
-            }
+            r = types.rfind ("|")
+            types = "#{types [:r]} or #{types [r + 1:]}"
             types = types.replace ("|", ", ")
         }
         return "Expected '#{argument}' to be of type #{types}"

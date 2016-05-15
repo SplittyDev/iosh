@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace iosh {
 
@@ -9,18 +10,43 @@ namespace iosh {
 	/// </summary>
 	public static class ConsoleHelper {
 
+        const int IndentBlockSize = 3;
+        internal static int indent;
         static bool suppressindent;
         static bool indentfrozen;
-        internal static int indent;
+        static bool logging;
+        static bool silent;
         static Stack<int> indents;
         static Stack<bool> suppresses;
         static Stack<bool> freezes;
-        const int IndentBlockSize = 3;
+        static StringBuilder log;
 
         static ConsoleHelper () {
             indents = new Stack<int> ();
             suppresses = new Stack<bool> ();
             freezes = new Stack<bool> ();
+            log = new StringBuilder ();
+        }
+
+        public static void Silence () {
+            silent = true;
+        }
+
+        public static void Unsilence () {
+            silent = false;
+        }
+
+        public static void StartLog () {
+            log.Clear ();
+            logging = true;
+        }
+
+        public static string GetLog () {
+            return log.ToString ();
+        }
+
+        public static void StopLog () {
+            logging = false;
         }
 
         public static void FreezeIndent () {
@@ -84,8 +110,13 @@ namespace iosh {
         }
 
         public static void Writec (params object [] args) {
-            if (!indentfrozen)
-                Console.Write (string.Empty.PadLeft (indent, ' '));
+            if (!indentfrozen) {
+                var indentstr = string.Empty.PadLeft (indent, ' ');
+                if (logging)
+                    log.Append (indentstr);
+                if (!silent)
+                    Console.Write (indentstr);
+            }
             var c = Console.ForegroundColor;
             foreach (var arg in args) {
                 if (arg is ConsoleColor) {
@@ -96,7 +127,10 @@ namespace iosh {
                     Console.ForegroundColor = c;
                     continue;
                 }
-                Console.Write (arg);
+                if (logging)
+                    log.Append (arg);
+                if (!silent)
+                    Console.Write (arg);
             }
             Console.ForegroundColor = c;
         }
@@ -109,12 +143,12 @@ namespace iosh {
 
         public static void WriteLinec (params object [] args) {
             Writec (args);
-            Console.WriteLine ();
+            Writec ("\n");
         }
 
         public static void WriteLinecn (params object [] args) {
             Writecn (args);
-            Console.WriteLine ();
+            Writecn ("\n");
         }
 	}
 

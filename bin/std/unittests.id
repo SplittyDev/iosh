@@ -1,10 +1,18 @@
-use describe, expect from testing
+use AssertionException, describe, expect from testing
 
 # IodineClosure generators are broken
 func generatorTest () {
     yield 1;
     yield 2;
     yield 3;
+}
+
+func fail (*args) {
+    if (len (args) == 1) {
+        raise AssertionException (typecast (Str, args [0]))
+    } else {
+        raise AssertionException ("Test terminated by user")
+    }
 }
 
 describe ('stdlib', lambda (test) {
@@ -320,7 +328,7 @@ describe ('stdlib', lambda (test) {
                     raised = true
                 }
                 if (!raised) {
-                    expect (true).to.be._false ()
+                    fail ('should have raised')
                 }
             })
             test.it ('should accept its type as keyword argument', lambda () {
@@ -359,7 +367,7 @@ describe ('stdlib', lambda (test) {
                     raised = true
                 }
                 if (!raised) {
-                    expect (true).to.be._false ()
+                    fail ('should have raised')
                 }
             })
             test.it ('should correctly push items onto itself', lambda () {
@@ -442,7 +450,7 @@ describe ('stdlib', lambda (test) {
                     raised = true
                 }
                 if (!raised) {
-                    expect (true).to.be._false ()
+                    fail ('should have raised')
                 }
             })
             test.it ('should accept its type as keyword argument', lambda () {
@@ -451,6 +459,94 @@ describe ('stdlib', lambda (test) {
                 #stack.add ('a')
                 #stack.add ('b')
                 #stack.add ('c')
+            })
+        })
+    })
+    
+    # exceptions.id
+    test.describe ('exceptions', lambda (test) {
+
+        # exceptions.id ArgumentException
+        test.describe ('ArgumentException', lambda (test) {
+            test.it ('should raise', lambda () {
+                raised = false
+                try {
+                    raise ArgumentException ('x', 'test')
+                } except (e as ArgumentException) {
+                    raised = true
+                }
+                if (!raised) {
+                    fail ('should have raised')
+                }
+            })
+            test.it ('should have the right message', lambda () {
+                try {
+                    raise ArgumentException ('x', 'test')
+                } except (e as ArgumentException) {
+                    expect (e.message).to.equal ("Argument 'x': test")
+                    return;
+                }
+                fail ('should have raised')
+            })
+        })
+
+        # exceptions.id TypeException
+        test.describe ('TypeException', lambda (test) {
+            test.it ('should raise', lambda () {
+                raised = false
+                try {
+                    raise TypeException ('x', 'Str|Int')
+                } except (e as TypeException) {
+                    raised = true
+                }
+                if (!raised) {
+                    fail ('should have raised')
+                }
+            })
+            test.it ('should have the right message', lambda () {
+                try {
+                    raise TypeException ('x', 'Str|Int')
+                } except (e as TypeException) {
+                    expect (e.message).to.equal ("Expected 'x' to be of type Str or Int")
+                    return;
+                }
+                fail ('should have raised')
+            })
+        })
+    })
+
+    # functools.id
+    test.describe ('functools', lambda (test) {
+
+        # functools.id memoize
+        test.describe ('memoize', lambda (test) {
+            test.it ('should correctly cache values', lambda () {
+                @memoize
+                func fib (n) {
+                    if (n < 2) {
+                        return n
+                    }
+                    return fib (n - 2) + fib (n - 1)
+                }
+                fib (31)
+                ckeys = [1, 0]
+                ckeys.appendrange (List (2 .. 32))
+                cvals = [
+                    0000001, 0000000, 0000001, 0000002,
+                    0000003, 0000005, 0000008, 0000013,
+                    0000021, 0000034, 0000055, 0000089,
+                    0000144, 0000233, 0000377, 0000610,
+                    0000987, 0001597, 0002584, 0004181,
+                    0006765, 0010946, 0017711, 0028657,
+                    0046368, 0075025, 0121393, 0196418,
+                    0317811, 0514229, 0832040, 1346269
+                ]
+                i = 0
+                for (key, value in fib.cache) {
+                    expect (key [0]).to.equal (ckeys [i])
+                    expect (value).to.equal (cvals [i])
+                    i += 1
+                }
             })
         })
     })

@@ -10,7 +10,7 @@ namespace iosh {
     
     public static class Representer {
 
-        public static void WriteDoc (IodineObject obj, int depth, bool suppressindent = false) {
+        public static void WriteDoc (IodineObject obj, int depth = 0, bool suppressindent = false) {
             if (!obj.HasAttribute ("__doc__"))
                 return;
             var docstr = (IodineString) obj.GetAttribute ("__doc__");
@@ -143,13 +143,13 @@ namespace iosh {
                 Writec ();
                 for (var i = 0; i < tpl.Objects.Count (); i++) {
                     if (i > 0)
-                        Write (", ");
+                        Writecn (", ");
                     if (i > Shell.MaxListDisplayLength) {
                         Writecn (Magenta, "...");
                         break;
                     }
                     if (i > 0 && CursorLeft > (WindowWidth * 0.2)) {
-                        Write ("\n");
+                        Writecn ("\n");
                         Writec ();
                     }
                     PopFreeze ();
@@ -178,13 +178,13 @@ namespace iosh {
                 Writec ();
                 for (var i = 0; i < lst.Objects.Count; i++) {
                     if (i > 0)
-                        Write (", ");
+                        Writecn (", ");
                     if (i > Shell.MaxListDisplayLength) {
                         Writecn (Magenta, "...");
                         break;
                     }
                     if (i > 0 && CursorLeft > (WindowWidth * 0.2)) {
-                        Write ("\n");
+                        Writecn ("\n");
                         Writec ();
                     }
                     PopFreeze ();
@@ -211,13 +211,13 @@ namespace iosh {
                 Writec ();
                 for (var i = 0; i < keys.Length; i++) {
                     if (i > 0)
-                        Write (", ");
+                        Writecn (", ");
                     //if (i > Shell.MaxListDisplayLength) {
                     //    Writecn (Magenta, "...");
                     //    break;
                     //}
                     if (CursorLeft > (WindowWidth * 0.2)) {
-                        Write ("\n");
+                        Writecn ("\n");
                         Writec ();
                     }
                     var key = keys [i];
@@ -231,7 +231,7 @@ namespace iosh {
                     UnfreezeIndent ();
                 }
                 Unindent ();
-                WriteLine ();
+                Writecn ();
                 Writec ("}");
                 break;
             case "IodineString":
@@ -244,13 +244,13 @@ namespace iosh {
             case "MethodBuilder":
                 var method = obj as IodineMethod;
                 Writec (Cyan, "[Function: ");
-                Write (method.Name);
+                Writecn (method.Name);
                 if (method.ParameterCount > 0) {
                     Writecn (" (");
                     for (var i = 0; i < method.Parameters.Count; i++) {
                         var arg = method.Parameters.ElementAt (i);
                         if (i > 0)
-                            Write (", ");
+                            Writecn (", ");
                         Writecn (Yellow, arg.Key);
                     }
                     Writecn (")");
@@ -267,21 +267,21 @@ namespace iosh {
                 Writec (Cyan, "[Function: ");
                 Writecn (instancefunc.Method.Name, " ");
                 if (instancefunc.Method.ParameterCount > 0) {
-                    Write ("(");
+                    Writecn ("(");
                     for (var i = 0; i < instancefunc.Method.ParameterCount; i++) {
                         var arg = instancefunc.Method.Parameters.ElementAt (i);
                         if (i > 0)
-                            Write (", ");
+                            Writecn (", ");
                         Writecn (Yellow, arg.Key);
                     }
-                    Write (") ");
+                    Writecn (") ");
                 }
                 Writecn (Magenta, "(bound)", Cyan, "]");
                 break;
             case "ModuleBuilder":
                 var module = obj as IodineModule;
                 Writec (Cyan, "[Module: ");
-                Write (module.Name);
+                Writecn (module.Name);
                 if (module.ExistsInGlobalNamespace)
                     Writec (Magenta, " (global)");
                 Writec (Cyan, "]");
@@ -293,8 +293,8 @@ namespace iosh {
                     var attr = module.Attributes.ElementAt (i);
                     if (attr.Value == null || attr.Value.TypeDef == null)
                         continue;
-                    WriteLine ();
-                    Write ("{0}: ", attr.Key);
+                    WriteLinecn ();
+                    Writecn ("{0}: ", attr.Key);
                     WriteStringRepresentation (attr.Value, depth + 1);
                 }
                 break;
@@ -353,8 +353,8 @@ namespace iosh {
                 Indent ();
                 for (var i = 0; i < iodineTrait.RequiredMethods.Count; i++) {
                     if (i > 0) {
-                        Write (", ");
-                        WriteLine ();
+                        Writecn (", ");
+                        WriteLinecn ();
                     }
                     Writec ();
                     FreezeIndent ();
@@ -374,7 +374,7 @@ namespace iosh {
                     var sig = iodineTrait.RequiredMethods [i];
                     WriteStringRepresentation (sig, depth);
                     if (i < iodineTrait.RequiredMethods.Count - 1)
-                        WriteLine ();
+                        WriteLinecn ();
                 }
                 Unindent ();
                 Writec (Cyan, "\n   ]");
@@ -395,8 +395,8 @@ namespace iosh {
                 Indent ();
                 for (var i = 0; i < iodineContract.RequiredMethods.Count; i++) {
                     if (i > 0) {
-                        Write (", ");
-                        WriteLine ();
+                        Writecn (", ");
+                        WriteLinecn ();
                     }
                     Writec ();
                     FreezeIndent ();
@@ -419,7 +419,7 @@ namespace iosh {
                     Writecn (" implements ");
                     for (var i = 0; i < iodineClass.Interfaces.Count; i++) {
                         if (i > 0)
-                            Write (", ");
+                            Writecn (", ");
                         Writecn (Cyan, iodineClass.Interfaces [i].Name);
                     }
                 }
@@ -434,7 +434,7 @@ namespace iosh {
                         continue;
                     if (attr.Key.StartsWith ("__", StringComparison.Ordinal))
                         continue;
-                    WriteLine ();
+                    WriteLinecn ();
                     Writec ();
                     Writecn (attr.Key, ": ");
                     FreezeIndent ();
@@ -469,7 +469,7 @@ namespace iosh {
                     if (attr.Key.StartsWith ("__", StringComparison.Ordinal))
                         continue;
                     if (i > 0) {
-                        WriteLine ();
+                        WriteLinecn ();
                         Writec ();
                     }
                     Writecn (attr.Key, ": ");
@@ -481,7 +481,7 @@ namespace iosh {
                 PopFreeze ();
                 break;
                 /*
-                WriteLine ();
+                WriteLinecn ();
                 //Writec (Darknull, "# begin type ", obj.TypeDef.Name);
                 Indent ();
                 Writec ();
@@ -491,7 +491,7 @@ namespace iosh {
                         continue;
                     if (attr.Key.StartsWith ("__", StringComparison.Ordinal))
                         continue;
-                    WriteLine ();
+                    WriteLinecn ();
                     Writecn (attr.Key, ": ");
                     FreezeIndent ();
                     WriteStringRepresentation (attr.Value, depth + 1, true);
