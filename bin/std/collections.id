@@ -47,17 +47,17 @@ class Array : Collection {
         self.list = []
         self.length = 0
         self.capacity = -1
-        for (key in kwargs) {
-            current = kwargs [key]
+        for (key, value in kwargs) {
             match (key) {
                 case "capacity" {
-                    self.capacity = typecast (Int, current)
+                    self.capacity = typecast (Int, value)
                     for (i in 0 .. self.capacity) {
                         self.add (null)
                     }
                 }
                 case "items" {
-                    for (i in typecast (Iterable, current)) {
+                    self.clear ()
+                    for (i in typecast (Iterable, value)) {
                         self.add (i)
                     }
                 }
@@ -72,10 +72,6 @@ class Array : Collection {
     func clear (self) {
         self.list.clear ()
         self.length = 0
-    }
-
-    func clearrange (self, src_start, length) {
-        return self.fillrange (src_start, length, 0)
     }
 
     /**
@@ -113,16 +109,10 @@ class Array : Collection {
      * @return null
      */
     func remove (self, item) {
-        i = 0
-        for (x in self.list) {
-            if (x == item) {
-                self.list.removeAt (i)
-                self.length -= 1
-                return null
-            }
-            i += 1
+        if (!self.list.contains (item)) {
+            raise Exception ("The item is not an element of the collection.")
         }
-        raise Exception ("The item is not an element of the collection.")
+        self.list.remove (item)
     }
 
     /**
@@ -131,7 +121,7 @@ class Array : Collection {
      * @return null
      */
     func removeat (self, index) {
-        self.list.removeAt (typecast (Int, index))
+        self.list.removeat (typecast (Int, index))
         self.length -= 1
     }
 
@@ -238,11 +228,11 @@ class Set : Collection {
         self.list = []
         self.cardinality = 0
         self.capacity = -1
-        for (key in kwargs) {
+        for (key, value in kwargs) {
             match (key) {
-                case "capacity" => self.capacity = typecast (Int, kwargs [key])
+                case "capacity" => self.capacity = typecast (Int, value)
                 case "items" {
-                    for (i in typecast (List, kwargs [key])) {
+                    for (i in typecast (List, value)) {
                         self.add (i)
                     }
                 }
@@ -300,7 +290,7 @@ class Set : Collection {
         i = 0
         for (x in self.list) {
             if (x == item) {
-                self.list.removeAt (i)
+                self.list.removeat (i)
                 self.cardinality -= 1
                 return null
             }
@@ -516,11 +506,10 @@ class GenericSet : Set, Collection {
     func GenericSet (self, **kwargs) {
         super (kwargs);
         self.type = null
-        for (key in kwargs) {
+        for (key, value in kwargs) {
             print (key)
-            current = kwargs [key]
             match (key) {
-                case "T" => self.type = current
+                case "T" => self.type = value
             }
         }
     }
@@ -564,11 +553,11 @@ class Stack : Collection {
         self.list = []
         self.top = 0
         self.capacity = -1
-        for (key in kwargs) {
+        for (key, value in kwargs) {
             match (key) {
-                case "capacity" => self.capacity = typecast (Int, kwargs [key])
+                case "capacity" => self.capacity = typecast (Int, value)
                 case "items" {
-                    for (i in typecast (List, kwargs [key])) {
+                    for (i in typecast (List, value)) {
                         self.push (i)
                     }
                 }
@@ -633,7 +622,7 @@ class Stack : Collection {
         }
         self.top -= 1
         item = self.list [self.top]
-        self.list.removeAt (self.top)
+        self.list.removeat (self.top)
         return item
     }
 
@@ -645,7 +634,7 @@ class Stack : Collection {
     func remove (self, item) {
         for (i = 0; i < self.top; i += 1) {
             if (self [i] == item) {
-                self.list.removeAt (self.top - i - 1)
+                self.list.removeat (self.top - i - 1)
                 self.top -= 1
                 return null
             }
@@ -667,7 +656,7 @@ class Stack : Collection {
      * @return null
      */
     func removeat (self, index) {
-        self.list.removeAt (self.top - typecast (Int, index) - 1)
+        self.list.removeat (self.top - typecast (Int, index) - 1)
         self.top -= 1
     }
 
@@ -740,10 +729,9 @@ class GenericStack : Stack, Collection {
     func GenericStack (self, **kwargs) {
         super (kwargs);
         self.type = null
-        for (key in kwargs) {
-            current = kwargs [key]
+        for (key, value in kwargs) {
             match (key) {
-                case "T" => self.type = current
+                case "T" => self.type = value
             }
         }
     }

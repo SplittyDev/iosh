@@ -167,7 +167,7 @@ func zip (*iterables) {
  */
 func reduce (iterable, callback, **kwargs) {
     typecast (Iterable, iterable)
-     # TODO: Use trait Callable/Invokable for callback
+    # TODO: Use trait Callable/Invokable for callback
     result = 0
     for (key in kwargs) {
         match (key) {
@@ -190,12 +190,15 @@ func reduce (iterable, callback, **kwargs) {
  */
 func filter (iterable, callback) {
     typecast (Iterable, iterable)
-     # TODO: Use trait Callable/Invokable for callback
+    # TODO: Use trait Callable/Invokable for callback
+    lst = List ()
     for (item in iterable) {
         if (callback (item)) {
-            yield item
+            lst.append (item)
+            #yield item
         }
     }
+    return lst
 }
 
 /**
@@ -208,8 +211,8 @@ func filter (iterable, callback) {
  */
 func map (iterable, callback) {
     typecast (Iterable, iterable)
-     # TODO: Use trait Enumerable/Iterable for iterable
-     # TODO: Use trait Callable/Invokable for callback
+    # TODO: Use trait Enumerable/Iterable for iterable
+    # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         yield callback (item)
     }

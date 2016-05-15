@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Codeaddicts.libArgument;
 using Iodine.Compiler;
 using Iodine.Runtime;
@@ -18,6 +20,10 @@ namespace iosh {
 		/// </summary>
 		/// <param name="args">The command-line arguments.</param>
 		public static void Main (string[] args) {
+
+            // Set the culture
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Set the console output encoding to UTF-8
             Console.OutputEncoding = Encoding.UTF8;

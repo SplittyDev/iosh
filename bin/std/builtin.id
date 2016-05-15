@@ -25,21 +25,22 @@
 
 use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
-use instanceof from std.reflection
 
-# Any type that has a string representation
+/**
+ * Any type that has a string representation
+ */
 trait Representable {
     func __repr__ (self)
 }
 
 /**
  * Returns a string representation of an object
- * @param Object object The object to be represented
- * @return Str The string representation of the specified object
+ * @param object : Object The object to be represented
+ * @returns Str The string representation of the specified object
  */
 func repr (object) {
 
-    # Check if the object matches the trait representable
+    # Check if the object matches the representable trait
     if (object is Representable) {
         return object.__repr__ ()
     }
@@ -50,38 +51,27 @@ func repr (object) {
             typecast (Str, object)
             return "\"#{object}\""
         },
-        "Tuple": lambda () {
-            typecast (Tuple, object)
-            i = 0
-            accum = StringBuffer ()
-            accum.append ("(")
-            for (key in object) {
-                if (i > 0) {
-                    accum.append (", ")
-                }
-                accum.append (repr (key))
-                i += 1
-            }
-            accum.append (")")
-            return Str (accum)
-        },
         "Dict": lambda () {
             typecast (Dict, object)
             i = 0
             accum = StringBuffer ()
             accum.append ("{")
-            for (key in object) {
+            for (key, value in object) {
                 if (i > 0) {
                     accum.append (", ")
                 }
                 accum.append (repr (key))
                 accum.append (" = ")
-                accum.append (repr (object [key]))
+                accum.append (repr (value))
                 i += 1
             }
             accum.append ("}")
             return Str (accum)
         },
+        "Null": lambda () {
+            typecast (Null, object)
+            return "null"
+        }
     }
 
     # Check the table of special representations
@@ -93,16 +83,22 @@ func repr (object) {
     # Check if the object matches the Iterable trait
     if (object is Iterable) {
         i = 0
+        prefix = '['
+        suffix = ']'
+        if (object is Tuple) {
+            prefix = '('
+            suffix = ')'
+        }
         accum = StringBuffer ()
-        accum.append ("[")
+        accum.append (prefix)
         for (item in object) {
             if (i > 0) {
-                accum.append (", ")
+                accum.append (', ')
             }
             accum.append (repr (item))
             i += 1
         }
-        accum.append ("]")
+        accum.append (suffix)
         return Str (accum)
     }
 
@@ -113,8 +109,8 @@ func repr (object) {
 
 /**
  * Returns the type of an object
- * @param Object object The object whose type is to be returned
- * @return Null|Type The type of the specified object
+ * @param object : Object The object whose type is to be returned
+ * @returns Null|Type The type of the specified object
  */
 func type (object) {
     return object.__type__
@@ -122,13 +118,10 @@ func type (object) {
 
 /**
  * Returns an iterable covering a range
- * @param Int start The inclusive start
- * @param Int end The exclusive end
- * @param **Object kwargs Optional arguments
- * @optional Int step The step
- * @yield Int The whole numbers that lie within the specified range
+ * @variadic Int start, stop and step values
+ * @yields Int The whole numbers that lie within the specified range
  */
-func range (*args, **kwargs) {
+func range (*args) {
 
     # Default values
     start = 0
@@ -140,13 +133,15 @@ func range (*args, **kwargs) {
     if (arglen > 3) {
         raise Exception ("Too many arguments")
     }
-    if (arglen > 2) {
+    if (arglen == 3) {
         step = typecast (Int, args [2])
+        arglen = 2
     }
-    if (arglen > 1) {
-        start = typecast (Int, args [1])
+    if (arglen == 2) {
+        start = typecast (Int, args [0])
+        end = typecast (Int, args [1])
     }
-    if (arglen > 0) {
+    if (arglen == 1) {
         end = typecast (Int, args [0])
     }
     if (arglen == 0) {
@@ -163,8 +158,8 @@ func range (*args, **kwargs) {
 
 /**
  * Returns the length of a countable object
- * @param Object|Collection|Countable countable The countable object
- * @return Int The length of the specified object
+ * @param countable : Object|Collection|Countable The countable object
+ * @returns Int The length of the specified object
  */
 func len (countable) {
 
@@ -203,9 +198,9 @@ func len (countable) {
 
 /**
  * Verifies that an object is of a specific type
- * @param Type The type
- * @param Object object The object
- * @return Object The object
+ * @param type : Type The type
+ * @param object : Object The object
+ * @returns Object The object
  */
 func typecast (type, object) {
     if (object isnot type) {
@@ -216,8 +211,8 @@ func typecast (type, object) {
 
 /**
  * Verifies that an object is of integer type
- * @param Object object The object
- * @return Object The object
+ * @param object : Object The object
+ * @returns Object The object
  */
 func intcast (object) {
     if (object isnot Int && object isnot BigInt) {
@@ -228,11 +223,24 @@ func intcast (object) {
 
 /**
  * Returns the hex representation of an iterable
- * @param Iterable arr The iterable
- * @return Str The hex representation of the specified iterable
+ * @param arr : Iterable The iterable
+ * @kwparam prefix : Bool Whether to prefix the string with "0x"
+ * @returns Str The hex representation of the specified iterable
  */
-func hex (arr) {
+func hex (arr, **kwargs) {
     typecast (Iterable, arr)
+
+    # Default prefix
+    prefix = false
+
+    # Handle keyword arguments
+    for (key, value in kwargs) {
+        match (key) {
+            case "prefix" {
+                prefix = typecast (Bool, value)
+            }
+        }
+    }
 
     # The lookup table
     lut = [
@@ -265,6 +273,9 @@ func hex (arr) {
 
     # Build the hex string
     accum = StringBuffer ()
+    if (prefix) {
+        accum.append ("0x")
+    }
     for (i = 0; i < arrlen; i += 1) {
 
         # Store the current element so it doesn't have to be

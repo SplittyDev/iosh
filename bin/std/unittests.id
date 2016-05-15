@@ -1,0 +1,165 @@
+use describe, expect from testing
+
+describe ('stdlib', lambda (test) {
+
+    # builtin.id
+    test.describe ('builtin', lambda (test) {
+
+        # builtin.id repr
+        test.describe ('repr', lambda (test) {
+            test.it ('should work with strings', lambda () {
+                expect (repr ('hello')).to.equal ('"hello"')
+            })
+            test.it ('should work with integers', lambda () {
+                expect (repr (1234)).to.equal ('1234')
+                expect (repr (0xFFFFFFFFFFFFFFFFL)).to.equal ('18446744073709551615')
+            })
+            test.it ('should work with tuples', lambda () {
+                expect (repr ((1, 2, 3, 4))).to.equal ('(1, 2, 3, 4)')
+                expect (repr (("a", "b", "c"))).to.equal ('("a", "b", "c")')
+            })
+            test.it ('should work with dictionaries', lambda () {
+                expect (repr ({ "a": 1, "b": 2 })).to.equal ('{"b" = 2, "a" = 1}');
+            })
+            test.it ('should work with lists', lambda () {
+                expect (repr ([1, 2, 3, 4])).to.equal ('[1, 2, 3, 4]')
+                expect (repr ([null, null, null])).to.equal ('[null, null, null]')
+            })
+            test.it ('should work with collections', lambda () {
+                expect (repr (Array (items: [1, 2, 3, 4]))).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should work with null', lambda () {
+                expect (repr (null)).to.equal ('null')
+            })
+        })
+
+        # builtin.id type
+        test.describe ('type', lambda (test) {
+            test.it ('should return the correct type', lambda () {
+                expect (type (Str)).to.equal (Str.__type__)
+                expect (type (type)).to.equal (type.__type__)
+                expect (type (null)).to.equal (null.__type__)
+                expect (type ('test')).to.equal ('test'.__type__)
+            })
+        })
+
+        # builtin.id range
+        test.describe ('range', lambda (test) {
+            test.it ('should work with one argument', lambda () {
+                expect (List (range (1))).to.equal ([0])
+                expect (List (range (2))).to.equal ([0, 1])
+            })
+            test.it ('should work with two arguments', lambda () {
+                expect (List (range (0, 5))).to.equal ([0, 1, 2, 3, 4])
+                expect (List (range (1, 6))).to.equal ([1, 2, 3, 4, 5])
+            })
+            test.it ('should work with three arguments', lambda () {
+                expect (List (range (0, 10, 2))).to.equal ([0, 2, 4, 6, 8])
+                expect (List (range (1, 10, 2))).to.equal ([1, 3, 5, 7, 9])
+            })
+            test.it ('should yield the same values as the range operator', lambda () {
+                expect (List (range (10))).to.equal (List (0 .. 10))
+                expect (List (range (0, 10))).to.equal (List (0 .. 10))
+                expect (List (range (0, 11))).to.equal (List (0 ... 10))
+                expect (List (range (-10, 11))).to.equal (List (-10 ... 10))
+            })
+        })
+
+        # builtin.id len
+        test.describe ('len', lambda (test) {
+            test.it ('should work with collections', lambda () {
+                expect (len (Set  ())).to.equal (0)
+                expect (len (Array (items: [1, 2, 3, 4]))).to.equal (4)
+                expect (len (Stack (items: [1, 2, 3, 4]))).to.equal (4)
+            })
+            test.it ('should work with iterables', lambda () {
+                expect (len (List ())).to.equal (0)
+                expect (len ([1, 2, 3, 4])).to.equal (4)
+            })
+            test.it ('should work with generators', lambda () {
+                func _ () {
+                    yield 1;
+                    yield 2;
+                    yield 3;
+                }
+                expect (len (_ ())).to.equal (3)
+            })
+        })
+
+        # builtin.id typecast
+        test.describe ('typecast', lambda (test) {
+            test.it ('should work with all types', lambda () {
+                arr = Array ()
+                expect (typecast (Int, 1234)).to.equal (1234)
+                expect (typecast (Str, "hello")).to.equal ("hello")
+                expect (typecast (Null, null)).to.equal (null)
+                expect (typecast (Array, arr)).to.equal (arr)
+            })
+        })
+
+        # builtin.id intcast
+        test.describe ('intcast', lambda (test) {
+            test.it ('should work with Int literals', lambda () {
+                expect (intcast (0)).to.equal (0)
+                expect (intcast (1337)).to.equal (1337)
+            })
+            test.it ('should work with BigInt literals', lambda () {
+                # Compiler bug: expect (intcast (0L)).to.equal (0L)
+                expect (intcast (0xFFFFFFFFFFFFFFFFL)).to.equal (0xFFFFFFFFFFFFFFFFL)
+            })
+        })
+
+        # builtin.id hex
+        test.describe ('hex', lambda (test) {
+            test.it ('should produce the correct hex string', lambda () {
+                expect (hex ([255], prefix: true)).to.equal ("0xff")
+                expect (hex ([170, 187, 204, 221, 238, 255])).to.equal ("aabbccddeeff")
+            })
+        })
+    })
+    
+    # collections.id
+    test.describe ('collections', lambda (test) {
+
+        # collections.id Array
+        test.describe ('Array', lambda (test) {
+            test.it ('should correctly preallocated space', lambda () {
+                expect (len (Array (capacity: 0))).to.equal (0)
+                expect (len (Array (capacity: 100))).to.equal (100)
+            })
+            test.it ('should correctly fill the array', lambda () {
+                expect (List (Array (items: [1, 2, 3, 4]))).to.equal ([1, 2, 3, 4])
+            })
+            test.it ('should correctly count its items', lambda () {
+                expect (Array (items: [1, 2, 3, 4]).count ()).to.equal (4)
+            })
+            test.it ('should correctly clear its items', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                arr.clear ()
+                expect (len (arr)).to.equal (0)
+            })
+            test.it ('should correctly report whether it is empty or not', lambda () {
+                expect (Array ().empty ()).to.be._true ()
+                expect (Array (items: [1, 2, 3, 4]).empty ()).to.be._false ()
+            })
+            test.it ('should correctly add values to itself', lambda () {
+                arr = Array ()
+                arr.add (1)
+                arr.add (2)
+                expect (List (arr)).to.equal ([1, 2])
+            })
+            test.it ('should correctly remove values from itself', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                arr.remove (1)
+                arr.remove (3)
+                expect (List (arr)).to.equal ([2, 4])
+            })
+            test.it ('should correctly remove values at a specific index from itself', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                arr.removeat (1)
+                arr.removeat (3)
+                expect (List (arr)).to.equal ([1, 3])
+            })
+        })
+    })
+})

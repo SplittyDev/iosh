@@ -10,6 +10,81 @@ namespace iosh {
     
     public static class Representer {
 
+        public static void WriteDoc (IodineObject obj, int depth, bool suppressindent = false) {
+            if (!obj.HasAttribute ("__doc__"))
+                return;
+            var docstr = (IodineString) obj.GetAttribute ("__doc__");
+            if (docstr.Value == null)
+                return;
+            var doc = DocParser.Parse (docstr.Value);
+            if (doc.HasDescription) {
+                WriteLinec ("Documentation:");
+                Indent ();
+                foreach (var line in doc.Description.Split ('\n'))
+                    if (!string.IsNullOrWhiteSpace (line))
+                        WriteLinec (Green, line);
+                Unindent ();
+            }
+            if (doc.HasAuthors) {
+                var authors = doc.Authors;
+                WriteLinec ("Authors:");
+                Indent ();
+                foreach (var author in authors)
+                    WriteLinec (author);
+                Unindent ();
+            }
+            if (doc.HasParameters) {
+                var parameters = doc.Parameters;
+                WriteLinec ("Arguments:");
+                Indent ();
+                foreach (var p in parameters) {
+                    if (p.Name.StartsWith ("*", StringComparison.Ordinal))
+                        continue;
+                    WriteLinec (
+                        Yellow, p.Name, Magenta, " (", Cyan, p.Type, Magenta, ")",
+                        null, p.HasDescription ? ": " : string.Empty, p.Description
+                    );
+                }
+                Unindent ();
+            }
+            if (doc.HasKeywordParameters) {
+                var kwargs = doc.KeywordParameters;
+                WriteLinec ("Keyword arguments:");
+                Indent ();
+                foreach (var p in kwargs) {
+                    WriteLinec (
+                        Yellow, p.Name, Magenta, " (", Cyan, p.Type, Magenta, ")",
+                        null, p.HasDescription ? ": " : string.Empty, p.Description
+                    );
+                }
+                Unindent ();
+            }
+            if (doc.HasVariadicArguments) {
+                var varargs = doc.VariadicValue;
+                WriteLinec ("Variadic arguments:");
+                Indent ();
+                WriteLinec (
+                    "Zero or more ", Cyan, varargs.Type, "s",
+                    null, varargs.HasDescription ? ": " : string.Empty, varargs.Description
+                );
+                Unindent ();
+            }
+            if (doc.HasYieldValue) {
+                var retval = doc.YieldValue;
+                WriteLinec (
+                    "Yields ", Cyan, retval.Type,
+                    null, retval.HasDescription ? ": " : string.Empty, retval.Description
+                );
+            }
+            if (doc.HasReturnValue) {
+                var retval = doc.ReturnValue;
+                WriteLinec (
+                    "Returns ", Cyan, retval.Type,
+                    null, retval.HasDescription ? ": " : string.Empty, retval.Description
+                );
+            }
+        }
+
         public static bool WriteStringRepresentation (IodineObject obj, int depth = 0, bool suppressindent = false) {
 
             if (depth > Shell.MaxRecursionDepth) {
@@ -29,6 +104,8 @@ namespace iosh {
                 return true;
             }
 
+            WriteDoc (obj, depth, suppressindent);
+
             PushIndentState ();
             if (suppressindent)
                 SuppressIndent ();
@@ -36,7 +113,7 @@ namespace iosh {
             var value = obj.ToString ();
             switch (obj.GetType ().Name) {
             case "IodineNull":
-                // Writec (Gray, "null");
+                // Writec (null, "null");
                 // return true;
                 return false;
             case "IodineBool":
@@ -335,7 +412,7 @@ namespace iosh {
                 var iodineClassAttrcount = iodineClass.Attributes.Count;
                 var iodineClassHasattrs = !obj.Attributes.All (attr => attr.Key.StartsWith ("__", StringComparison.Ordinal));
                 //if (hasattrs)
-                //    WriteLinec (DarkGray, "# begin class ", iodineClass.Name);
+                //    WriteLinec (Darknull, "# begin class ", iodineClass.Name);
                 Writec (Cyan, "[Class: ", null, iodineClass.Name);
                 if (iodineClass.Interfaces.Count > 0) {
                     Writecn (" implements ");
@@ -363,7 +440,7 @@ namespace iosh {
                     WriteStringRepresentation (attr.Value, depth + 1, true);
                     UnfreezeIndent ();
                 }
-                //Writec (DarkGray, "# end class ", iodineClass.Name);
+                //Writec (Darknull, "# end class ", iodineClass.Name);
                 Unindent ();
                 break;
             default:
@@ -404,7 +481,7 @@ namespace iosh {
                 break;
                 /*
                 WriteLine ();
-                //Writec (DarkGray, "# begin type ", obj.TypeDef.Name);
+                //Writec (Darknull, "# begin type ", obj.TypeDef.Name);
                 Indent ();
                 Writec ();
                 for (var i = 0; i < obj.Attributes.Count; i++) {
@@ -419,7 +496,7 @@ namespace iosh {
                     WriteStringRepresentation (attr.Value, depth + 1, true);
                     UnfreezeIndent ();
                 }
-                //Writec (DarkGray, "# end type ", obj.TypeDef.Name);
+                //Writec (Darknull, "# end type ", obj.TypeDef.Name);
                 Unindent ();
                 break;
                  */
