@@ -8,6 +8,11 @@
  * Any type that can be iterated over
  */
 trait Iterable {
+
+    /**
+     * Gets the iterator
+     * @yields Object The items
+     */
     func __iter__ (self)
 }
 
@@ -15,6 +20,11 @@ trait Iterable {
  * Any type that can be counted
  */
 trait Countable {
+
+    /**
+     * Gets the length
+     * @returns Int The length
+     */
     func __len__ (self)
 }
 
@@ -22,11 +32,41 @@ trait Countable {
  * A collection of objects
  */
 contract Collection {
+
+    /**
+     * Clears the collection
+     */
     func clear (self)
+
+    /**
+     * Counts the elements in the collection
+     * @returns Int The element count
+     */
     func count (self)
+
+    /**
+     * Determines whether the collection is empty
+     * @returns Bool Whether the collection is empty
+     */
     func empty (self)
+
+    /**
+     * Adds an element to the collection
+     * @param item : Object The element to be added
+     */
     func add (self, item)
+
+    /**
+     * Removes an element from the collection
+     * @param item : Object The element to be removed
+     */
     func remove (self, item)
+
+    /**
+     * Determines whether something is an element of the collection
+     * @param item : Object The item
+     * @returns Bool Whether the specified item is an element of the collection
+     */
     func contains (self, item)
 }
 
@@ -37,11 +77,10 @@ class Array : Collection {
 
     /**
      * Constructor
-     * @param **Object kwargs Optional arguments
-     * @optional Int capacity The capacity
-     * @optional Iterable items The elements to initialize the Array with
-     * @optional Int prealloc The amount of space to be preallocated
-     * @raise Exception|TypeException
+     * @param **kwargs Optional arguments
+     * @kwparam capacity : Int The capacity
+     * @kwparam items : Iterable The elements to initialize the Array with
+     * @kwparam prealloc : Int The amount of space to be preallocated
      */
     func Array (self, **kwargs) {
         self.list = []
@@ -67,7 +106,6 @@ class Array : Collection {
 
     /**
      * Clears the collection
-     * @return null
      */
     func clear (self) {
         self.list.clear ()
@@ -76,7 +114,7 @@ class Array : Collection {
 
     /**
      * Counts the elements in the collection
-     * @return Int The element count
+     * @returns Int The element count
      */
     func count (self) {
         return self.length
@@ -84,7 +122,7 @@ class Array : Collection {
 
     /**
      * Determines whether the collection is empty
-     * @return Bool Whether the collection is empty
+     * @returns Bool Whether the collection is empty
      */
     func empty (self) {
         return self.length == 0
@@ -92,8 +130,7 @@ class Array : Collection {
 
     /**
      * Adds an element to the collection
-     * @param Object item The element to be added
-     * @return null
+     * @param item : Object The element to be added
      */
     func add (self, item) {
         if (self.length == self.capacity) {
@@ -105,30 +142,35 @@ class Array : Collection {
 
     /**
      * Removes an element from the collection
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func remove (self, item) {
         if (!self.list.contains (item)) {
             raise Exception ("The item is not an element of the collection.")
         }
-        self.list.remove (item)
-    }
-
-    /**
-     * Removes the specific element from the collection
-     * @param Int index The index of the element to be removed
-     * @return null
-     */
-    func removeat (self, index) {
-        self.list.removeat (typecast (Int, index))
+        if (!self.list.discard (item)) {
+            raise Exception ("Unable to remove item '#{item}'")
+        }
         self.length -= 1
     }
 
     /**
+     * Removes the specific element from the collection
+     * @param index : Int The index of the element to be removed
+     */
+    func removeat (self, index) {
+        try {
+            self.list.removeat (typecast (Int, index))
+            self.length -= 1
+        } except {
+            raise Exception ("Unable to remove item at index #{index}")
+        }
+    }
+
+    /**
      * Determines whether something is an element of the collection
-     * @param Object item The item
-     * @return bool Whether the specified item is an element of the collection
+     * @param item : Object The item
+     * @returns Bool Whether the specified item is an element of the collection
      */
     func contains (self, item) {
         return self.list.contains (item)
@@ -136,8 +178,8 @@ class Array : Collection {
 
     /**
      * Fills the collection with a value
-     * @param Object filler The object that the collection is to be filled with
-     * @return Array The modified collection
+     * @param filler The object that the collection is to be filled with
+     * @returns Array The modified collection
      */
     func fill (self, filler) {
         for (i = 0; i < self.length; i += 1) {
@@ -146,6 +188,13 @@ class Array : Collection {
         return self
     }
 
+    /**
+     * Fills a part of the collection with a value
+     * @param src_start : Int The start index
+     * @param length : Int The length
+     * @param filler The object that the collection is to be filled with
+     * @returns Array The modified collection
+     */
     func fillrange (self, src_start, length, filler) {
         for (i = 0; i < length; i += 1) {
             self [src_start + i] = filler
@@ -155,7 +204,7 @@ class Array : Collection {
 
     /**
      * Gets the length
-     * @return Int The length
+     * @returns Int The length
      */
     func __len__ (self) {
         return self.count ()
@@ -163,7 +212,7 @@ class Array : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __str__ (self) {
         return self.__repr__ ()
@@ -171,7 +220,7 @@ class Array : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __repr__ (self) {
         return repr (self.list)
@@ -179,8 +228,8 @@ class Array : Collection {
 
     /**
      * Gets the item at the specified index
-     * @param Int i The index
-     * @return Object The item at the specified index
+     * @param i : Int The index
+     * @returns Object The item at the specified index
      */
     func __getItem__ (self, i) {
         return self.list [i]
@@ -188,9 +237,8 @@ class Array : Collection {
 
     /**
      * Sets the item at the specified index
-     * @param Int i The index
-     * @param Object item The item
-     * @return null
+     * @param i : Int The index
+     * @param item : Object The item
      */
     func __setItem__ (self, i, item) {
         self.list [i] = item
@@ -198,7 +246,7 @@ class Array : Collection {
     
     /**
      * Gets the iterator
-     * @yield Object The items
+     * @yields Object The items
      */
     func __iter__ (self) {
         for (i = 0; i < self.length; i += 1) {
@@ -220,9 +268,9 @@ class Set : Collection {
 
     /**
      * Constructor
-     * @param **Object kwargs Optional arguments
-     * @optional Int capacity The capacity
-     * @optional List items The elements to initialize the Set with
+     * @param **kwargs Optional arguments
+     * @kwparam capacity : Int The capacity
+     * @kwparam items : Iterable The elements to initialize the Set with
      */
     func Set (self, **kwargs) {
         self.list = []
@@ -232,7 +280,7 @@ class Set : Collection {
             match (key) {
                 case "capacity" => self.capacity = typecast (Int, value)
                 case "items" {
-                    for (i in typecast (List, value)) {
+                    for (i in typecast (Iterable, value)) {
                         self.add (i)
                     }
                 }
@@ -242,7 +290,6 @@ class Set : Collection {
 
     /**
      * Clears the collection
-     * @return null
      */
     func clear (self) {
         self.list.clear ()
@@ -251,7 +298,7 @@ class Set : Collection {
 
     /**
      * Counts the elements in the collection
-     * @return Int The element count
+     * @returns Int The element count
      */
     func count (self) {
         return self.cardinality
@@ -259,7 +306,7 @@ class Set : Collection {
 
     /**
      * Determines whether the collection is empty
-     * @return Bool Whether the collection is empty
+     * @returns Bool Whether the collection is empty
      */
     func empty (self) {
         return self.cardinality == 0
@@ -267,8 +314,7 @@ class Set : Collection {
 
     /**
      * Adds an element to the set
-     * @param Object item The element to be added
-     * @return null
+     * @param item : Object The element to be added
      */
     func add (self, item) {
         if (self.cardinality == self.capacity) {
@@ -283,8 +329,7 @@ class Set : Collection {
 
     /**
      * Removes an element from the set
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func remove (self, item) {
         i = 0
@@ -301,8 +346,8 @@ class Set : Collection {
 
     /**
      * Returns the union of this and another set
-     * @param Set other The other set
-     * @return Set A set containing the union of this and another set
+     * @param other : Set The other set
+     * @returns Set A set containing the union of this and another set
      */
     func union (self, other) {
         typecast (Set, other)
@@ -317,8 +362,8 @@ class Set : Collection {
 
     /**
      * Returns the intersection of this and another set
-     * @param Set other The other set
-     * @return Set A set containing the intersection of this and the other set
+     * @param other : Set The other set
+     * @returns Set A set containing the intersection of this and the other set
      */
     func intersection (self, other) {
         typecast (Set, other)
@@ -333,8 +378,8 @@ class Set : Collection {
 
     /**
      * Returns the difference of this and another set
-     * @param Set other The other set
-     * @return Set A set containing the difference of this and the other set
+     * @param other : Set The other set
+     * @returns Set A set containing the difference of this and the other set
      */
     func difference (self, other) {
         typecast (Set, other)
@@ -349,8 +394,8 @@ class Set : Collection {
 
     /**
      * Determines whether this is a superset of another set
-     * @param Set other The other set
-     * @return Bool Whether this is a superset of the other set
+     * @param other : Set The other set
+     * @returns Bool Whether this is a superset of the other set
      */
     func superset (self, other) {
         typecast (Set, other)
@@ -365,8 +410,8 @@ class Set : Collection {
 
     /**
      * Determines whether this is a subset of another set
-     * @param Set other The other set
-     * @return Bool Whether this is a subset of the other set
+     * @param other : Set The other set
+     * @returns Bool Whether this is a subset of the other set
      */
     func subset (self, other) {
         typecast (Set, other)
@@ -381,8 +426,8 @@ class Set : Collection {
 
     /**
      * Determines whether something is an element of the set
-     * @param Object item The item
-     * @return bool Whether the specified item is an element of the array
+     * @param item : Object The item
+     * @returns bool Whether the specified item is an element of the array
      */
     func contains (self, item) {
         return self.list.contains (item)
@@ -390,7 +435,7 @@ class Set : Collection {
 
     /**
      * Gets the length
-     * @return Int The length
+     * @returns Int The length
      */
     func __len__ (self) {
         return self.count ()
@@ -398,7 +443,7 @@ class Set : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __str__ (self) {
         return self.__repr__ ()
@@ -406,7 +451,7 @@ class Set : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __repr__ (self) {
         return repr (self.list)
@@ -414,8 +459,8 @@ class Set : Collection {
 
     /**
      * Gets the item at the specified index
-     * @param Int i The index
-     * @return Object The item at the specified index
+     * @param i : Int The index
+     * @returns Object The item at the specified index
      */
     func __getItem__ (self, i) {
         return self.list [i]
@@ -423,7 +468,7 @@ class Set : Collection {
     
     /**
      * Gets the iterator
-     * @yield Object The items
+     * @yields Object The items
      */
     func __iter__ (self) {
         for (i = 0; i < self.cardinality; i += 1) {
@@ -433,18 +478,18 @@ class Set : Collection {
     
     /**
      * Creates a new set from a list
-     * @param List lst The items
-     * @return Set A set contaning the elements of the specified lists
+     * @param lst : Iterable The items
+     * @returns Set A set contaning the elements of the specified lists
      */
-    func create (lst) {
-        return Set (items: typecast (List, lst))
+    func create (items) {
+        return Set (items: typecast (Iterable, items))
     }
 
     /**
      * Returns the union of two sets
-     * @param Set a The first set
-     * @param Set b The second set
-     * @return Set A set containing the union of the two sets
+     * @param a : Set The first set
+     * @param b : Set The second set
+     * @returns Set A set containing the union of the two sets
      */
     func unionof (a, b) {
         return typecast (Set, a).union (b)
@@ -452,9 +497,9 @@ class Set : Collection {
 
     /**
      * Returns the intersection of two sets
-     * @param Set a The first set
-     * @param Set b The second set
-     * @return Set A set containing the intersection of the two sets
+     * @param a : Set The first set
+     * @param b : Set The second set
+     * @returns Set A set containing the intersection of the two sets
      */
     func intersectionof (a, b) {
         return typecast (Set, a).intersection (b)
@@ -462,9 +507,9 @@ class Set : Collection {
 
     /**
      * Returns the difference of two sets
-     * @param Set a The first set
-     * @param Set b The second set
-     * @return Set A set contaning the difference of the two sets
+     * @param a : Set The first set
+     * @param b : Set The second set
+     * @returns Set A set contaning the difference of the two sets
      */
     func differenceof (a, b) {
         return typecast (Set, a).difference (b)
@@ -472,9 +517,9 @@ class Set : Collection {
 
     /**
      * Determines whether a set is a superset of another set
-     * @param Set a The first set
-     * @param Set b The second set
-     * @return Bool Whether the first set is a superset of the second set
+     * @param a : Set The first set
+     * @param b : Set The second set
+     * @returns Bool Whether the first set is a superset of the second set
      */
     func supersetof (a, b) {
         return typecast (Set, a).superset (b)
@@ -482,9 +527,9 @@ class Set : Collection {
 
     /**
      * Determines whether a set is a subset of another set
-     * @param Set a The first set
-     * @param Set b The second set
-     * @return Bool Whether the first set is a subset of the second set
+     * @param a : Set The first set
+     * @param b : Set The second set
+     * @returns Bool Whether the first set is a subset of the second set
      */
     func subsetof (a, b) {
         return typecast (Set, a).subset (b)
@@ -498,16 +543,15 @@ class GenericSet : Set, Collection {
 
     /**
      * Constructor
-     * @param **Object kwargs Optional arguments
-     * @optional Type T
-     * @optional Int capacity
-     * @optional List items
+     * @param **kwargs Optional arguments
+     * @kwparam T The type
+     * @kwparam capacity : Int
+     * @kwparam items : List
      */
     func GenericSet (self, **kwargs) {
         super (kwargs);
         self.type = null
         for (key, value in kwargs) {
-            print (key)
             match (key) {
                 case "T" => self.type = value
             }
@@ -516,8 +560,7 @@ class GenericSet : Set, Collection {
 
     /**
      * Adds an element to the set
-     * @param Object item The element to be added
-     * @return null
+     * @param item : Object The element to be added
      */
     func add (self, item) {
         if (self.type is Null) {
@@ -529,8 +572,7 @@ class GenericSet : Set, Collection {
 
     /**
      * Removes an element from the set
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func remove (self, item) {
         typecast (self.type, item)
@@ -545,9 +587,9 @@ class Stack : Collection {
 
     /**
      * Constructor
-     * @param **Object kwargs Optional arguments
-     * @optional Int capacity
-     * @optional List items
+     * @param **kwargs Optional arguments
+     * @kwparam capacity : Int
+     * @kwparam items : Iterable
      */
     func Stack (self, **kwargs) {
         self.list = []
@@ -557,7 +599,7 @@ class Stack : Collection {
             match (key) {
                 case "capacity" => self.capacity = typecast (Int, value)
                 case "items" {
-                    for (i in typecast (List, value)) {
+                    for (i in typecast (Iterable, value)) {
                         self.push (i)
                     }
                 }
@@ -567,7 +609,6 @@ class Stack : Collection {
 
     /**
      * Clears the collection
-     * @return null
      */
     func clear (self) {
         self.list.clear ()
@@ -576,7 +617,7 @@ class Stack : Collection {
 
     /**
      * Counts the elements in the collection
-     * @return Int The element count
+     * @returns Int The element count
      */
     func count (self) {
         return self.top
@@ -584,7 +625,7 @@ class Stack : Collection {
 
     /**
      * Determines whether the collection is empty
-     * @return Bool Whether the collection is empty
+     * @returns Bool Whether the collection is empty
      */
     func empty (self) {
         return self.top == 0
@@ -592,8 +633,7 @@ class Stack : Collection {
 
     /**
      * Adds an element to the collection
-     * @param Object item The element to be added
-     * @return null
+     * @param item : Object The element to be added
      */
     func add (self, item) {
         raise Exception ("Use Stack.push instead!")
@@ -601,8 +641,7 @@ class Stack : Collection {
 
     /**
      * Pushes an item onto the stack
-     * @param Object item The item to be pushed onto the stack
-     * @return null
+     * @param item : Object The item to be pushed onto the stack
      */
     func push (self, item) {
         if (self.top == self.capacity) {
@@ -614,7 +653,7 @@ class Stack : Collection {
 
     /**
      * Pops an item from the stack
-     * @return Object The item that was popped from the stack
+     * @returns Object The item that was popped from the stack
      */
     func pop (self) {
         if (self.top == 0) {
@@ -628,8 +667,7 @@ class Stack : Collection {
 
     /**
      * Removes an element from the collection
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func remove (self, item) {
         for (i = 0; i < self.top; i += 1) {
@@ -643,8 +681,8 @@ class Stack : Collection {
 
     /**
      * Determines whether something is an element of the collection
-     * @param Object item The item
-     * @return bool Whether the specified item is an element of the collection
+     * @param item : Object The item
+     * @returns Bool Whether the specified item is an element of the collection
      */
     func contains (self, item) {
         return self.list.contains (item)
@@ -652,8 +690,7 @@ class Stack : Collection {
 
     /**
      * Removes an element from the collection
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func removeat (self, index) {
         self.list.removeat (self.top - typecast (Int, index) - 1)
@@ -662,7 +699,7 @@ class Stack : Collection {
 
     /**
      * Gets the length
-     * @return Int The length
+     * @returns Int The length
      */
     func __len__ (self) {
         return self.count ()
@@ -670,7 +707,7 @@ class Stack : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __str__ (self) {
         return self.__repr__ ()
@@ -678,7 +715,7 @@ class Stack : Collection {
 
     /**
      * Gets the string representation
-     * @return Str The string representation
+     * @returns Str The string representation
      */
     func __repr__ (self) {
         return repr (self.list)
@@ -686,8 +723,8 @@ class Stack : Collection {
 
     /**
      * Gets the item at the specified index
-     * @param Int i The index
-     * @return Object The item at the specified index
+     * @param i : Int The index
+     * @returns Object The item at the specified index
      */
     func __getItem__ (self, i) {
         return self.list [self.top - i - 1]
@@ -695,9 +732,8 @@ class Stack : Collection {
 
     /**
      * Sets the item at the specified index
-     * @param Int i The index
-     * @param Object item The item
-     * @return null
+     * @param i : Int The index
+     * @param item : Object The item
      */
     func __setItem__ (self, i, item) {
         self.list [self.top - i - 1] = item
@@ -705,7 +741,7 @@ class Stack : Collection {
     
     /**
      * Gets the iterator
-     * @yield Object The items
+     * @yields Object The items
      */
     func __iter__ (self) {
         for (i = 0; i < self.top; i += 1) {
@@ -722,9 +758,9 @@ class GenericStack : Stack, Collection {
     /**
      * Constructor
      * @param **Object kwargs Optional arguments
-     * @optional Int capacity
-     * @optional List items
-     * @optional Type T The type
+     * @kwparam capacity : Int
+     * @kwparam items : Iterable
+     * @kwparam T The type
      */
     func GenericStack (self, **kwargs) {
         super (kwargs);
@@ -738,8 +774,7 @@ class GenericStack : Stack, Collection {
 
     /**
      * Pushes an item onto the stack
-     * @param Object item The item to be pushed onto the stack
-     * @return null
+     * @param item : Object The item to be pushed onto the stack
      */
     func push (self, item) {
         if (self.type is Null) {
@@ -751,8 +786,7 @@ class GenericStack : Stack, Collection {
 
     /**
      * Removes an element from the collection
-     * @param Object item The element to be removed
-     * @return null
+     * @param item : Object The element to be removed
      */
     func remove (self, item) {
         typecast (self.type, item)

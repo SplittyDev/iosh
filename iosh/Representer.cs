@@ -85,7 +85,7 @@ namespace iosh {
             }
         }
 
-        public static bool WriteStringRepresentation (IodineObject obj, int depth = 0, bool suppressindent = false) {
+        public static bool WriteStringRepresentation (IodineObject obj, int depth = 0, bool suppressindent = false, bool suppressdoc = true) {
 
             if (depth > Shell.MaxRecursionDepth) {
                 return false;
@@ -104,7 +104,8 @@ namespace iosh {
                 return true;
             }
 
-            WriteDoc (obj, depth, suppressindent);
+            if (!suppressdoc)
+                WriteDoc (obj, depth, suppressindent);
 
             PushIndentState ();
             if (suppressindent)

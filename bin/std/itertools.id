@@ -191,14 +191,11 @@ func reduce (iterable, callback, **kwargs) {
 func filter (iterable, callback) {
     typecast (Iterable, iterable)
     # TODO: Use trait Callable/Invokable for callback
-    lst = List ()
     for (item in iterable) {
         if (callback (item)) {
-            lst.append (item)
-            #yield item
+            yield item
         }
     }
-    return lst
 }
 
 /**
@@ -211,7 +208,6 @@ func filter (iterable, callback) {
  */
 func map (iterable, callback) {
     typecast (Iterable, iterable)
-    # TODO: Use trait Enumerable/Iterable for iterable
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         yield callback (item)

@@ -1,5 +1,12 @@
 use describe, expect from testing
 
+# IodineClosure generators are broken
+func generatorTest () {
+    yield 1;
+    yield 2;
+    yield 3;
+}
+
 describe ('stdlib', lambda (test) {
 
     # builtin.id
@@ -77,12 +84,7 @@ describe ('stdlib', lambda (test) {
                 expect (len ([1, 2, 3, 4])).to.equal (4)
             })
             test.it ('should work with generators', lambda () {
-                func _ () {
-                    yield 1;
-                    yield 2;
-                    yield 3;
-                }
-                expect (len (_ ())).to.equal (3)
+                expect (len (generatorTest ())).to.equal (3)
             })
         })
 
@@ -123,11 +125,11 @@ describe ('stdlib', lambda (test) {
 
         # collections.id Array
         test.describe ('Array', lambda (test) {
-            test.it ('should correctly preallocated space', lambda () {
+            test.it ('should correctly preallocate space', lambda () {
                 expect (len (Array (capacity: 0))).to.equal (0)
                 expect (len (Array (capacity: 100))).to.equal (100)
             })
-            test.it ('should correctly fill the array', lambda () {
+            test.it ('should correctly prefill itself', lambda () {
                 expect (List (Array (items: [1, 2, 3, 4]))).to.equal ([1, 2, 3, 4])
             })
             test.it ('should correctly count its items', lambda () {
@@ -138,27 +140,317 @@ describe ('stdlib', lambda (test) {
                 arr.clear ()
                 expect (len (arr)).to.equal (0)
             })
-            test.it ('should correctly report whether it is empty or not', lambda () {
+            test.it ('should correctly report whether it is empty', lambda () {
                 expect (Array ().empty ()).to.be._true ()
                 expect (Array (items: [1, 2, 3, 4]).empty ()).to.be._false ()
             })
-            test.it ('should correctly add values to itself', lambda () {
+            test.it ('should correctly add items to itself', lambda () {
                 arr = Array ()
                 arr.add (1)
                 arr.add (2)
                 expect (List (arr)).to.equal ([1, 2])
             })
-            test.it ('should correctly remove values from itself', lambda () {
+            test.it ('should correctly remove items from itself', lambda () {
                 arr = Array (items: [1, 2, 3, 4])
                 arr.remove (1)
                 arr.remove (3)
                 expect (List (arr)).to.equal ([2, 4])
-            })
-            test.it ('should correctly remove values at a specific index from itself', lambda () {
                 arr = Array (items: [1, 2, 3, 4])
                 arr.removeat (1)
-                arr.removeat (3)
+                arr.removeat (2)
                 expect (List (arr)).to.equal ([1, 3])
+            })
+            test.it ('should correctly report whether it contains an item', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr.contains (2)).to.be._true ()
+                expect (arr.contains (5)).to.be._false ()
+            })
+            test.it ('should correctly fill itself with items', lambda () {
+                arr = Array (capacity: 5)
+                expect (List (arr.fill (0))).to.equal ([0, 0, 0, 0, 0])
+                expect (List (arr.fill ('a'))).to.equal (['a', 'a', 'a', 'a', 'a'])
+            })
+            test.it ('should correctly fill part of itself with items', lambda () {
+                arr = Array (items: ['a', 'b', 'b'])
+                expect (List (arr.fillrange (2, 1, 'c'))).to.equal (['a', 'b', 'c'])
+                arr = Array (items: ['0', '1', '1', '0'])
+                expect (List (arr.fillrange (1, 2, '0'))).to.equal (['0', '0', '0', '0'])
+            })
+            test.it ('should correctly report its length', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr.__len__ ()).to.equal (4)
+            })
+            test.it ('should correctly override its string representation', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr.__str__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly report its string representation', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr.__repr__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly return items by index', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr [0]).to.equal (1)
+                expect (arr [3]).to.equal (4)
+            })
+            test.it ('should correctly set items by index', lambda () {
+                arr = Array (items: [1, 0, 0, 4])
+                arr [1] = 2
+                arr [2] = 3
+                expect (List (arr)).to.equal ([1, 2, 3, 4])
+            })
+            test.it ('should be iterable', lambda () {
+                arr = Array (items: [1, 2, 3, 4])
+                expect (arr is Iterable).to.be._true ()
+                lst = [1, 2, 3, 4]
+                i = 0
+                for (item in arr) {
+                    expect (item).to.equal (lst [i])
+                    i += 1
+                }
+            })
+        })
+        
+        # collections.id Set
+        test.describe ('Set', lambda (test) {
+            test.it ('should correctly prefill itself', lambda () {
+                expect (List (Set (items: [1, 2, 3, 4]))).to.equal ([1, 2, 3, 4])
+            })
+            test.it ('should correctly clear its items', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                set.clear ()
+                expect (len (set)).to.equal (0)
+            })
+            test.it ('should correctly count its items', lambda () {
+                expect (Set (items: [1, 2, 3, 4]).count ()).to.equal (4)
+            })
+            test.it ('should correctly report whether it is empty', lambda () {
+                expect (Set ().empty ()).to.be._true ()
+                expect (Set (items: [1, 2, 3, 4]).empty ()).to.be._false ()
+            })
+            test.it ('should correctly add items to itself', lambda () {
+                set = Set ()
+                set.add (1)
+                set.add (2)
+                expect (List (set)).to.equal ([1, 2])
+            })
+            test.it ('should correctly remove items from itself', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                set.remove (1)
+                set.remove (3)
+                expect (List (set)).to.equal ([2, 4])
+            })
+            test.it ('should correctly calculate the union', lambda () {
+                set1 = Set (items: [1, 2])
+                set2 = Set (items: [3, 4])
+                expect (List (set1.union (set2))).to.equal ([3, 4, 1, 2])
+            })
+            test.it ('should correctly calculate the intersection', lambda () {
+                set1 = Set (items: [1, 2, 3, 4])
+                set2 = Set (items: [3, 4, 5, 6])
+                expect (List (set1.intersection (set2))).to.equal ([3, 4])
+            })
+            test.it ('should correctly calculate the difference', lambda () {
+                set1 = Set (items: [2, 4, 6, 8])
+                set2 = Set (items: [1, 4, 5, 8])
+                expect (List (set1.difference (set2))).to.equal ([2, 6])
+                expect (List (set2.difference (set1))).to.equal ([1, 5])
+            })
+            test.it ('should correctly determine whether it is a superset', lambda () {
+                set1 = Set (items: [1, 2, 3, 4, 5, 6, 7, 8, 9])
+                set2 = Set (items: [   2,    4,    6,    8   ])
+                expect (set1.superset (set2)).to.be._true ()
+                expect (set2.superset (set1)).to.be._false ()
+            })
+            test.it ('should correctly determine whether it is a subset', lambda () {
+                set1 = Set (items: [   2,    4,    6,    8   ])
+                set2 = Set (items: [1, 2, 3, 4, 5, 6, 7, 8, 9])
+                expect (set1.subset (set2)).to.be._true ()
+                expect (set2.subset (set1)).to.be._false ()
+            })
+            test.it ('should correctly report whether it contains an item', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set.contains (2)).to.be._true ()
+                expect (set.contains (5)).to.be._false ()
+            })
+            test.it ('should correctly report its length', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set.__len__ ()).to.equal (4)
+            })
+            test.it ('should correctly override its string representation', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set.__str__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly report its string representation', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set.__repr__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly return items by index', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set [0]).to.equal (1)
+                expect (set [3]).to.equal (4)
+            })
+            test.it ('should be iterable', lambda () {
+                set = Set (items: [1, 2, 3, 4])
+                expect (set is Iterable).to.be._true ()
+                lst = [1, 2, 3, 4]
+                i = 0
+                for (item in set) {
+                    expect (item).to.equal (lst [i])
+                    i += 1
+                }
+            })
+        })
+        
+        # collections.id GenericSet
+        test.describe ('GenericSet', lambda (test) {
+            test.it ('should correctly infer the type', lambda () {
+                set = GenericSet ()
+                set.add (1)
+                set.add (2)
+                expect (set.type).to.equal (Int)
+            })
+            test.it ('should not accept other types', lambda () {
+                set = GenericSet ()
+                set.add (0)
+                raised = false
+                try {
+                    set.add ('a')
+                } except {
+                    raised = true
+                }
+                if (!raised) {
+                    expect (true).to.be._false ()
+                }
+            })
+            test.it ('should accept its type as keyword argument', lambda () {
+                # Compiler bug: super (kwargs) consumes the **kwargs
+                #set = GenericSet (T: Str)
+                #set.add ('a')
+                #set.add ('b')
+                #set.add ('c')
+            })
+        })
+
+        # collections.id Stack
+        test.describe ('Stack', lambda (test) {
+            test.it ('should correctly prefill itself', lambda () {
+                expect (List (Stack (items: [1, 2, 3, 4]))).to.equal ([4, 3, 2, 1])
+            })
+            test.it ('should correctly clear its items', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                stack.clear ()
+                expect (len (stack)).to.equal (0)
+            })
+            test.it ('should correctly count its items', lambda () {
+                expect (Stack (items: [1, 2, 3, 4]).count ()).to.equal (4)
+            })
+            test.it ('should correctly report whether it is empty', lambda () {
+                expect (Stack ().empty ()).to.be._true ()
+                expect (Stack (items: [1, 2, 3, 4]).empty ()).to.be._false ()
+            })
+            test.it ('should raise if items are added using Stack.add', lambda () {
+                stack = Stack ()
+                raised = false
+                try {
+                    stack.add (1)
+                    stack.add (2)
+                } except {
+                    raised = true
+                }
+                if (!raised) {
+                    expect (true).to.be._false ()
+                }
+            })
+            test.it ('should correctly push items onto itself', lambda () {
+                stack = Stack ()
+                stack.push (1)
+                stack.push (2)
+                expect (List (stack)).to.equal ([2, 1])
+            })
+            test.it ('should correctly pop items from itself', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                stack.pop ()
+                stack.pop ()
+                expect (List (stack)).to.equal ([2, 1])
+            })
+            test.it ('should correctly remove items from itself', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                stack.remove (1)
+                stack.remove (3)
+                expect (List (stack)).to.equal ([4, 2])
+                stack = Stack (items: [1, 2, 3, 4])
+                stack.removeat (0)
+                stack.removeat (0)
+                expect(List (stack)).to.equal ([2, 1])
+            })
+            test.it ('should correctly report whether it contains an item', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack.contains (2)).to.be._true ()
+                expect (stack.contains (5)).to.be._false ()
+            })
+            test.it ('should correctly report its length', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack.__len__ ()).to.equal (4)
+            })
+            test.it ('should correctly override its string representation', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack.__str__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly report its string representation', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack.__repr__ ()).to.equal ('[1, 2, 3, 4]')
+            })
+            test.it ('should correctly return items by index', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack [0]).to.equal (4)
+                expect (stack [3]).to.equal (1)
+            })
+            test.it ('should correctly set items by index', lambda () {
+                stack = Stack (items: [1, 0, 0, 4])
+                stack [1] = 3
+                stack [2] = 2
+                expect (List (stack)).to.equal ([4, 3, 2, 1])
+            })
+            test.it ('should be iterable', lambda () {
+                stack = Stack (items: [1, 2, 3, 4])
+                expect (stack is Iterable).to.be._true ()
+                lst = [4, 3, 2, 1]
+                i = 0
+                for (item in stack) {
+                    expect (item).to.equal (lst [i])
+                    i += 1
+                }
+            })
+        })
+
+        # collections.id GenericStack
+        test.describe ('GenericStack', lambda (test) {
+            test.it ('should correctly infer the type', lambda () {
+                stack = GenericStack ()
+                stack.push (1)
+                stack.push (2)
+                expect (stack.type).to.equal (Int)
+            })
+            test.it ('should not accept other types', lambda () {
+                stack = GenericStack ()
+                stack.push (0)
+                raised = false
+                try {
+                    stack.push ('a')
+                } except {
+                    raised = true
+                }
+                if (!raised) {
+                    expect (true).to.be._false ()
+                }
+            })
+            test.it ('should accept its type as keyword argument', lambda () {
+                # Compiler bug: super (kwargs) consumes the **kwargs
+                #stack = GenericStack (T: Str)
+                #stack.add ('a')
+                #stack.add ('b')
+                #stack.add ('c')
             })
         })
     })

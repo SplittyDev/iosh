@@ -165,7 +165,7 @@ namespace iosh {
 
             // Print the result
             if (rawvalue != null) {
-                if (Representer.WriteStringRepresentation (rawvalue))
+                if (Representer.WriteStringRepresentation (rawvalue, suppressdoc: false))
                     WriteLine ();
             }
         }
