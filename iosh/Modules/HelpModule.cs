@@ -8,10 +8,10 @@ using static iosh.ConsoleHelper;
 
 namespace iosh {
 
-    [IodineBuiltinModule ("__iosh_help__")]
+    [IodineBuiltinModule ("iosh_help")]
     public class HelpModule : IodineModule {
 
-        public HelpModule () : base ("__iosh_help__") {
+        public HelpModule () : base ("iosh_help") {
             ExistsInGlobalNamespace = true;
             SetAttribute ("help", new BuiltinMethodCallback (help, null));
         }

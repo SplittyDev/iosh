@@ -3,10 +3,15 @@ using Iodine.Runtime;
 
 namespace iosh {
 
-    [IodineBuiltinModule ("__iosh_doc__")]
+    [IodineBuiltinModule ("iosh_doc")]
+    [BuiltinDocString (
+        "iosh's builtin documentation module",
+        "Call doc (<object>) to see the documentation for any object,",
+        "call doc (<object>, true) to get the documentation as Str."
+    )]
     public class DocModule : IodineModule {
 
-        public DocModule () : base ("__iosh_doc__") {
+        public DocModule () : base ("iosh_doc") {
             ExistsInGlobalNamespace = true;
             SetAttribute ("doc", new BuiltinMethodCallback (doc, this));
         }

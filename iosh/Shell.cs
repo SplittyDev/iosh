@@ -120,7 +120,7 @@ namespace iosh {
                 try {
                     RunIteration ();
                 } catch (Exception e) {
-                    WriteLinec (Red, "\n*** ", "Ye dun fuk'd up.");
+                    WriteLinec (Magenta, "\n*** ", "Ye dun fuk'd up.");
                     WriteLinec ("    Reason: ", e.Message);
                     WriteLine (e.StackTrace);
                 }
