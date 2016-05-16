@@ -4,6 +4,14 @@
  * @author SplittyDev
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_CRYPTO_CORE)
+global __STDLIB_CRYPTO_CORE=true}
+except{global __STDLIB_CRYPTO_CORE=true}
+# --- stdlib include guard ---------->
+
 contract hashProvider {
     func update (self, data)
     func digest (self)

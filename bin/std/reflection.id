@@ -4,6 +4,14 @@
  * @author SplittyDev
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_REFLECTION)
+global __STDLIB_REFLECTION=true}
+except{global __STDLIB_REFLECTION=true}
+# --- stdlib include guard ---------->
+
  # TODO: Fix weird string behavior
  # type(Str)?
 

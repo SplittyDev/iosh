@@ -1,3 +1,11 @@
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_UNITTESTS)
+global __STDLIB_UNITTESTS=true}
+except{global __STDLIB_UNITTESTS=true}
+# --- stdlib include guard ---------->
+
 use AssertionException, describe, expect from testing
 
 # IodineClosure generators are broken
@@ -548,6 +556,80 @@ describe ('stdlib', lambda (test) {
                     i += 1
                 }
             })
+        })
+    })
+
+    # ints.id
+    test.describe ('ints', lambda (test) {
+
+        # ints.id int8
+        test.it ('should correctly cast signed bytes', lambda () {
+            div = 0x7F
+            dix = div + 0x1
+            max = dix * 0x20
+            for (i in range (0, max, pow (2, 10))) {
+                expect (int8 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id uint8
+        test.it ('should correctly cast unsigned bytes', lambda () {
+            div = 0xFF
+            dix = div + 0x1
+            max = dix * 0x20
+            for (i in range (0, max, pow (2, 10))) {
+                expect (uint8 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id int16
+        test.it ('should correctly cast signed halfwords', lambda () {
+            div = 0x7FFF
+            dix = div + 0x1
+            max = dix * 0x8
+            for (i in range (0, max, pow (2, 10 + 0x2))) {
+                expect (int16 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id uint16
+        test.it ('should correctly cast unsigned halfwords', lambda () {
+            div = 0xFFFF
+            dix = div + 0x1
+            max = dix * 0x8
+            for (i in range (0, max, pow (2, 10 + 0x4))) {
+                expect (uint16 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id int32
+        test.it ('should correctly cast signed words', lambda () {
+            div = 0x7FFFFFFF
+            dix = div + 0x1
+            max = dix * 0x4
+            for (i in range (0, max, pow (2, 10 + 0x10))) {
+                expect (int32 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id uint32
+        test.it ('should correctly cast unsigned words', lambda () {
+            div = 0xFFFFFFFF
+            dix = div + 0x1
+            max = dix * 0x4
+            for (i in range (0, max, pow (2, 10 + 0x10))) {
+                expect (uint32 (i)).to.equal (i % dix)
+            }
+        })
+
+        # ints.id int64
+        test.it ('should correctly cast signed qwords', lambda () {
+            dix = 0x8000000000000000L
+            max = dix * 0x2
+            for (i in range (0, max, bigpow (2, 10 + 0x30))) {
+                result = int64 (i)
+                expect (result).to.equal (i % dix)
+            }
         })
     })
 })

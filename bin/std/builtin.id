@@ -23,6 +23,14 @@
  * using the runtime-provided stdout and stdin objects.
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_BUILTIN)
+global __STDLIB_BUILTIN=true}
+except{global __STDLIB_BUILTIN=true}
+# --- stdlib include guard ---------->
+
 use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
 
@@ -30,6 +38,11 @@ use Collection, Countable, Iterable from std.collections
  * Any type that has a string representation
  */
 trait Representable {
+
+    /**
+     * Gets the string representation
+     * @returns Str The string representation
+     */
     func __repr__ (self)
 }
 
@@ -134,25 +147,29 @@ func range (*args) {
         raise Exception ("Too many arguments")
     }
     if (arglen == 3) {
-        step = typecast (Int, args [2])
+        step = intcast (args [2])
         arglen = 2
     }
     if (arglen == 2) {
-        start = typecast (Int, args [0])
-        end = typecast (Int, args [1])
+        start = intcast (args [0])
+        end = intcast (args [1])
     }
     if (arglen == 1) {
-        end = typecast (Int, args [0])
+        end = intcast (args [0])
     }
     if (arglen == 0) {
         raise Exception ("Too few arguments")
     }
 
-    # Yield the values within the desired range
-    for (i in start .. end) {
-        if ((start + i) % step == 0) {
-            yield i
-        }
+    # Prepare index variable
+    i = start
+    if (start is Int && end is BigInt) {
+        i = BigInt (start)
+    }
+
+    # Yield values within the desired range
+    for (i; i < end; i += step) {
+        yield i
     }
 }
 

@@ -5,6 +5,14 @@
  * @author SplittyDev
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_TRACER)
+global __STDLIB_TRACER=true}
+except{global __STDLIB_TRACER=true}
+# --- stdlib include guard ---------->
+
 use nameof from std.reflection
 
 /**

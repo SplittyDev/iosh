@@ -31,10 +31,10 @@ namespace iosh {
         }
 
 		public IodineEngine () {
-            if (!BuiltInModules.Modules.ContainsKey ("__iosh_help__"))
-			    BuiltInModules.Modules.Add ("__iosh_help__", new HelpModule ());
-            if (!BuiltInModules.Modules.ContainsKey ("__iosh_doc__"))
-                BuiltInModules.Modules.Add ("__iosh_doc__", new DocModule ());
+            if (!BuiltInModules.Modules.ContainsKey ("iosh_help"))
+			    BuiltInModules.Modules.Add ("iosh_help", new HelpModule ());
+            if (!BuiltInModules.Modules.ContainsKey ("iosh_doc"))
+                BuiltInModules.Modules.Add ("iosh_doc", new DocModule ());
 			Init ();
 		}
 

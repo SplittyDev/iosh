@@ -6,6 +6,14 @@
  * @author SplittyDev
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_FASTMATH)
+global __STDLIB_FASTMATH=true}
+except{global __STDLIB_FASTMATH=true}
+# --- stdlib include guard ---------->
+
 use sin, cos, sqrt, factorial from std.math
 
 /**

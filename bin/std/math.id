@@ -4,6 +4,14 @@
  * @author SplittyDev
  */
 
+# <-- stdlib include guard -----------
+try{if(__STDLIB);}
+except{global __STDLIB=true}
+try{if(!__STDLIB_MATH)
+global __STDLIB_MATH=true}
+except{global __STDLIB_MATH=true}
+# --- stdlib include guard ---------->
+
 use ArgumentException, TypeException from std.exceptions
 use memoize from std.functools
 
@@ -340,7 +348,7 @@ func bigpow (base, exp) {
         return base * base
     }
 
-    result = 1
+    result = BigInt (1)
     while (exp > 0) {
         if ((exp & 1) == 1) {
             result *= base
