@@ -704,6 +704,7 @@ describe ('stdlib', lambda (test) {
             test.it ('should correctly zip iterables together', lambda () {
                 itera = [1, 2]
                 iterb = [3, 4]
+                iterc = zip (itera, iterb)
                 print (repr (iterc))
                 lst = [(1, 3), (2, 4)]
                 i = 0
