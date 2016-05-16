@@ -632,4 +632,114 @@ describe ('stdlib', lambda (test) {
             }
         })
     })
+
+    # itertools.id
+    test.describe ('itertools', lambda (test) {
+
+        # itertools.id chain
+        test.describe ('chain', lambda (test) {
+            test.it ('should correctly combine iterables', lambda () {
+                itera = [1, 2, 3]
+                iterb = [4, 5, 6]
+                expect (List (chain (itera, iterb))).to.equal ([1, 2, 3, 4, 5, 6])
+            })
+        })
+
+        # itertools.id each
+        test.describe ('each', lambda (test) {
+            test.it ('should correctly imitate \'for\' behavior', lambda () {
+                itera = [1, 2, 3, 4]
+                sum = 0
+                each (itera, lambda (i) => sum += i)
+                expect (sum).to.equal (10)
+            })
+        })
+
+        # itertools.id take
+        test.describe ('take', lambda (test) {
+            test.it ('should yield the correct elements', lambda () {
+                itera = [1, 2, 3, 4]
+                iterb = take (itera, 2)
+                expect (List (iterb)).to.equal ([1, 2])
+            })
+        })
+
+        # itertools.id takewhile
+        test.describe ('takeWhile', lambda (test) {
+            test.it ('should yield the correct elements', lambda () {
+                itera = [1, 2, 3, 4]
+                iterb = takewhile (itera, lambda (i) => i <= 2)
+                expect (List (iterb)).to.equal ([1, 2])
+            })
+        })
+
+        # itertools.id skip
+        test.describe ('skip', lambda (test) {
+            test.it ('should yield the correct elements', lambda () {
+                itera = [1, 2, 3, 4]
+                iterb = skip (itera, 2)
+                expect (List (iterb)).to.equal ([3, 4])
+            })
+        })
+
+        # itertools.id skipwhile
+        test.describe ('skipwhile', lambda (test) {
+            test.it ('should yield the correct elements', lambda () {
+                itera = [1, 2, 3, 4]
+                iterb = skipwhile (itera, lambda (i) => i <= 2)
+                expect (List (iterb)).to.equal ([3, 4])
+            })
+        })
+
+        # itertools.id sum
+        test.describe ('sum', lambda (test) {
+            test.it ('should correctly sum up iterables', lambda () {
+                itera = [1, 2, 3, 4]
+                expect (sum (itera)).to.equal (10)
+            })
+        })
+
+        # itertools.id zip
+        test.describe ('zip', lambda (test) {
+            test.it ('should correctly zip iterables together', lambda () {
+                itera = [1, 2]
+                iterb = [3, 4]
+                print (repr (iterc))
+                lst = [(1, 3), (2, 4)]
+                i = 0
+                for (tpl in iterc) {
+                    print ("a: #{repr (lst [i])}; b: #{repr (tpl)}")
+                    expect (tpl).to.equal (lst [i])
+                    i += 1
+                }
+            })
+        })
+
+        # itertools.id reduce
+        test.describe ('reduce', lambda (test) {
+            test.it ('should correctly reduce iterables', lambda () {
+                itera = [1, 2, 3, 4]
+                sum = reduce (itera, lambda (i, j) => i + j)
+                expect (sum).to.equal (10)
+            })
+        })
+
+        # itertools.id filter
+        test.describe ('filter', lambda (test) {
+            test.it ('should correctly filter iterables', lambda () {
+                itera = [0, 1, 2, 3]
+                iterb = filter (itera, lambda (i) => i % 2 == 0)
+                expect (List (iterb)).to.equal ([0, 2])
+            })
+        })
+
+        # itertools.id map
+        test.describe ('map', lambda (test) {
+            test.it ('should correctly map iterables', lambda () {
+                itera = [0, 1, 2, 3]
+                iterb = map (itera, lambda (i) => i % 2)
+                expect (List (iterb)).to.equal ([0, 1, 0, 1])
+            })
+        })
+    })
 })

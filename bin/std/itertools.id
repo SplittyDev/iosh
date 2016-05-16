@@ -65,7 +65,7 @@ func take (iterator, count) {
  * @param Object callback The condition
  * @yield Object The elements
  */
-func takeWhile (iterator, callback) {
+func takewhile (iterator, callback) {
     typecast (Iterable, iterator)
     stop = false
     for (item in iterator) {
@@ -102,7 +102,7 @@ func skip (iterator, count) {
  * @param Object callback The condition
  * @yield Object The remaining elements
  */
-func skipWhile (iterator, callback) {
+func skipwhile (iterator, callback) {
     typecast (Iterable, iterator)
     _skip = true
     for (item in iterator) {
