@@ -4,13 +4,8 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_COLLECTIONS)
-global __STDLIB_COLLECTIONS=true}
-except{global __STDLIB_COLLECTIONS=true}
-# --- stdlib include guard ---------->
+global __STDLIB = true
+global __STDLIB_COLLECTIONS = true
 
 /**
  * Any type that can be iterated over

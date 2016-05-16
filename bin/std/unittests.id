@@ -1,11 +1,12 @@
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_UNITTESTS)
-global __STDLIB_UNITTESTS=true}
-except{global __STDLIB_UNITTESTS=true}
-# --- stdlib include guard ---------->
+/**
+ * Provides unit tests for the stdlib
+ * @module std/unittests
+ * @author SplittyDev
+ */
 
+global __STDLIB = true
+global __STDLIB_UNITTESTS = true
+use stdlib_isdefined from std.info
 use AssertionException, describe, expect from testing
 
 # IodineClosure generators are broken
@@ -27,6 +28,9 @@ describe ('stdlib', lambda (test) {
 
     # builtin.id
     test.describe ('builtin', lambda (test) {
+        if (!stdlib_isdefined ('builtin')) {
+            use * from std.builtin
+        }
 
         # builtin.id repr
         test.describe ('repr', lambda (test) {
@@ -138,6 +142,9 @@ describe ('stdlib', lambda (test) {
     
     # collections.id
     test.describe ('collections', lambda (test) {
+        if (!stdlib_isdefined ('collections')) {
+            use * from std.collections
+        }
 
         # collections.id Array
         test.describe ('Array', lambda (test) {
@@ -473,6 +480,9 @@ describe ('stdlib', lambda (test) {
     
     # exceptions.id
     test.describe ('exceptions', lambda (test) {
+        if (!stdlib_isdefined ('exceptions')) {
+            use * from std.exceptions
+        }
 
         # exceptions.id ArgumentException
         test.describe ('ArgumentException', lambda (test) {
@@ -525,6 +535,9 @@ describe ('stdlib', lambda (test) {
 
     # functools.id
     test.describe ('functools', lambda (test) {
+        if (!stdlib_isdefined ('functools')) {
+            use * from std.functools
+        }
 
         # functools.id memoize
         test.describe ('memoize', lambda (test) {
@@ -561,6 +574,9 @@ describe ('stdlib', lambda (test) {
 
     # ints.id
     test.describe ('ints', lambda (test) {
+        if (!stdlib_isdefined ('ints')) {
+            use * from std.ints
+        }
 
         # ints.id int8
         test.it ('should correctly cast signed bytes', lambda () {
@@ -635,6 +651,9 @@ describe ('stdlib', lambda (test) {
 
     # itertools.id
     test.describe ('itertools', lambda (test) {
+        if (!stdlib_isdefined ('itertools')) {
+            use * from std.itertools
+        }
 
         # itertools.id chain
         test.describe ('chain', lambda (test) {
@@ -704,6 +723,7 @@ describe ('stdlib', lambda (test) {
             test.it ('should correctly zip iterables together', lambda () {
                 itera = [1, 2]
                 iterb = [3, 4]
+                iterc = zip (itera, iterb)
                 print (repr (iterc))
                 lst = [(1, 3), (2, 4)]
                 i = 0

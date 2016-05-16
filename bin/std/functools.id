@@ -4,13 +4,8 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_FUNCTOOLS)
-global __STDLIB_FUNCTOOLS=true}
-except{global __STDLIB_FUNCTOOLS=true}
-# --- stdlib include guard ---------->
+global __STDLIB = true
+global __STDLIB_FUNCTOOLS = true
 
 /**
  * Decorator to achieve automatic memoization

@@ -1,0 +1,18 @@
+/**
+ * Provides basic information about the stdlib
+ * @module std/info
+ * @author SplittyDev
+ */
+
+use map, filter from std.itertools
+
+func stdlib_getmodules () {
+    prefix = "__STDLIB_"
+    return List (map (filter (__globals__,
+        lambda (tpl) => fst (tpl).startswith (prefix)),
+        lambda (tpl) => fst (tpl) [len (prefix):].lower ()))
+}
+
+func stdlib_isdefined (module: Str) {
+    return __globals__.contains ("__STDLIB_#{module.upper ()}")
+}

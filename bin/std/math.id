@@ -4,14 +4,8 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_MATH)
-global __STDLIB_MATH=true}
-except{global __STDLIB_MATH=true}
-# --- stdlib include guard ---------->
-
+global __STDLIB = true
+global __STDLIB_MATH = true
 use ArgumentException, TypeException from std.exceptions
 use memoize from std.functools
 

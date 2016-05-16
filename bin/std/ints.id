@@ -4,14 +4,6 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_INTS)
-global __STDLIB_INTS=true}
-except{global __STDLIB_INTS=true}
-# --- stdlib include guard ---------->
-
 /*
  * This module contains functions to force
  * any integer to lie within a specific range
@@ -21,6 +13,8 @@ except{global __STDLIB_INTS=true}
  * is only bound by the available memory, use the BigInt type.
  */
 
+global __STDLIB = true
+global __STDLIB_INTS = true
 use TypeException from std.exceptions
 
 /**

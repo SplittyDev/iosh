@@ -4,13 +4,8 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_TYPES)
-global __STDLIB_TYPES=true}
-except{global __STDLIB_TYPES=true}
-# --- stdlib include guard ---------->
+global __STDLIB = true
+global __STDLIB_TYPES = true
 
 NullType            = Null
 ObjectType          = Object

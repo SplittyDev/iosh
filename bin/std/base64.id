@@ -4,13 +4,8 @@
  * @author SplittyDev
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_BASE64)
-global __STDLIB_BASE64=true}
-except{global __STDLIB_BASE64=true}
-# --- stdlib include guard ---------->
+global __STDLIB = true
+global __STDLIB_BASE64 = true
 
 /**
  * Base64 class

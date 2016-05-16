@@ -23,14 +23,8 @@
  * using the runtime-provided stdout and stdin objects.
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_BUILTIN)
-global __STDLIB_BUILTIN=true}
-except{global __STDLIB_BUILTIN=true}
-# --- stdlib include guard ---------->
-
+global __STDLIB = true
+global __STDLIB_BUILTIN = true
 use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
 
@@ -244,10 +238,7 @@ func intcast (object) {
  * @kwparam prefix : Bool Whether to prefix the string with "0x"
  * @returns Str The hex representation of the specified iterable
  */
-func hex (arr, **kwargs) {
-    typecast (Iterable, arr)
-
-    # Default prefix
+func hex (arr: Iterable, **kwargs) {
     prefix = false
 
     # Handle keyword arguments

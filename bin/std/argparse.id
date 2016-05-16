@@ -15,14 +15,8 @@
  * it is definitely needed. ;)
  */
 
-# <-- stdlib include guard -----------
-try{if(__STDLIB);}
-except{global __STDLIB=true}
-try{if(!__STDLIB_ARGPARSE)
-global __STDLIB_ARGPARSE=true}
-except{global __STDLIB_ARGPARSE=true}
-# --- stdlib include guard ---------->
-
+global __STDLIB = true
+global __STDLIB_ARGPARSE = true
 use skip, take, takeWhile from std.itertools
 
 func __isBuiltinType (arg) {
