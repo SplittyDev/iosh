@@ -126,7 +126,7 @@ describe ('stdlib', lambda (test) {
                 expect (intcast (1337)).to.equal (1337)
             })
             test.it ('should work with BigInt literals', lambda () {
-                # Compiler bug: expect (intcast (0L)).to.equal (0L)
+                expect (intcast (0L)).to.equal (0L)
                 expect (intcast (0xFFFFFFFFFFFFFFFFL)).to.equal (0xFFFFFFFFFFFFFFFFL)
             })
         })

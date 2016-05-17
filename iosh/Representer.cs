@@ -294,7 +294,7 @@ namespace iosh {
                     if (attr.Value == null || attr.Value.TypeDef == null)
                         continue;
                     WriteLinecn ();
-                    Writecn ("{0}: ", attr.Key);
+                    Writecn (attr.Key, ": ");
                     WriteStringRepresentation (attr.Value, depth + 1);
                 }
                 break;
