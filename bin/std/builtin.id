@@ -41,6 +41,47 @@ trait Representable {
 }
 
 /**
+ * Prints one or more objects to the standard output stream
+ * and appends a newline character to each one
+ * @variadic Object The objects to be printed
+ */
+func print (*args) {
+    for (i in args) {
+        if (i isnot Str) {
+            i = Str (i)
+        }
+        stdout.writeln (i)
+    }
+}
+
+/**
+ * Reads a line from the standard input stream
+ * @kwparam prompt : Str The prompt
+ */
+func read (**kwargs) {
+    prompt = ""
+
+    # Handle keyword arguments
+    for (key, value in kwargs) {
+        match (key) {
+            case "prompt" => prompt = typecast (Str, value)
+        }
+    }
+
+    # Print the prompt
+    if (!prompt.iswhitespace ()) {
+        stdout.write (prompt)
+    }
+
+    return stdin.readln ()
+}
+
+/* to be implemented
+func sort (iterable: Iterable) {
+}
+*/
+
+/**
  * Returns a string representation of an object
  * @param object : Object The object to be represented
  * @returns Str The string representation of the specified object
