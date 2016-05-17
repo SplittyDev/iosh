@@ -5,10 +5,11 @@ The Iodine REPL shell
 Iosh is modeled after the NodeJS REPL shell.
 
 ## Features
-- Easy and intuitive to use
+- Easy to use and intuitive
+- Bundled with an amazing standard library
 - On the fly evaluation of expressions and statements
-- Intelligent line continuation mode for multiline expressions
-- Interpreter for Iodine sources
 - Beautifully colored and formatted representations of any type
+- Intelligent line continuation mode for multiline expressions
+- Builtin interpreter and documentation
 
 ## Screenshots

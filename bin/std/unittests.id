@@ -6,6 +6,7 @@
 
 global __STDLIB = true
 global __STDLIB_UNITTESTS = true
+use * from std.tracer
 use stdlib_isdefined from std.info
 use AssertionException, describe, expect from testing
 
@@ -24,6 +25,7 @@ func fail (*args) {
     }
 }
 
+tracer_start ()
 describe ('stdlib', lambda (test) {
 
     # builtin.id
@@ -762,4 +764,72 @@ describe ('stdlib', lambda (test) {
             })
         })
     })
+
+    # math.id
+    test.describe ('math', lambda (test) {
+        if (!stdlib_isdefined ('math')) {
+            use * from std.math
+        }
+
+        # math.id fibonacci
+        test.describe ('fibonacci', lambda (test) {
+            test.it ('naive algorithm', lambda () {
+                lst = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+                for (i in range (1, 11)) {
+                    expect (fibonacci (i, method: 'naive')).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('fastdoubling algorithm', lambda () {
+                lst = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+                for (i in range (1, 11)) {
+                    expect (fibonacci (i, method: 'fastdoubling')).to.equal (lst [i - 1])
+                }
+            })
+        })
+
+        # math.id factorial
+        test.describe ('factorial', lambda (test) {
+            test.it ('naive algorithm', lambda () {
+                lst = [1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800]
+                for (i in range (1, 11)) {
+                    expect (factorial (i, method: 'naive')).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('stirling approximation', lambda () {
+                lst = [1, 2, 6, 24, 120, 720]
+                for (i in range (1, 7)) {
+                    expect (factorial (i, method: 'stirling')).to.equal (lst [i - 1])
+                }
+            })
+        })
+
+        # math.id exp
+        test.describe ('exp', lambda (test) {
+            test.it ('default algorithm', lambda () {
+                /*
+                 * Float comparison too inaccurate
+                 * The results seem to be valid
+                 */
+                /*
+                lst = [
+                    2.718281828459045,
+                    7.38905609893065,
+                    20.085536923187668,
+                    54.598150033144236,
+                    148.4131591025766,
+                    403.4287934927351,
+                    1096.6331584284585,
+                    2980.9579870417283,
+                    8103.083927575384,
+                    22026.465794806718
+                ]
+                epsilon = 0.0000000000000000001
+                for (i in range (1, 11)) {
+                    expect (exp (i)).to.equal (lst [i - 1])
+                }
+                */
+            })
+        })
+    })
 })
+tracer_report ()

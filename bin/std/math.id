@@ -39,10 +39,11 @@ LOG2E = 1.44269504088896
  */
 LOG10E = 0.43429448190325
 
+use * from std.tracer
 func fibonacci (x, **kwargs) {
 
     # Make sure that x is of type Int
-    typecast (Int, x)
+    intcast (x)
 
     # Special case: x < 0
     if (x < 0) {
@@ -55,14 +56,18 @@ func fibonacci (x, **kwargs) {
     # Algorithms
     algorithms = {
         /* Naive algorithm
-         * Easy to implement, but extremely slow.
+         * Easy to implement, but extremely slow
          * Details:
          * F(n + 2) = F(n + 1) + F(n)
          */
         "naive": lambda () {
             a = 0
             b = 1
-            for (i = 0; i < x; i += 1) {
+            if (x > 1330) {
+                a = 0L
+                b = 1L
+            }
+            for (i = 0L; i < x; i += 1) {
                 c = a + b
                 a = b
                 b = c
@@ -72,7 +77,7 @@ func fibonacci (x, **kwargs) {
         /* Fast matrix algorithm
          * Way faster than the naive algorithm, but has
          * a constant factor slowdown compared to the
-         * fast doubling algorithm.
+         * fast doubling algorithm
          * Details:
          * [1  1] ^ n   [F(n + 1)  F(n - 0)]
          * [1  0]     = [F(n + 0)  F(n - 1)]
@@ -114,7 +119,7 @@ func fibonacci (x, **kwargs) {
             return result [1]
         }, */
         /* Extremely fast doubling algorithm
-         * This one is even faster than the matrix algorithm.
+         * This one is even faster than the matrix algorithm
          * Details:
          * F(2n + 0) = F(n + 0) * (2 * F(n + 1) - F(n))
          * F(2n + 1) = F(n + 1) ^  2 + F(n + 0) ^ 2
@@ -122,6 +127,10 @@ func fibonacci (x, **kwargs) {
         "fastdoubling": lambda () {
             a = 0
             b = 1
+            if (x > 1330) {
+                a = 0L
+                b = 1L
+            }
             for (i = 31; i >= 0; i -= 1) {
                 d = a * (b * 2 - a)
                 e = a * a + b * b
@@ -138,18 +147,17 @@ func fibonacci (x, **kwargs) {
     }
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "method"  { 
-                typecast (Str, current)
-                if (current == "default") {
-                    current = method
+                typecast (Str, value)
+                if (value == "default") {
+                    value = method
                 }
-                if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
+                if (!algorithms.contains (value)) {
+                    raise ArgumentException ("method", "Algorithm '#{value}' not found")
                 }
-                method = current
+                method = value
             }
         }
     }
@@ -179,38 +187,42 @@ func factorial (x, **kwargs) {
     # Algorithms
     algorithms = {
         /* The naive algorithm.
-         * Easy to implement and accurate, but slow.
+         * Easy to implement and accurate, but slow
          */
         "naive": lambda () {
-            # Naive algorithm
             sum = 1
+            if (x > 20) {
+                sum = 1L
+            }
             for (i = 1; i <= x; i += 1) {
                 sum *= i
             }
             return sum
         },
         /* Stirling's approximation
-         * Very fast but also very inaccurate.
+         * Very fast but also very inaccurate
          */
         "stirling": lambda () {
-            # Added one to the result to simulate ceiling behavior
-            return 1 + Int (Float (sqrt (2.0 * PI * x)) * pow ((Float (x) / E), x))
+            res = Int (Float (sqrt (2.0 * PI * x)) * pow ((Float (x) / E), x))
+            # Small corrections
+            res += 1 + res / 75 + res / 750
+            # if (res > 750) { res -= res / 375 }
+            return res
         },
     }
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "method"  { 
-                typecast (Str, current)
-                if (current == "default") {
-                    current = method
+                typecast (Str, value)
+                if (value == "default") {
+                    value = method
                 }
-                if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
+                if (!algorithms.contains (value)) {
+                    raise ArgumentException ("method", "Algorithm '#{value}' not found")
                 }
-                method = current
+                method = value
             }
         }
     }
@@ -234,10 +246,10 @@ func exp (x, **kwargs) {
         x = abs (x)
     }
 
-    # Special case: x ~> 702
+    # Special case: x > ~702
     # 702.2884533631839199...
     if (x > 702.2884533631839) {
-        raise ArgumentException ("x", "Value too big; Result would exceed the bounds of Float")
+        raise ArgumentException ("x", "Range error: Float overflow")
     }
 
     # Default algorithm
@@ -246,33 +258,35 @@ func exp (x, **kwargs) {
     # Algorithms
     algorithms = {
         "default": lambda () {
-            eps = 0.0000000000000000001
-            elem = 1.0
+            epsilon = 0.0000000000000000001
+            mul = 1.0
             sum = 0.0
             i = 1.0
             do {
-                sum += elem
-                elem *= x / i
-                i += 1.0
-            } while (elem >= eps)
+                sum += mul
+                mul *= x / i
+                i += 1
+            } while (mul >= epsilon)
             return sum
         },
+        /* Pade's approximation
+         * Very fast but inaccurate
+         */
         "pade": lambda () => 1.0 + x * (6.0 + x) / (6.0 - 2.0 * x),
     }
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "method"  { 
-                typecast (Str, current)
-                if (current == "default") {
-                    current = method
+                typecast (Str, value)
+                if (value == "default") {
+                    value = method
                 }
-                if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
+                if (!algorithms.contains (value)) {
+                    raise ArgumentException ("method", "Algorithm '#{value}' not found")
                 }
-                method = current
+                method = value
             }
         }
     }
@@ -320,12 +334,11 @@ func log2 (v) {
     return r
 }
 
-func bigpow (base, exp) {
+func bigpow (base, exp: Int) {
     if (base is Int) {
         base = BigInt (base)
     }
     typecast (BigInt, base)
-    typecast (Int, exp)
 
     # Special case: exp < 0
     if (exp < 0) {
@@ -478,7 +491,7 @@ func pow (base, exp, **kwargs) {
                 255, 255, 255, 255, 255, 255, 255, 255,
             ]
             result = 1
-            current = 0
+            value = 0
             while (true) {
                 endloop = false
                 match (lut [exp]) {
@@ -545,18 +558,17 @@ func pow (base, exp, **kwargs) {
     }
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "method"  { 
-                typecast (Str, current)
-                if (current == "default") {
-                    current = method
+                typecast (Str, value)
+                if (value == "default") {
+                    value = method
                 }
-                if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
+                if (!algorithms.contains (value)) {
+                    raise ArgumentException ("method", "Algorithm '#{value}' not found")
                 }
-                method = current
+                method = value
             }
         }
     }
@@ -669,22 +681,21 @@ func sqrt (x, **kwargs) {
     }
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "method"  { 
-                typecast (Str, current)
-                if (current == "default") {
-                    current = method
+                typecast (Str, value)
+                if (value == "default") {
+                    value = method
                 }
-                if (!algorithms.contains (current)) {
-                    raise ArgumentException ("method", "Algorithm '#{current}' not found")
+                if (!algorithms.contains (value)) {
+                    raise ArgumentException ("method", "Algorithm '#{value}' not found")
                 }
-                method = current
+                method = value
             }
             case "precision" {
-                typecast (Int, current)
-                precision = max (pow (10, -current), pow (10, -15)) # 1e^-current
+                typecast (Int, value)
+                precision = max (pow (10, -value), pow (10, -15)) # 1e^-value
             }
         }
     }
@@ -710,15 +721,14 @@ func sin (x, **kwargs) {
     precision = 20.0
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "precision" {
-                if (current is Int) {
-                    current = Float (current)
+                if (value is Int) {
+                    value = Float (value)
                 }
-                typecast (Float, current)
-                precision = current
+                typecast (Float, value)
+                precision = value
             }
         }
     }
@@ -758,15 +768,14 @@ func cos (x, **kwargs) {
     precision = 20.0
 
     # Handle optional arguments
-    for (key in kwargs) {
-        current = kwargs [key]
+    for (key, value in kwargs) {
         match (key) {
             case "precision" {
-                if (current is Int) {
-                    current = Float (current)
+                if (value is Int) {
+                    value = Float (value)
                 }
-                typecast (Float, current)
-                precision = current
+                typecast (Float, value)
+                precision = value
             }
         }
     }
