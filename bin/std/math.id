@@ -368,12 +368,19 @@ func bigpow (base, exp: Int) {
 
 func pow (base, exp, **kwargs) {
 
+    # Use bigpow if needed
+    if (base is BigInt && exp is Int) {
+        return bigpow (base, exp)
+    } else if (exp isnot Int) {
+        raise TypeException ("exp", "Int")
+    }
+
     # Make sure that exp is of type Int
     typecast (Int, exp)
 
     # Make sure that base is either of type Int or Float
     if (base isnot Int && base isnot Float && base isnot BigInt) {
-        raise TypeException ("base", "Int|BigInt|Float")
+        raise TypeException ("base", "Int|Float")
     }
 
     # Special case: exp == 0
@@ -445,7 +452,7 @@ func pow (base, exp, **kwargs) {
             if (exp < 0) {
                 return (tmp * tmp) / base
             }
-            return base * tmp * tmp
+            return Float (base * tmp * tmp)
         },
         "shiftpow": lambda () {
             typecast (Int, base)

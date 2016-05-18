@@ -10,42 +10,58 @@ use Iterable from std.collections
 
 /**
  * Chains multiple iterables to one
- * @param *iterators The iterables
- * @yield Object The items of the chain
+ * @variadic Iterable The iterables to be chained together
+ * @yields Object The items of the chain
  */
 func chain (*iterables) {
     typecast (Iterable, iterables)
-    for (iterator in iterables) {
-        typecast (Iterable, iterator)
-        for (item in iterator) {
+    for (iterable in iterables) {
+        typecast (Iterable, iterable)
+        for (item in iterable) {
             yield item
         }
     }
 }
 
 /**
- * Executes a function for every element of an iterator
- * @param Object iterator The iterator
- * @param Object The callback
- * @return null
+ * Checks if an Iterable contains any items
+ * If a callback is passed, runs filter and checks
+ * if the result is not Null
+ * @param iterable : Iterable The iterator
+ * @variadic Object The callback (only pass one callback)
+ * @returns Bool Whether the check succeeded or failed
  */
-func each (iterator, callback) {
-    typecast (Iterable, iterator)
-    for (item in iterator) {
+func any (iterable: Iterable, *callback) {
+    callbacklen = len (callback)
+    if (callbacklen > 1) {
+        raise ArgumentException ("callback", "Pass zero or one callbacks")
+    }
+    if (callbacklen == 1) {
+        return filter (iterable, fst (callback)) isnot Null
+    }
+    return len (iterable) > 0
+}
+
+/**
+ * Executes a function for every element of an Iterable
+ * @param iterable : Iterable The iterable
+ * @param callback The callback
+ */
+func each (iterable: Iterable, callback) {
+    for (item in iterable) {
         callback (item)
     }
 }
 
 /**
  * Takes the first n elements
- * @param Object iterator The iterator
- * @param Int count The number of elements to take
- * @yield Object The elements
+ * @param iterable : Iterable The iterable
+ * @param count : Int The number of elements to take
+ * @yields Object The elements
  */
-func take (iterator, count) {
-    typecast (Iterable, iterator)
+func take (iterable: Iterable, count) {
     i = 0
-    for (item in iterator) {
+    for (item in iterable) {
         if (i < count) {
             yield item
         }
@@ -55,14 +71,13 @@ func take (iterator, count) {
 
 /**
  * Takes elements while a condition is true
- * @param Object iterator The iterator
- * @param Object callback The condition
- * @yield Object The elements
+ * @param iterable : Iterable The iterable
+ * @param callback The condition
+ * @yields Object The elements
  */
-func takewhile (iterator, callback) {
-    typecast (Iterable, iterator)
+func takewhile (iterable: Iterable, callback) {
     stop = false
-    for (item in iterator) {
+    for (item in iterable) {
         if (!stop && !typecast (Bool, callback (item))) {
             stop = true
         }
@@ -75,14 +90,13 @@ func takewhile (iterator, callback) {
 
 /**
  * Skips the first n elements
- * @param Object iterator The iterator
- * @param Int The number of elements to skip
- * @yield The remaining elements
+ * @param iterable : Iterable The iterable
+ * @param count : Int The number of elements to skip
+ * @yields Object The remaining elements
  */
-func skip (iterator, count) {
-    typecast (Iterable, iterator)
+func skip (iterable: Iterable, count) {
     i = 0
-    for (item in iterator) {
+    for (item in iterable) {
         if (i >= count) {
             yield item
         }
@@ -92,14 +106,13 @@ func skip (iterator, count) {
 
 /**
  * Skips elements while a condition is true
- * @param Object iterator The iterator
- * @param Object callback The condition
- * @yield Object The remaining elements
+ * @param iterable : Iterable The iterable
+ * @param callback The condition
+ * @yields Object The remaining elements
  */
-func skipwhile (iterator, callback) {
-    typecast (Iterable, iterator)
+func skipwhile (iterable, callback) {
     _skip = true
-    for (item in iterator) {
+    for (item in iterable) {
         if (_skip && !typecast (Bool, callback (item))) {
             _skip = false
         }
@@ -112,10 +125,10 @@ func skipwhile (iterator, callback) {
 
 /**
  * Adds up all items of an iterable
- * @param Object iterable The iterable
- * @param **Object kwargs Optional arguments
- * @optional Object start The result to start with
- * @return Object The result
+ * @param iterable : Iterable The iterable
+ * @param **kwargs Optional arguments
+ * @kwparam start The value to start with
+ * @returns Object The result
  */
 func sum (iterable, **kwargs) {
     typecast (Iterable, iterable)
@@ -131,29 +144,36 @@ func sum (iterable, **kwargs) {
     return result
 }
 
+/** Zips iterables together
+ * @variadic Iterable The iterables
+ * @yields Tuple The zipped iterable parts
+ */
 func zip (*iterables) {
     typecast (Iterable, iterables)
-    result = []
     iteratorCount = len (iterables)
-    iterators = []
-    iteratorIndices = []
-    iteratorCounts = []
+    iterators = List ()
+    iteratorIndices = List ()
+    iteratorCounts = List ()
     for (iterator in iterables) {
         typecast (Iterable, iterator)
         iterators.append (iterator)
         iteratorIndices.append (0)
         iteratorCounts.append (len (iterator))
     }
-    while (true) {
+    loop = true
+    while (loop) {
         objs = []
         for (i = 0; i < iteratorCount; i += 1) {
             if (iteratorCounts [i] == iteratorIndices [i]) {
-                return result
+                loop = false
+                break
             }
             objs.append (iterators [i] [iteratorIndices [i]])
             iteratorIndices [i] += 1
         }
-        result.append (Tuple (objs))
+        if (loop) {
+            yield Tuple (objs)
+        }
     }
 }
 
@@ -161,14 +181,13 @@ func zip (*iterables) {
  * Reduces an iterable by iterating over it,
  * passing, for all items, the result of the previous item and the current item
  * to a function, whose result is then returned to the caller.
- * @param Object iterable The iterable
- * @param Object callback The callback
- * @param **Object kwargs Optional arguments
- * @optional Object start The result to start with
- * @return Object The result of the reduction
+ * @param iterable : Iterable The iterable
+ * @param callback The callback
+ * @param **kwargs Optional arguments
+ * @kwparam start The value to start with
+ * @returns Object The result of the reduction
  */
-func reduce (iterable, callback, **kwargs) {
-    typecast (Iterable, iterable)
+func reduce (iterable: Iterable, callback, **kwargs) {
     # TODO: Use trait Callable/Invokable for callback
     result = 0
     for (key in kwargs) {
@@ -183,15 +202,14 @@ func reduce (iterable, callback, **kwargs) {
 }
 
 /**
- * Iterates through an iterable, passing each to a function.
+ * Iterates over an iterable, passing each to a function.
  * If that functions returns true, the item is appended to a list,
  * which is then returned to the caller.
- * @param Object iterable The iterable
- * @param Object callback The callback
- * @return List The filtered items
+ * @param iterable : Iterable The iterable
+ * @param callback The callback
+ * @returns List The filtered items
  */
-func filter (iterable, callback) {
-    typecast (Iterable, iterable)
+func filter (iterable: Iterable, callback) {
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         if (callback (item)) {
@@ -201,15 +219,14 @@ func filter (iterable, callback) {
 }
 
 /**
- * Iterates through an iterable, passing each to a function.
+ * Iterates over an iterable, passing each to a function.
  * The return value of each function call is appended to a list,
  * which is then returned to the caller.
- * @param Object iterable The iterable
- * @param Object callback The callback
- * @return List The mapped items
+ * @param iterable : Iterable The iterable
+ * @param callback The callback
+ * @returns List The mapped items
  */
-func map (iterable, callback) {
-    typecast (Iterable, iterable)
+func map (iterable: Iterable, callback) {
     # TODO: Use trait Callable/Invokable for callback
     for (item in iterable) {
         yield callback (item)

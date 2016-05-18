@@ -10,13 +10,6 @@ use * from std.tracer
 use stdlib_isdefined from std.info
 use AssertionException, describe, expect from testing
 
-# IodineClosure generators are broken
-func generatorTest () {
-    yield 1;
-    yield 2;
-    yield 3;
-}
-
 func fail (*args) {
     if (len (args) == 1) {
         raise AssertionException (typecast (Str, args [0]))
@@ -106,6 +99,11 @@ describe ('stdlib', lambda (test) {
                 expect (len ([1, 2, 3, 4])).to.equal (4)
             })
             test.it ('should work with generators', lambda () {
+                func generatorTest () {
+                    yield 1;
+                    yield 2;
+                    yield 3;
+                }
                 expect (len (generatorTest ())).to.equal (3)
             })
         })
@@ -657,6 +655,22 @@ describe ('stdlib', lambda (test) {
             use * from std.itertools
         }
 
+        # itertools.id any
+        test.describe ('any', lambda (test) {
+            test.it ('should work with empty iterables', lambda () {
+                expect (any (List ())).to.be._false ()
+            })
+            test.it ('should work with non-empty iterables', lambda () {
+                expect (any ([1, 2, 3, 4])).to.be._true ()
+            })
+            test.it ('should work with empty iterables and conditions', lambda () {
+                expect (any (List (), lambda (i) => 0)).to.be._false ()
+            })
+            test.it ('should work with non-empty iterables and conditions', lambda () {
+                expect (any ([0, 1, 2, 3], lambda (i) => i == 0)).to.be._true ()
+            })
+        })
+
         # itertools.id chain
         test.describe ('chain', lambda (test) {
             test.it ('should correctly combine iterables', lambda () {
@@ -828,6 +842,90 @@ describe ('stdlib', lambda (test) {
                     expect (exp (i)).to.equal (lst [i - 1])
                 }
                 */
+            })
+        })
+
+        # math.id bigpow
+        test.describe ('bigpow', lambda (test) {
+            test.it ('should compute the correct value', lambda () {
+                lst = [2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L]
+                for (i in range (1, 11)) {
+                    expect (bigpow (2, i)).to.equal (lst [i - 1])
+                    expect (bigpow (2L, i)).to.equal (lst [i - 1])
+                }
+            })
+        })
+
+        # math.id pow
+        test.describe ('pow', lambda (test) {
+            test.it ('should accept Ints and compute the correct values', lambda () {
+                lst = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i)).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('should accept Floats and compute the correct values', lambda () {
+                lsta = [2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0, 1024.0]
+                for (i in range (1, 11)) {
+                    expect (pow (2.0, i)).to.equal (lsta [i - 1])
+                }
+                /*
+                 * Float comparison too inaccurate
+                 * The results seem to be valid
+                 */
+                /*
+                lstb = [
+                    2.1, 4.41, 9.261,
+                    19.4481, 40.84101,
+                    85.766121, 180.1088541,
+                    378.22859361, 794.280046581,
+                    1667.9880978201
+                ]
+                for (i in range (1, 11)) {
+                    expect (pow (2.1, i)).to.equal (lstb [i - 1])
+                }
+                */
+            })
+            test.it ('should call bigpow if supplied with a BigInt', lambda () {
+                lst = [2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L]
+                for (i in range (1, 11)) {
+                    expect (pow (2L, i)).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('intpow algorithm', lambda () {
+                lst = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i, method: 'intpow')).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('altpow algorithm', lambda () {
+                lst = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i, method: 'altpow')).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('floatpow algorithm', lambda () {
+                /*
+                 * Float comparison is completely fucked.
+                 */
+                /*
+                lst = [2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i, method: 'floatpow')).to.equal (lst [i - 1])
+                }
+                */
+            })
+            test.it ('shiftpow algorithm', lambda () {
+                lst = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i, method: 'shiftpow')).to.equal (lst [i - 1])
+                }
+            })
+            test.it ('fastpow algorithm', lambda () {
+                lst = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                for (i in range (1, 11)) {
+                    expect (pow (2, i, method: 'fastpow')).to.equal (lst [i - 1])
+                }
             })
         })
     })
