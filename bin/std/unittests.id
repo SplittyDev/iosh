@@ -928,6 +928,111 @@ describe ('stdlib', lambda (test) {
                 }
             })
         })
+
+        # math.id sqrt
+        test.describe ('sqrt', lambda (test) {
+            test.it ('should compute the correct value', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key))
+                    expect (val).to.equal (value)
+                }
+            })
+            test.it ('babylonian algorithm', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key, method: 'babylonian'))
+                    expect (val).to.equal (value)
+                }
+            })
+            test.it ('babylonian2 algorithm', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key, method: 'babylonian2'))
+                    expect (val).to.equal (value)
+                }
+            })
+            test.it ('bakhsali algorithm', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key, method: 'bakhsali'))
+                    expect (val).to.equal (value)
+                }
+            })
+            test.it ('newtons algorithm (high precision)', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key, method: 'newtons', precision: 15))
+                    expect (val).to.equal (value)
+                }
+            })
+            test.it ('newtons2 algorithm (high precision)', lambda () {
+                dct = {1: 1, 4: 2, 9: 3, 16: 4,25: 5, 36: 6}
+                for (key, value in dct) {
+                    val = Int (sqrt (key, method: 'newtons2', precision: 15))
+                    expect (val).to.equal (value)
+                }
+            })
+        })
+
+        # math.id sin
+        test.describe ('sin', lambda (test) {
+            /*
+             * Unable to test sin
+             * Float comparison is broken
+             */
+        })
+
+        # math.id cos
+        test.describe ('cos', lambda (test) {
+            /*
+             * Unable to test cos
+             * Float comparison is broken
+             */
+        })
+
+        # math.id min
+        test.describe ('min', lambda (test) {
+            test.it ('should work with positive values', lambda () {
+                expect (min (1, 10)).to.equal (1)
+            })
+            test.it ('should work with negative values', lambda () {
+                expect (min (-1, -10)).to.equal (-10)
+            })
+        })
+
+        # math.id max
+        test.describe ('max', lambda (test) {
+            test.it ('should work with positive values', lambda () {
+                expect (max (1, 10)).to.equal (10)
+            })
+            test.it ('should work with negative values', lambda () {
+                expect (max (-1, -10)).to.equal (-1)
+            })
+        })
+
+        # math.id floor
+        test.describe ('floor', lambda (test) {
+            test.it ('should work with positive values', lambda () {
+                expect (floor (0.99999999)).to.equal (0)
+            })
+        })
+
+        # math.id abs
+        test.describe ('abs', lambda (test) {
+            test.it ('should work with positive Ints', lambda () {
+                expect (abs (100)).to.equal (100)
+            })
+            test.it ('should work with negative Ints', lambda () {
+                expect (abs (-100)).to.equal (100)
+            })
+            test.it ('should work with positive Floats', lambda () {
+                expect (abs (10.10)).to.equal (10.10)
+            })
+            test.it ('should work with negative Floats', lambda () {
+                expect (abs (-10.10)).to.equal (10.10)
+            })
+        })
     })
 })
 tracer_report ()
