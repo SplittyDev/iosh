@@ -8,23 +8,39 @@ global __STDLIB = true
 global __STDLIB_REFLECTION = true
 
  # TODO: Fix weird string behavior
- # type(Str)?
+ # type(Str) == null
 
-func istypedef (obj) {
-    return nameof (TypeDef) == nameof (obj)
+func typedef (obj) {
+    try {
+        if (obj == Str) {
+            return true
+        }
+    } except { }
+    return obj is TypeDef
 }
 
 func instance (obj) {
-    return istypedef (type (type (obj)))
+    try {
+        return typedef (type (obj))
+    } except { }
+    return false
 }
 
 func instanceof (T, obj) {
-    if (!istypedef (T)) {
-        raise TypeException ("T", "TypeDef")
-    }
-    return type (T) != type (obj) && nameof (T) == nameof (obj)
+    try {
+        if (!typedef (T)) {
+            raise TypeException ("T", "TypeDef")
+        }
+        return obj is T
+    } except { }
+    return false
 }
 
 func nameof (a) {
+    try {
+        if (obj is Str || obj == Str) {
+            return "Str"
+        }
+    } except { }
     return a.__name__
 }

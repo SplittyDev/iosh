@@ -821,7 +821,8 @@ describe ('stdlib', lambda (test) {
         test.describe ('exp', lambda (test) {
             test.it ('default algorithm', lambda () {
                 /*
-                 * Float comparison too inaccurate
+                 * Float comparison too inaccurate:
+                 * Probably a compiler bug.
                  * The results seem to be valid
                  */
                 /*
@@ -1031,6 +1032,154 @@ describe ('stdlib', lambda (test) {
             })
             test.it ('should work with negative Floats', lambda () {
                 expect (abs (-10.10)).to.equal (10.10)
+            })
+        })
+    })
+    
+    # reflection.id
+    test.describe ('reflection', lambda (test) {
+        if (!stdlib_isdefined ('reflection')) {
+            use * from std.reflection
+        }
+
+        # reflection.id typedef
+        test.describe ('typedef', lambda (test) {
+            test.it ('should work with builtin type definitions', lambda () {
+                expect (typedef (Int)).to.be._true ()
+                expect (typedef (Str)).to.be._true ()
+                expect (typedef (Null)).to.be._true ()
+            })
+            test.it ('should work with custom type definitions', lambda () {
+                class Foo { }
+                expect (typedef (Foo)).to.be._true ()
+            })
+            test.it ('should work with builtin instances', lambda () {
+                expect (typedef (0)).to.be._false ()
+                expect (typedef ('')).to.be._false ()
+                expect (typedef (null)).to.be._false ()
+            })
+            test.it ('should work with custom instances', lambda () {
+                class Foo { }
+                expect (typedef (Foo ())).to.be._false ()
+            })
+        })
+
+        # reflection.id instance
+        test.describe ('instance', lambda (test) {
+            test.it ('should work with builtin type definitions', lambda () {
+                expect (instance (Int)).to.be._false ()
+                expect (instance (Str)).to.be._false ()
+                expect (instance (Null)).to.be._false ()
+            })
+            test.it ('should work with custom type definitions', lambda () {
+                class Foo { }
+                expect (instance (Foo)).to.be._false ()
+            })
+            test.it ('should work with builtin instances', lambda () {
+                expect (instance (0)).to.be._true ()
+                expect (instance ('')).to.be._true ()
+                expect (instance (null)).to.be._true ()
+            })
+            test.it ('should work with custom instances', lambda () {
+                class Foo { }
+                expect (instance (Foo ())).to.be._true ()
+            })
+        })
+
+        # reflection.id instanceof
+        test.describe ('instanceof', lambda (test) {
+            test.it ('should work with builtin types/types', lambda () {
+                expect (instanceof (Int, Int)).to.be._false ()
+                expect (instanceof (Str, Str)).to.be._false ()
+                expect (instanceof (Null, Null)).to.be._false ()
+                expect (instanceof (Int, Str)).to.be._false ()
+                expect (instanceof (Str, Null)).to.be._false ()
+                expect (instanceof (Null, Int)).to.be._false ()
+            })
+            test.it ('should work with builtin types/instances', lambda () {
+                expect (instanceof (Int, 0)).to.be._true ()
+                expect (instanceof (Str, '')).to.be._true ()
+                expect (instanceof (Null, null)).to.be._true ()
+            })
+            test.it ('should work with builtin instances/instances', lambda () {
+                expect (instanceof (0, 0)).to.be._false ()
+                expect (instanceof ('', '')).to.be._false ()
+                expect (instanceof (null, null)).to.be._false ()
+                expect (instanceof (0, '')).to.be._false ()
+                expect (instanceof ('', null)).to.be._false ()
+                expect (instanceof (null, 0)).to.be._false ()
+            })
+            test.it ('should work with custom types/types', lambda () {
+                class Foo { }
+                expect (instanceof (Foo, Foo)).to.be._false ()
+            })
+            test.it ('should work with custom types/instances', lambda () {
+                class Foo { }
+                expect (instanceof (Foo, Foo ())).to.be._true ()
+            })
+            test.it ('should work with custom instances/instances', lambda () {
+                class Foo { }
+                expect (instanceof (Foo (), Foo ())).to.be._false ()
+            })
+        })
+
+        # reflection.id nameof
+        test.describe ('nameof', lambda (test) {
+            test.it ('should work with builtin types', lambda () {
+                expect (nameof (Int)).to.equal ('Int')
+                # Probably a compiler bug:
+                # expect (nameof (Str)).to.equal ('Str')
+            })
+            test.it ('should work with builtin instances', lambda () {
+                expect (nameof (0)).to.equal ('Int')
+                # Probably a compiler bug:
+                # expect (nameof ('')).to.equal ('Str')
+            })
+            test.it ('should work with custom types', lambda () {
+                class Foo { }
+                expect (nameof (Foo)).to.equal ('Foo')
+            })
+            test.it ('should work wih custom instances', lambda () {
+                class Foo { }
+                expect (nameof (Foo ())).to.equal ('Foo')
+            })
+            test.it ('should work with functions', lambda () {
+                class Foo {
+                    func foo () { }
+                }
+                expect (nameof (Foo.foo)).to.equal ('foo')
+            })
+            test.it ('should work with closures', lambda () {
+                foo = lambda () { }
+                expect (nameof (foo)).to.equal ('Closure')
+            })
+        })
+    })
+    
+    # tupletools.id
+    test.describe ('tupletools', lambda (test) {
+
+        # tupletools.id fst
+        test.describe ('fst', lambda (test) {
+            test.it ('should return the correct value', lambda () {
+                tpl = (1, 2)
+                expect (fst (tpl)).to.equal (1)
+            })
+        })
+
+        # tupletools.id snd
+        test.describe ('snd', lambda (test) {
+            test.it ('should return the correct value', lambda () {
+                tpl = (1, 2)
+                expect (snd (tpl)).to.equal (2)
+            })
+        })
+
+        # tupletools.id nth
+        test.describe ('nth', lambda (test) {
+            test.it ('should return the correct value', lambda () {
+                tpl = (1, 2, 3)
+                expect (nth (tpl, 3)).to.equal (3)
             })
         })
     })
