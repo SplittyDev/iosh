@@ -1183,5 +1183,21 @@ describe ('stdlib', lambda (test) {
             })
         })
     })
+
+    # types.id
+    test.describe ('types', lambda (test) {
+        test.it ('should define the correct types', lambda () {
+            expect (NullType).to.equal (Null)
+            expect (ObjectType).to.equal (Object)
+            expect (IntType).to.equal (Int)
+            expect (FloatType).to.equal (Float)
+            expect (BooleanType).to.equal (Bool)
+            expect (StringType).to.equal (Str)
+            expect (TupleType).to.equal (Tuple)
+            expect (ListType).to.equal (List)
+            expect (DictType).to.equal (Dict)
+            expect (ExceptionType).to.equal (Exception)
+        })
+    })
 })
 tracer_report ()

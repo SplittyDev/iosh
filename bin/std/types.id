@@ -6,6 +6,7 @@
 
 global __STDLIB = true
 global __STDLIB_TYPES = true
+use __builtins__
 
 NullType            = Null
 ObjectType          = Object
@@ -17,7 +18,7 @@ TupleType           = Tuple
 ListType            = List
 DictType            = Dict
 ExceptionType       = Exception
-BuiltinFunctionType = type (print)
+BuiltinFunctionType = type (__builtins__.eval)
 RangeType           = type (0 .. 0)
 BuiltinMethodType   = type ([].append)
 TypeType            = type (type (type))
