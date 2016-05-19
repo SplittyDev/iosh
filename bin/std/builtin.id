@@ -29,7 +29,7 @@ use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
 
 /**
- * Any type that has a string representation
+ * Any type that has a string representation.
  */
 trait Representable {
 
@@ -41,8 +41,20 @@ trait Representable {
 }
 
 /**
+ * Any type that can be invoked.
+ */
+trait Invokable {
+
+    /**
+     * Invokes the object
+     * @returns Object
+     */
+    func __invoke__ (self, *args)
+}
+
+/**
  * Prints one or more objects to the standard output stream
- * and appends a newline character to each one
+ * and appends a newline character to each one.
  * @variadic Object The objects to be printed
  */
 func print (*args) {
@@ -55,7 +67,7 @@ func print (*args) {
 }
 
 /**
- * Reads a line from the standard input stream
+ * Reads a line from the standard input stream.
  * @kwparam prompt : Str The prompt
  */
 func read (**kwargs) {
@@ -76,13 +88,54 @@ func read (**kwargs) {
     return stdin.readln ()
 }
 
-/* to be implemented
-func sort (iterable: Iterable) {
+/**
+ * Sorts an iterable using the quicksort algorithm.
+ * If no compare function is supplied, a builtin one
+ * is automatically chosen, based on the items in the list.
+ * @param iterable : Iterable
+ * @param **kwargs Keyword arguments
+ * @kwparam comparer The function used for comparing
+ * @returns List The sorted iterable
+ */
+func sort (iterable: Iterable, **kwargs) {
+
+    # Default comparators
+    func intcompare (a: Int, b: Int) => a - b
+    func lexcompare (a, b) => ord (Str (a) [0]) - ord (Str (b) [0])
+
+    # Create a mutable copy of the iterable
+    lst = List (iterable)
+    if (len (lst) == 0) {
+        return List ()
+    }
+
+    # Choose the pivot
+    pivot = lst [0]
+
+    # Set the default comparator function
+    compare = intcompare
+    if (pivot is Str) {
+        compare = lexcompare
+    }
+
+    # Handle keyword arguments
+    for (key, value in kwargs) {
+        match (key) {
+            case "comparator" {
+                compare = typecast (Invokable, value)
+            }
+        }
+    }
+
+    # Do the magic
+    return List ()
+        .appendrange (sort ([x for x in lst [1:] if compare (x, pivot) < 0]))
+        .appendrange (lst [0:1])
+        .appendrange (sort ([x for x in lst [1:] if compare (x, pivot) >= 0]))
 }
-*/
 
 /**
- * Returns a string representation of an object
+ * Returns a string representation of an object.
  * @param object : Object The object to be represented
  * @returns Str The string representation of the specified object
  */
@@ -156,7 +209,7 @@ func repr (object) {
 }
 
 /**
- * Returns the type of an object
+ * Returns the type of an object.
  * @param object : Object The object whose type is to be returned
  * @returns Null|Type The type of the specified object
  */
@@ -165,7 +218,7 @@ func type (object) {
 }
 
 /**
- * Returns an iterable covering a range
+ * Returns an iterable covering a range.
  * @variadic Int start, stop and step values
  * @yields Int The whole numbers that lie within the specified range
  */
@@ -209,7 +262,7 @@ func range (*args) {
 }
 
 /**
- * Returns the length of a countable object
+ * Returns the length of a countable object.
  * @param countable : Object|Collection|Countable The countable object
  * @returns Int The length of the specified object
  */
@@ -249,7 +302,7 @@ func len (countable) {
 }
 
 /**
- * Verifies that an object is of a specific type
+ * Verifies that an object is of a specific type.
  * @param type : Type The type
  * @param object : Object The object
  * @returns Object The object
@@ -262,7 +315,7 @@ func typecast (type, object) {
 }
 
 /**
- * Verifies that an object is of integer type
+ * Verifies that an object is of integer type.
  * @param object : Object The object
  * @returns Object The object
  */
@@ -274,7 +327,7 @@ func intcast (object) {
 }
 
 /**
- * Returns the hex representation of an iterable
+ * Returns the hex representation of an iterable.
  * @param arr : Iterable The iterable
  * @kwparam prefix : Bool Whether to prefix the string with "0x"
  * @returns Str The hex representation of the specified iterable
