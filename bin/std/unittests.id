@@ -27,6 +27,36 @@ describe ('stdlib', lambda (test) {
             use * from std.builtin
         }
 
+        # builtin.id sort
+        test.describe ('sort', lambda (test) {
+            test.it ('should correctly sort a List of Int', lambda () {
+                lsta = [2, 4, 1, 3]
+                lstb = [1, 2, 3, 4]
+                expect (sort (lsta)).to.equal (lstb)
+            })
+            test.it ('should correctly sort a List of Str', lambda () {
+                lsta = ['b', 'd', 'a', 'c']
+                lstb = ['a', 'b', 'c', 'd']
+                expect (sort (lsta)).to.equal (lstb)
+            })
+            test.it ('should correctly sort a Str', lambda () {
+                lsta = 'bdac'
+                lstb = ['a', 'b', 'c', 'd']
+                expect (sort (lsta)).to.equal (lstb)
+            })
+            test.it ('should correctly sort a List of functions', lambda () {
+                class Foo {
+                    func a () => null
+                    func b () => null
+                    func c () => null
+                    func d () => null
+                }
+                lsta = [Foo.b, Foo.d, Foo.a, Foo.c]
+                lstb = [Foo.a, Foo.b, Foo.c, Foo.d]
+                expect (sort (lsta)).to.equal (lstb)
+            })
+        })
+
         # builtin.id repr
         test.describe ('repr', lambda (test) {
             test.it ('should work with strings', lambda () {
@@ -52,6 +82,12 @@ describe ('stdlib', lambda (test) {
             })
             test.it ('should work with null', lambda () {
                 expect (repr (null)).to.equal ('null')
+            })
+            test.it ('should work with functions', lambda () {
+                class Foo {
+                    func foo () => null
+                }
+                expect (repr (Foo.foo)).to.equal ('foo')
             })
         })
 

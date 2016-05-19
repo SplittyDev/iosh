@@ -27,6 +27,8 @@ global __STDLIB = true
 global __STDLIB_BUILTIN = true
 use ArgumentException, TypeException from std.exceptions
 use Collection, Countable, Iterable from std.collections
+use FuncType, MethodType from std.types
+use nameof from std.reflection
 
 /**
  * Any type that has a string representation.
@@ -89,6 +91,55 @@ func read (**kwargs) {
 }
 
 /**
+ * A comparator that sorts by integer value.
+ * @param a The first integer
+ * @param b The second integer
+ * @returns Int
+ */
+func IntComparator (a, b) {
+    return intcast (a) - intcast (b)
+}
+
+/**
+ * A comparator that compares by ascii value.
+ * Converts the objects to a Str if needed.
+ * @param a The first object
+ * @param b The second object
+ * @returns Int
+ */
+func AsciiComparator (a, b) {
+    if (a isnot Str) {
+        a = Str (a)
+    }
+    if (b isnot Str) {
+        b = Str (b)
+    }
+    return ord (a [0]) - ord (b [0])
+}
+
+/**
+ * A comparator that compares by ascii value.
+ * Uses AsciiComparator internally.
+ * @param a : Str The first string
+ * @param b : Str The second string
+ * @returns Int
+ */
+func StringComparator (a: Str, b: Str) {
+    return AsciiComparator (a, b)
+}
+
+/**
+ * A comparator that compares by the name of an
+ * object using the AsciiComparator.
+ * @param a The first object
+ * @param b The second object
+ * @returns Int
+ */
+func NameComparator (a, b) {
+    return AsciiComparator (nameof (a), nameof (b))
+}
+
+/**
  * Sorts an iterable using the quicksort algorithm.
  * If no compare function is supplied, a builtin one
  * is automatically chosen, based on the items in the list.
@@ -98,10 +149,6 @@ func read (**kwargs) {
  * @returns List The sorted iterable
  */
 func sort (iterable: Iterable, **kwargs) {
-
-    # Default comparators
-    func intcompare (a: Int, b: Int) => a - b
-    func lexcompare (a, b) => ord (Str (a) [0]) - ord (Str (b) [0])
 
     # Create a mutable copy of the iterable
     lst = List (iterable)
@@ -113,9 +160,9 @@ func sort (iterable: Iterable, **kwargs) {
     pivot = lst [0]
 
     # Set the default comparator function
-    compare = intcompare
-    if (pivot is Str) {
-        compare = lexcompare
+    compare = AsciiComparator
+    if (pivot is FuncType || pivot is MethodType) {
+        compare = NameComparator
     }
 
     # Handle keyword arguments
@@ -179,6 +226,11 @@ func repr (object) {
     typename = Str (object.__type__)
     if (dict.contains (typename)) {
         return dict [typename] ()
+    }
+
+    # Check if the object is a function with a name
+    if (object is FuncType || object is MethodType) {
+        return nameof (object)
     }
 
     # Check if the object matches the Iterable trait
