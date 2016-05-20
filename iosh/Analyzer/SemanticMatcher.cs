@@ -5,10 +5,12 @@ using System.Text;
 namespace iosh {
     public class SemanticMatcher {
 
+        public readonly List<AnalyzerHint> hints;
         AnalyzerSource source;
         Lexeme [] last;
         
         public SemanticMatcher (AnalyzerSource source) {
+            hints = new List<AnalyzerHint> ();
             this.source = source;
         }
 

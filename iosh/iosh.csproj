@@ -52,28 +52,33 @@
     <Compile Include="Prompt.cs" />
     <Compile Include="ConsoleHelper.cs" />
     <Compile Include="Modules\HelpModule.cs" />
-    <Compile Include="IodineEngine.cs" />
     <Compile Include="LineContinuationRule.cs" />
     <Compile Include="IodineConstants.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Std.cs" />
     <Compile Include="Representer.cs" />
-    <Compile Include="Lexer.cs" />
-    <Compile Include="LexerSource.cs" />
-    <Compile Include="Lexeme.cs" />
-    <Compile Include="TokenClass.cs" />
-    <Compile Include="Analyzer.cs" />
-    <Compile Include="AnalyzerSource.cs" />
-    <Compile Include="SemanticMatcher.cs" />
-    <Compile Include="DocParser.cs" />
-    <Compile Include="DocParameter.cs" />
-    <Compile Include="DocElement.cs" />
     <Compile Include="Modules\DocModule.cs" />
+    <Compile Include="Iodine\Lexer.cs" />
+    <Compile Include="Iodine\TokenClass.cs" />
+    <Compile Include="Iododoc\DocParser.cs" />
+    <Compile Include="Iododoc\DocParameter.cs" />
+    <Compile Include="Iododoc\DocElement.cs" />
+    <Compile Include="Analyzer\Analyzer.cs" />
+    <Compile Include="Analyzer\AnalyzerSource.cs" />
+    <Compile Include="Iodine\Lexeme.cs" />
+    <Compile Include="Iodine\LexerSource.cs" />
+    <Compile Include="Analyzer\SemanticMatcher.cs" />
+    <Compile Include="Properties\GlobalSuppressions.cs" />
+    <Compile Include="Iodine\IodineEngine.cs" />
+    <Compile Include="Analyzer\AnalyzerHint.cs" />
+    <Compile Include="Analyzer\AnalyzerFlags.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Modules\" />
+    <Folder Include="Iodine\" />
+    <Folder Include="Iododoc\" />
+    <Folder Include="Analyzer\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

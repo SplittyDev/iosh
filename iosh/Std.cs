@@ -22,6 +22,7 @@ namespace iosh {
             Itertools,
             Math,
             Reflection,
+            Tracer,
             Tupletools,
             Types,
         };
@@ -35,7 +36,7 @@ namespace iosh {
         [Stable]
         public const string Base64 = "std.base64";
 
-        [Untested]
+        [Stable]
         public const string Collections = "std.collections";
 
         [Stable]
@@ -50,14 +51,17 @@ namespace iosh {
         [Stable]
         public const string Ints = "std.ints";
 
-        [Untested]
+        [Stable]
         public const string Itertools = "std.itertools";
 
         [Untested]
         public const string Math = "std.math";
 
-        [Untested]
+        [Stable]
         public const string Reflection = "std.reflection";
+
+        [Untested]
+        public const string Tracer = "std.tracer";
 
         [Stable]
         public const string Tupletools = "std.tupletools";

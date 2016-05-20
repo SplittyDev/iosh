@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using Iodine.Compiler;
 using Iodine.Runtime;
@@ -44,44 +42,22 @@ namespace iosh {
         readonly Options CommandLineOptions;
 
         /// <summary>
-        /// The foreground color.
-        /// </summary>
-        readonly ConsoleColor Foreground;
-
-        /// <summary>
-        /// The background color.
-        /// </summary>
-        readonly ConsoleColor Background;
-
-        /// <summary>
         /// Whether exiting the shell was requested.
         /// </summary>
         bool ExitRequested;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:iosh.Shell"/> class.
+        /// Initializes a new instance of the <see cref="Shell"/> class.
         /// </summary>
-        Shell () {
-
-            // Set colors
-            ColoredString.Fallback = Foreground;
-
+        public Shell (Options options) {
+            CommandLineOptions = options;
+            
             // Create the default prompt
             prompt = new Prompt ("λ");
 
-            // Create the iodine engine
+            // Create the Iodine engine
+            IodineEngine.UseStableStdlib =! options.NoStdlib;
             engine = new IodineEngine ();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Shell"/> class.
-        /// </summary>
-        public Shell (Options options) : this () {
-            CommandLineOptions = options;
-
-            // Set colors
-            Foreground = options.ForegroundColor;
-            Background = options.BackgroundColor;
 
             // Add search path if requested
             if (options.IncludeFolders != null)
@@ -100,13 +76,6 @@ namespace iosh {
         /// Run the REPL shell.
         /// </summary>
         public void Run (bool showLogo = true) {
-
-            // Set the culture
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-            OutputEncoding = Encoding.UTF8;
-            ForegroundColor = Foreground;
-            BackgroundColor = Background;
 
             // Print the assembly version
             var version = Assembly.GetEntryAssembly ().GetName ().Version;
@@ -188,7 +157,7 @@ namespace iosh {
             // Native read line
             if (!CommandLineOptions.EnableSyntaxHighlighting)
                 return ReadLine ();
-            ForegroundColor = Foreground;
+            var foregroundColor = ForegroundColor;
             var accum = new StringBuilder ();
             var accumcw = new StringBuilder ();
             int total = 0;
@@ -245,11 +214,11 @@ namespace iosh {
                         } else
                             stringchr = chr == '"' ? '"' : '\'';
                         if (!instring) {
-                            ForegroundColor = ConsoleColor.Green;
+                            ForegroundColor = Green;
                             Write ("\b{0}", stringchr);
                             instring = true;
                         } else if (instring && chr == stringchr) {
-                            ForegroundColor = Foreground;
+                            ForegroundColor = foregroundColor;
                             instring = false;
                             stringchr = '\0';
                         }

@@ -16,11 +16,11 @@ namespace iosh {
 			"false",
 			"null",
 			"lambda",
+            "raise",
 			"try",
 			"except",
 			"break",
 			"continue",
-			"params",
 			"super",
 			"return",
 			"from",
@@ -29,10 +29,11 @@ namespace iosh {
 			"as",
             "match",
 			"case",
-			"default",
 			"with",
             "trait",
             "contract",
+            "mixin",
+            "extend",
 		};
 	}
 }

@@ -10,7 +10,7 @@ namespace iosh {
 	public class IodineEngine {
 
         public static bool UseStableStdlib = true;
-        public static bool UseExtraStdlib = false;
+        public static bool UseExtraStdlib;
 
         public static string AssemblyDirectory {
             get {

@@ -23,6 +23,7 @@ namespace iosh {
         Semicolon,
         Colon,
         Comma,
+        IoshAnalysisHint,
     }
 }
 

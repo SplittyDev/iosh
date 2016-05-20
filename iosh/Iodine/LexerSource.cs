@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Text;
 
 namespace iosh {
     
@@ -73,9 +74,11 @@ namespace iosh {
             return str;
         }
 
-        void assert (bool condition) {
-            if (!condition)
-                throw new Exception ();
+        public string ReadLine () {
+            var accum = new StringBuilder ();
+            while (Peek () != '\n')
+                accum.Append (Read ());
+            return accum.ToString ();
         }
     }
 }

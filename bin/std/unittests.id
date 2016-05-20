@@ -4,11 +4,11 @@
  * @author SplittyDev
  */
 
-global __STDLIB = true
-global __STDLIB_UNITTESTS = true
-use * from std.tracer
+# analysis disable recommendations
+
+use tracer_start, tracer_report from std.tracer
 use stdlib_isdefined from std.info
-use AssertionException, describe, expect from testing
+use * from testing
 
 func fail (*args) {
     if (len (args) == 1) {
@@ -17,6 +17,8 @@ func fail (*args) {
         raise AssertionException ("Test terminated by user")
     }
 }
+
+FrontendManager.set (ConciseConsoleFrontend ())
 
 tracer_start ()
 describe ('stdlib', lambda (test) {
@@ -776,11 +778,9 @@ describe ('stdlib', lambda (test) {
                 itera = [1, 2]
                 iterb = [3, 4]
                 iterc = zip (itera, iterb)
-                print (repr (iterc))
                 lst = [(1, 3), (2, 4)]
                 i = 0
                 for (tpl in iterc) {
-                    print ("a: #{repr (lst [i])}; b: #{repr (tpl)}")
                     expect (tpl).to.equal (lst [i])
                     i += 1
                 }
@@ -1194,6 +1194,9 @@ describe ('stdlib', lambda (test) {
     
     # tupletools.id
     test.describe ('tupletools', lambda (test) {
+        if (!stdlib_isdefined ('tupletools')) {
+            use * from std.tupletools
+        }
 
         # tupletools.id fst
         test.describe ('fst', lambda (test) {
@@ -1222,6 +1225,10 @@ describe ('stdlib', lambda (test) {
 
     # types.id
     test.describe ('types', lambda (test) {
+        if (!stdlib_isdefined ('types')) {
+            use * from std.types
+        }
+
         test.it ('should define the correct types', lambda () {
             expect (NullType).to.equal (Null)
             expect (ObjectType).to.equal (Object)

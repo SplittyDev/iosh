@@ -40,6 +40,9 @@ namespace iosh {
             
             while (source.See ()) {
 
+                if (source.Peek ().Type == TokenClass.IoshAnalysisHint)
+                    AnalyzerHint.Parse (source.Read ());
+
                 if (matcher.IsMatch ("[any] . __type__")) {
                     var identifier = matcher.GetMatch ().First ();
                     Recommend (matcher.GetMatch ().Last (), $"use type({identifier.Value}) instead of {identifier.Value}.__type__");
@@ -65,10 +68,18 @@ namespace iosh {
         }
 
         void Recommend (Lexeme lex, string what) {
+            foreach (var hint in AnalyzerHint.Flags) {
+                if (hint.HasFlag (AnalyzerFlags.Disable) && hint.HasFlag (AnalyzerFlags.Recommendations))
+                    return;
+            }
             Console.WriteLine ($"[Recommended at {lex.Location}]: {what}");
         }
 
         void Warn (Lexeme lex, string what) {
+            foreach (var hint in AnalyzerHint.Flags) {
+                if (hint.HasFlag (AnalyzerFlags.Disable) && hint.HasFlag (AnalyzerFlags.Warnings))
+                    return;
+            }
             Console.WriteLine ($"[Warning at {lex.Location}]: {what}");
         }
     }

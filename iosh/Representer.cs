@@ -114,8 +114,6 @@ namespace iosh {
             var value = obj.ToString ();
             switch (obj.GetType ().Name) {
             case "IodineNull":
-                // Writec (null, "null");
-                // return true;
                 return false;
             case "IodineBool":
                 Writec (DarkYellow, value.ToLowerInvariant ());
@@ -212,10 +210,6 @@ namespace iosh {
                 for (var i = 0; i < keys.Length; i++) {
                     if (i > 0)
                         Writecn (", ");
-                    //if (i > Shell.MaxListDisplayLength) {
-                    //    Writecn (Magenta, "...");
-                    //    break;
-                    //}
                     if (CursorLeft > (WindowWidth * 0.2)) {
                         Writecn ("\n");
                         Writec ();
@@ -365,22 +359,6 @@ namespace iosh {
                 PopIndentState ();
                 PopFreeze ();
                 break;
-                /*
-                WriteLinec (Cyan, "[Trait: ", null, iodineTrait.Name);
-                Indent ();
-                WriteLinec ("Prototypes: ", Cyan, "[");
-                Indent ();
-                for (var i = 0; i < iodineTrait.RequiredMethods.Count; i++) {
-                    var sig = iodineTrait.RequiredMethods [i];
-                    WriteStringRepresentation (sig, depth);
-                    if (i < iodineTrait.RequiredMethods.Count - 1)
-                        WriteLinecn ();
-                }
-                Unindent ();
-                Writec (Cyan, "\n   ]");
-                Unindent ();
-                Writec(Cyan, "\n]");
-                */
             case "IodineContract":
                 var iodineContract = (IodineContract)obj;
                 if (iodineContract.RequiredMethods.Count == 0) {
@@ -412,8 +390,6 @@ namespace iosh {
                 var iodineClass = (IodineClass)obj;
                 var iodineClassAttrcount = iodineClass.Attributes.Count;
                 var iodineClassHasattrs = !obj.Attributes.All (attr => attr.Key.StartsWith ("__", StringComparison.Ordinal));
-                //if (hasattrs)
-                //    WriteLinec (Darknull, "# begin class ", iodineClass.Name);
                 Writec (Cyan, "[Class: ", null, iodineClass.Name);
                 if (iodineClass.Interfaces.Count > 0) {
                     Writecn (" implements ");
@@ -441,7 +417,6 @@ namespace iosh {
                     WriteStringRepresentation (attr.Value, depth + 1, true);
                     UnfreezeIndent ();
                 }
-                //Writec (Darknull, "# end class ", iodineClass.Name);
                 Unindent ();
                 break;
             default:
@@ -482,7 +457,6 @@ namespace iosh {
                 break;
                 /*
                 WriteLinecn ();
-                //Writec (Darknull, "# begin type ", obj.TypeDef.Name);
                 Indent ();
                 Writec ();
                 for (var i = 0; i < obj.Attributes.Count; i++) {
@@ -497,14 +471,12 @@ namespace iosh {
                     WriteStringRepresentation (attr.Value, depth + 1, true);
                     UnfreezeIndent ();
                 }
-                //Writec (Darknull, "# end type ", obj.TypeDef.Name);
                 Unindent ();
                 break;
                  */
             }
 
             PopIndentState ();
-
             return true;
         }
     }
