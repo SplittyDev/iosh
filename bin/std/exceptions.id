@@ -10,7 +10,7 @@ global __STDLIB_EXCEPTIONS = true
 /**
  * Argument Exception
  */
-class ArgumentException : Exception {
+class ArgumentException extends Exception {
 
     func ArgumentException (self, argument, message) {
         super ("Argument '#{argument}': #{message}")
@@ -20,7 +20,7 @@ class ArgumentException : Exception {
 /**
  * Type Exception
  */
-class TypeException : Exception {
+class TypeException extends Exception {
 
     func TypeException (self, argument, expectedType) {
         super (TypeException.buildMessage (argument, expectedType))

@@ -76,7 +76,7 @@ contract Collection {
 /**
  * Array
  */
-class Array : Collection {
+class Array implements Collection {
 
     /**
      * Constructor
@@ -267,7 +267,7 @@ class Array : Collection {
 /**
  * Set
  */
-class Set : Collection {
+class Set implements Collection {
 
     /**
      * Constructor
@@ -542,7 +542,7 @@ class Set : Collection {
 /**
  * Generic Set
  */
-class GenericSet : Set, Collection {
+class GenericSet extends Set implements Collection {
 
     /**
      * Constructor
@@ -586,7 +586,7 @@ class GenericSet : Set, Collection {
 /**
  * Stack
  */
-class Stack : Collection {
+class Stack implements Collection {
 
     /**
      * Constructor
@@ -756,7 +756,7 @@ class Stack : Collection {
 /**
  * Generic Stack
  */
-class GenericStack : Stack, Collection {
+class GenericStack extends Stack implements Collection {
 
     /**
      * Constructor
